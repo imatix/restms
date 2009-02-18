@@ -4,8 +4,7 @@
 package RestMS::Feed;
 our @ISA = qw(RestMS::Base);
 use Alias qw(attr);
-use vars qw($name);
-use vars qw($DOMAIN $TYPE $TITLE $LICENSE);
+use vars qw($NAME $DOMAIN $TYPE $TITLE $LICENSE);
 
 #   my $feed = RestMS::Feed->new ($domain, name => "whatever", type = "topic",...)
 #
@@ -25,7 +24,7 @@ sub new {
     bless ($self, $class);
 
     #   Set feed properties as specified
-    $self->{name}    = $argv {name};
+    $self->{NAME}    = $argv {name};
     $self->{DOMAIN}  = $domain;
     $self->{TYPE}    = $argv {type};
     $self->{TITLE}   = $argv {title};
@@ -37,6 +36,10 @@ sub new {
 }
 
 #   Get/set properties
+sub name {
+    my $self = attr shift;
+    return $NAME;
+}
 sub domain {
     my $self = attr shift;
     return $DOMAIN;
@@ -61,7 +64,7 @@ sub license {
 #
 sub create {
     my $self = attr shift;
-    $URI = $DOMAIN->post (document => $self->document, slug => $name);
+    $URI = $DOMAIN->post (document => $self->document, slug => $NAME);
     if (!$URI) {
         $DOMAIN->trace (verbose => 1);
         $DOMAIN->croak ("'Location:' missing after POST feed to domain");

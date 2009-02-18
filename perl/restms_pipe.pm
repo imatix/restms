@@ -4,10 +4,10 @@
 package RestMS::Pipe;
 our @ISA = qw(RestMS::Base);
 use Alias qw(attr);
-use vars qw($name);
-use vars qw($DOMAIN $TYPE $TITLE $MESSAGES);
+use vars qw($NAME $DOMAIN $TYPE $TITLE $MESSAGES);
 
 #   my $pipe = RestMS::Pipe->new ($domain, name => "whatever", type = "fifo",...)
+#   If name is specified, looks for existing pipe with name
 #
 sub new {
     my $proto = shift;
@@ -24,7 +24,7 @@ sub new {
     bless ($self, $class);
 
     #   Set pipe properties as specified
-    $self->{name}     = $argv {name};
+    $self->{NAME}     = $argv {name};
     $self->{DOMAIN}   = $domain;
     $self->{TYPE}     = $argv {type};
     $self->{TITLE}    = $argv {title};
@@ -36,6 +36,10 @@ sub new {
 }
 
 #   Get/set properties
+sub name {
+    my $self = attr shift;
+    return $NAME;
+}
 sub domain {
     my $self = attr shift;
     return $DOMAIN;
@@ -55,12 +59,27 @@ sub title {
 #
 sub create {
     my $self = attr shift;
-    $URI = $DOMAIN->post (document => $self->document, slug => $name);
-    if (!$URI) {
+
+    if ($NAME) {
+        $URI = "http://$HOSTNAME/restms/resource/$NAME";
+        $request = HTTP::Request->new (GET => $URI);
+        $request->header (Accept => $mimetype);
+        $response = $ua->request ($request);
+        if ($self->code == 200) {
+            #   Pipe still exists, which is great
+            $self->parse ($self->body);
+            return ($self->code);
+        }
+    }
+    #   Create new pipe, ignore requested name
+    $URI = $DOMAIN->post (document => $self->document, slug => $NAME);
+    if ($URI) {
+        $self->parse ($DOMAIN->body);
+    }
+    else {
         $DOMAIN->trace (verbose => 1);
         $DOMAIN->croak ("'Location:' missing after POST pipe to domain");
     }
-    $self->parse ($DOMAIN->body);
     return ($DOMAIN->code);
 }
 
@@ -97,6 +116,7 @@ sub parse {
     my $restms = XML::Simple::XMLin ($content, forcearray => ['message']);
     #   Always use the @{} form to copy an array out of the parsed XML
     @MESSAGES = @{$restms->{pipe}{message}};
+    $NAME = $restms->{pipe}{name};
     $TYPE = $restms->{pipe}{type};
     $TITLE = $restms->{pipe}{title};
 }
@@ -117,10 +137,8 @@ sub join {
 sub recv {
     my $self = attr shift;
 
-    if (scalar (@MESSAGES) == 0) {
-        $self->carp ("no more messages, fetching pipe");
-        $self->read;
-    }
+    #   If pipe has no more messages, fetch it again
+    $self->read if (scalar (@MESSAGES) == 0);
     $self->croak ("broken pipe") if (scalar (@MESSAGES) == 0);
     my $message_item = shift (@MESSAGES);
     my $message = RestMS::Message->new (hostname => $self->hostname);

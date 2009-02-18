@@ -213,7 +213,8 @@ sub trace {
             . $response->status_line. "\n"
             . $request->content);
         if ($response->content_length
-        and $response->content_type eq "application/restms+xml") {
+        and $response->content_type eq "application/restms+xml"
+        or  $response->content_type eq "text/xml") {
             $self->carp ("Content-Length: "
                 . $response->content_length . "\n"
                 . $response->content);

@@ -12,3 +12,5 @@ Pending tasks for RestMS
 - Clarify: add rules explaining how clients should handle unknown elements
 - Clarify: server MAY decode content before sending if encoding is "base64", http://tools.ietf.org/html/rfc4648
 - Add: security on feeds, using passwords defined at feed create time
+- Fix: any references to ;type=xxx should be removed
+- Clarify: for OOB contents, what headers are preserved

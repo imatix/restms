@@ -4,7 +4,7 @@
 package RestMS::Message;
 our @ISA = qw(RestMS::Base);
 use Alias qw(attr);
-use vars qw($domain $name);
+use vars qw($domain);
 use vars qw($ADDRESS $REPLY_TO $FEED $CORRELATION_ID $EXPIRATION $MESSAGE_ID);
 use vars qw($TIMESTAMP $TYPE $USER_ID $APP_ID $SENDER_ID $PRIORITY $DELIVERY_MODE);
 use vars qw($content_uri $CONTENT $CONTENT_TYPE $ENCODING);

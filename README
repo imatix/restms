@@ -1,0 +1,5 @@
+RestMS is the RESTful Messaging Service, a standard way of doing business messaging over plain HTTP.
+
+RestMS is developed on the community site http://www.restms.org.
+
+RestMS was originally part of the AMQP protocol community and is also at http://wiki.amqp.org/spec:7.
