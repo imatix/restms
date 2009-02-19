@@ -1,8 +1,9 @@
 Pending tasks for RestMS
 
+- Change: break the specification into four sections: Using RestMS, Generic RESTful Framework, RestMS spec, RestMS-AMQP interoperability
+
 - Change: Etag must include the the MIME type as part of the calculation
 - Clarify: URIs can be relative coming from client, always absolute from server
-- Change: break the specification into four sections: Using RestMS, Generic RESTful Framework, RestMS spec, RestMS-AMQP interoperability
 - Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
 - Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
 - Change: the generic data model example should not be <restms>, that is confusing

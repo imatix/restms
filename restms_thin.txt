@@ -1,6 +1,27 @@
-RestMS Quick Reference
+RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document is a summary of RestMS documents and methods, for RestMS users.
 
-This is a summary reference for RestMS developers.
+* Name: 10-RESTMS-THIN@wiki.amqp.org
+* Version: draft/3
+* Editor: Pieter Hintjens <ph@imatix.com>
+* Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
+* Resources: http://www.restms.org.
+
+++ License
+
+This document is licensed under the [http://wiki.amqp.org/main:intellectual-property-policy Intellectual Property Policy] of the wiki.amqp.org site.
+
+++ Change process
+
+This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
+
+++ Related documents
+
+This document is part of the [[[spec:7 |RestMS specification]]].  It provides a guide to using RestMS in applications.  The specification is described in more detail by these separate documents:
+
+* [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
+* [[[spec:11|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
+* [[[spec:12|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
+* [[[spec:13|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
 
 ++ Documents and URIs
 
@@ -367,3 +388,9 @@ In which publishers distribute messages to subscribers:
 * RestMS publisher: create public feed: **POST <feed name="{feed-name}" type="topic"/> to /restms/domain/default**, then publish messages to that feed: **POST <message address="{category}"/> to /restms/feed/{feed-name}**.
 
 * RestMS subscriber: create pipe: **POST <pipe/> to /restms/domain/default**.  Create join from pipe to feed: **POST <join address="{category pattern}" feed="{feed-name}"/>** Then retrieve message asynclet: **GET /restms/resource/{asynclet-hash}**.
+
+++ References
+
+[[bibliography]]
+: coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
+[[/bibliography]]
