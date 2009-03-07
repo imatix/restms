@@ -1,1 +1,0 @@
-This document will explain the generic structured data model, and generic RESTful method architecture.  The specifications will be reusable for other protocols, and will thus be abstracted from RestMS per se.

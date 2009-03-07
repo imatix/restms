@@ -1,2 +1,0 @@
-This document will explain how to use RestMS, without going into detail of the formal specification.
-

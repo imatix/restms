@@ -23,7 +23,45 @@ This document provides an overview of RestMS.  The specification is described in
 * [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
 * [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
 
-++ RESTful messaging
+++ The need for a RESTful messaging specification
+
+Whereas 20 years ago, there were fears of a global software shortage, today's software engineers are able to create new applications rapidly and cheaply, by combining existing libraries and frameworks, using flexible high level languages.  One area of software construction remains expensive, slow, and overwhelmingly proprietary: the messaging 'middleware' that connects these numerous applications together.
+
+The need for messaging is inevitable, as applications scale beyond the capacity of one system.  Messaging can be as simple as a front-end login program asking a back-end credentials database whether a particular user can access the network.  Or as complex as a real-time market data streaming service, where hundreds of terminals can subscribe to complex selections of data coming off stockmarkets.
+
+The AMQP[((bibcite amqp))] protocol demonstrates a flexible and open architecture for messaging based on an abstracted routing and queuing model.  AMQP has been proven to be a solid performer for local-area messaging.  AMQP can be used over the public Internet but it is not ideal for that.  It has an immature security model; it does not support the most popular web application architecture (AJAX), it does not use the web caching architecture that forms the basis of the scalable Internet; it uses a port (5672) that is alien to network managers and firewalls.
+
+It is arguable that a majority of new applications today are written as browser-hosted web applications, often in JavaScript, using AJAX frameworks.  These applications need messaging as much as do in-house Java applications.  Web messaging would allow these applications to participate fully in a global real-time information network.
+
+
+
+Here are some scenarios where web-based messaging
+
+When designing a messaging protocol, one must balance a number of requirements:
+
+* Simplicity: which makes it accessible to implementors
+* one or several pieces
+* extensible over time
+* how content is carried
+* overhead for small messages
+* ability to block messages together
+* ease of implementation in diverse languages
+* ease of use
+* obviousness of concepts
+* portability of encodings
+* security
+*
+
+
+Enterprise messaging is much like the database systems of the early 1990's: slow, expensive, proprietary, clumsy.  The
+
+.
+
+xxx
+
+
+
+
 
 > All REST interactions are stateless. That is, each request contains all of the information necessary for a connector to understand the request, independent of any requests that may have preceded it.[((bibcite rest))]
 
@@ -33,7 +71,7 @@ RestMS is a RESTful messaging service designed for web applications.
 
 Before inventing a new protocol we need to look at what we are trying to achieve, and whether existing protocols can do the job.  What RestMS wants to do is provide the benefits of modern messaging to the widest possible audience.
 
-* By "modern messaging" we mean portable, decoupled, abstract messaging of the style defined by AMQP[((bibcite amqp))].
+* By "modern messaging" we mean portable, decoupled, abstract messaging of the style defined by AMQP.
 * By the "widest possible audience" we mean web application developers.
 
 While AMQP offers an attractive and flexible messaging architecture that has been adopted by many teams, it does not offer any interface to web application developers.  In theory the protocol can be accessed across any IP network but the public internet poses specific challenges such as:
