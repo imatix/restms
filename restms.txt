@@ -14,16 +14,24 @@ This document is licensed under the [http://wiki.amqp.org/main:intellectual-prop
 
 This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
 
-++ Related documents
+++ Goals and structure of this document
 
-This document provides an introduction to RestMS.  The specification is described in more detail by these separate documents:
+This document is an introduction and cover sheet for the rest of the specification.  If you are new to RestMS, this is the place to start.  We cover:
+
+# What messaging is and why it is important;
+# The need for a web messaging and why it was necessary to build RestMS;
+# The aspects that in our view make RestMS a satisfactory solution;
+# How RestMS interoperates with AMQP;
+# The language and terminology used in the rest of the specification.
+
+The specification is described in more detail by these separate documents:
 
 * [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
 * [[[spec:10|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
 * [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
 * [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
 
-++ Background to web messaging
+++ Background to messaging
 
 Whereas up to a decade ago, there were fears of a global software shortage, today's software engineers are able to create new applications rapidly and cheaply, by combining existing libraries and frameworks, and using flexible high level languages.  Open source and free software licenses enable large-scale collaborative projects, and the cheap global Internet amplifies this productivity.  The software crisis of the 80's and 90's is definitely over.  But one area of software construction remains expensive, slow, and mostly proprietary:.  That is the messaging 'middleware' that connects these numerous applications together.
 
@@ -52,7 +60,7 @@ Our estimate of the significance of these three families is that they cover 10%,
 In all three families, we see closed and open technologies, and standards development.  Across all three families, the best designs are, in our opinion, those that are:
 
 * Asynchronous, so they promote the use of robust event-driven architectures.  This means providing queues and ways to work with queues.
-* Decoupled, so they create architectures where the cost of change is minimized.  This means providing abstract addressing.
+* Decoupled, so they encourage architectures where the cost of change is minimized.  This means providing abstract addressing and dynamic wiring.
 
 And these features are desirable in all technologies
 
@@ -68,7 +76,9 @@ And these features are desirable in all technologies
 
 Security, efficiency, and performance are also important but these will emerge naturally from a healthy open standardization process.
 
-It is arguable that a majority of new applications today are written as browser-hosted web applications, often in JavaScript, using AJAX frameworks.  These applications need messaging as much as do in-house Java applications.  Web messaging would allow these applications to participate fully in a global real-time information network.
+++ The need for web messaging
+
+We would arguable that a majority of new applications today are written as web applications, often as browser-side JavaScript.  These applications need messaging as much as do in-house Java applications.  Web messaging would allow these applications to participate fully in a global real-time information network.
 
 Certainly from an economic point of view, the most valuable technologies are those that bring together the most diverse parties in an open market.  So while enterprise messaging can improve the value of one firm, web messaging can improve the value of many firms at once.
 
@@ -102,7 +112,7 @@ We will take each of requirement in turn and examine how RestMS satisfies it:
 
 * Asynchronous: the RestMS server delivers incoming messages to the recipient immediately as these arrive, and if the recipient is busy, holds messages on a "pipe" until it can deliver them.  REST does not obviously offer asynchronous message delivery, but RestMS adds the concept of an asynchronous resource (asynclet).
 
-* Decoupled: RestMS uses an abstract addressing model so that senders and recipients can be added and removed at any time.  Senders send to "feeds", receivers read from "pipes", and receivers "join" their pipes to one or more feeds in order to receive messages.
+* Decoupled: RestMS uses an abstract addressing model and dynamic wiring so that senders and recipients can be added and removed at any time.  Senders send to "feeds", receivers read from "pipes", and receivers "join" their pipes to one or more feeds in order to receive messages.
 
 * Scalable: RestMS is as scalable as HTTP, using the same technologies: caching, proxies, multiple front-ends.  The limits of HTTP scalability are well known and the solutions also well known.  A RestMS network could deliver messages to millions of receivers in parallel.
 
@@ -128,13 +138,13 @@ As we explained, AMQP works well for enterprise messaging but is inadequate and 
 
 We believe this to be a natural and advantageous architecture, especially when it becomes necessary to expand an existing enterprise messaging network to include external parties.
 
-Thus, RestMS is explicitly designed to be interoperable with AMQP.  RestMS is probably interoperable with other messaging architectures but that is not proven.
+RestMS semantics for working with resources and transferring messages can be mapped to and from AMQP semantics, and we provide rules for this mapping so that any RestMS server can work with any AMQP server, if both respect those rules.   Thus, RestMS is explicitly designed to be interoperable with AMQP.  RestMS may be interoperable with other messaging architectures but that is not proven.
 
 ++ Language
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
-++ Terminolgy
+++ Terminology
 
 These terms are introduced by, or have specific meaning, in this specification:
 

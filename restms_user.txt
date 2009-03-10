@@ -14,13 +14,27 @@ This document is licensed under the [http://wiki.amqp.org/main:intellectual-prop
 
 This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
 
-++ Related documents
+++ Goals and structure of this document
 
-This document is part of the [[[spec:7 |RestMS specification]]].  It provides a guide to using RestMS in applications.  The specification is described in more detail by these separate documents:
+This document is a guide for developers who wish to learn and use RestMS in their applications.  We cover:
+
+# A set of worked examples in a high-level programming language;
+# The HTTP requests and responses for the worked examples;
+# A summary of the methods that RestMS understands;
+# A summary of the resources that RestMS supports;
+# A proposal for a standardized high-level class API;
+
+The specification is described in more detail by these separate documents:
 
 * [[[spec:10|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
 * [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
 * [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+
+++ Worked examples
+
+- show two examples in Perl
+
+++ The 
 
 ++ RestMS in brief
 
