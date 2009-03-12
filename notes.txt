@@ -1,5 +1,8 @@
 Pending tasks for RestMS
 
+Done
+- Fix: any references to ;type=xxx should be removed
+
 - Change: break the specification into four sections: Using RestMS, Generic RESTful Framework, RestMS spec, RestMS-AMQP interoperability
 
 - Change: Etag must include the the MIME type as part of the calculation
@@ -13,5 +16,4 @@ Pending tasks for RestMS
 - Clarify: add rules explaining how clients should handle unknown elements
 - Clarify: server MAY decode content before sending if encoding is "base64", http://tools.ietf.org/html/rfc4648
 - Add: security on feeds, using passwords defined at feed create time
-- Fix: any references to ;type=xxx should be removed
 - Clarify: for OOB contents, what headers are preserved
