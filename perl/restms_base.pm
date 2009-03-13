@@ -6,7 +6,7 @@ use Alias qw(attr);
 #   Internal use only
 use vars qw($myclass $ua $request $response $mimetype);
 #   Exported via methods
-use vars qw($HOSTNAME $URI $VERBOSE);
+use vars qw($HOSTNAME $URI $VERBOSE $DATETIME);
 
 #   Base constructor
 #   $resource = RestMS::Base->new (hostname => "localhost");
@@ -27,6 +27,7 @@ sub new {
         HOSTNAME => undef,
         URI      => undef,
         VERBOSE  => 0,
+        DATETIME => 0,
     };
     bless ($self, $class);
     $self->hostname ($argv {hostname});
@@ -61,6 +62,16 @@ sub verbose {
     my $self = attr shift;
     $VERBOSE = shift if (@_);
     return $VERBOSE;
+}
+
+#   Enables/disables date/time tracing
+#   $resource->datetime (0|1);
+#   print $resource->datetime;
+#
+sub datetime {
+    my $self = attr shift;
+    $DATETIME = shift if (@_);
+    return $DATETIME;
 }
 
 #   Get/set connection timeout, in seconds
@@ -165,10 +176,15 @@ sub post {
 sub carp {
     my $self = attr shift;
     my $string = shift;
-    ($sec, $min, $hour, $day, $month, $year) = localtime;
-    $date = sprintf ("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
-    $time = sprintf ("%2d:%02d:%02d", $hour, $min, $sec);
-    print "$date $time $string\n";
+    if ($DATETIME) {
+        ($sec, $min, $hour, $day, $month, $year) = localtime;
+        $date = sprintf ("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
+        $time = sprintf ("%2d:%02d:%02d", $hour, $min, $sec);
+        print "$date $time $string\n";
+    }
+    else {
+        print "$string\n";
+    }
 }
 
 #   Carp and die
@@ -207,18 +223,20 @@ sub trace {
         @_
     );
     $VERBOSE = $argv {verbose} if $argv {verbose};
-    if ($VERBOSE) {
-        $self->carp ($request->method . " "
-            . $request->uri . " => "
-            . $response->status_line. "\n"
-            . $request->content);
-        if ($response->content_length
-        and $response->content_type eq "application/restms+xml"
-        or  $response->content_type eq "text/xml") {
-            $self->carp ("Content-Length: "
-                . $response->content_length . "\n"
-                . $response->content);
-        }
+   if ($VERBOSE) {
+        $self->carp ("\nClient:");
+        $self->carp ("-------------------------------------------------");
+        my $headers = $request->headers_as_string;
+        $self->carp ($request->method . " " . $request->uri);
+        $self->carp ($headers);
+        $self->carp ($request->content) if $request->content;
+
+        $self->carp ("Server:");
+        $self->carp ("-------------------------------------------------");
+        $self->carp ("HTTP/1.1 " . $response->status_line);
+        my $headers = $response->headers_as_string;
+        $self->carp ($headers);
+        $self->carp ($response->content) if $response->content;
     }
 }
 

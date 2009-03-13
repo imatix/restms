@@ -175,12 +175,13 @@ sub selftest {
 sub selftest_fanout {
     my $self = attr shift;
 
-    my $pipe1 = RestMS::Pipe->new ($self->domain);
-    my $pipe2 = RestMS::Pipe->new ($self->domain);
+    my $pipe1 = $self->domain->pipe ();
+    my $pipe2 = $self->domain->pipe ();
     my $join1 = $self->join (pipe => $pipe1);
     my $join2 = $self->join (pipe => $pipe2);
 
     my $message = RestMS::Message->new;
+    $message->verbose ($self->verbose);
     $message->message_id ("message-".$self->type);
     $message->content ("This is a string");
     $message->headers (name1 => "value1");

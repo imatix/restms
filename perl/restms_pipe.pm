@@ -143,6 +143,7 @@ sub recv {
     my $message_item = shift (@MESSAGES);
     my $message = RestMS::Message->new (hostname => $self->hostname);
     $message->timeout ($self->timeout);
+    $message->verbose ($self->verbose);
     if ($message->read ($message_item->{href}) == 500) {
         return undef;
     }
@@ -182,7 +183,9 @@ sub selftest {
 
     #   Test join from pipe to default feed
     my $feed = RestMS::Feed->new ($self->domain, name => "test.feed");
+    $feed->verbose ($self->verbose);
     my $join = $self->join (feed => $feed, address => "*");
+    $join->verbose ($self->verbose);
     $join->selftest;
 
     $self->delete;
