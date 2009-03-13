@@ -99,6 +99,7 @@ sub selftest {
     $self->croak ("Failed nameeq") if $self->name ne "default";
     $self->read;
     $self->update (expect => 403);
+    $self->delete (expect => 402);
     $self->delete (expect => 403);
 
     #   Test message class

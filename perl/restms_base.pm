@@ -244,16 +244,15 @@ sub trace {
 sub assert {
     my $self = attr shift;
     my $expect = shift;
+
     if (($expect and $self->code != $expect)
     or (!$expect and $self->code >= 300)) {
         $self->carp ("$myclass: E: " . $request->method . " " . $request->uri);
-        $self->carp ($response->status_line);
-        $self->carp ("Expected $expect") if ($expect);
-        if ($request->content) {
-            $self->carp ("Content: ". $request->content);
-        }
-        if ($response->content =~ /id="error_text">\n    (.*)\n/) {
-            $self->carp ("Error: $1");
+        if ($expect) {
+            $self->carp (
+                "Expected $expect, got ".
+                    $response->status_line .": \"".
+                    $response->content ."\"");
         }
         exit (1);
     }
