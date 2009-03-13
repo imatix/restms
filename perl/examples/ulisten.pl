@@ -7,8 +7,7 @@
 #   with no conditions or restrictions.
 #
 use RestMS ();
-my $domain = RestMS::Domain->new (hostname => "15.154.209.199");
-$domain->verbose (0);
+my $domain = RestMS::Domain->new (hostname => "localhost:8080");
 my $feed = $domain->feed (name => "ublog", type => "fanout");
 
 #   Cache the pipe name to reuse existing pipes (polite!)
