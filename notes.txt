@@ -2,18 +2,19 @@ Pending tasks for RestMS
 
 Done
 - Fix: any references to ;type=xxx should be removed
-
 - Change: break the specification into four sections: Using RestMS, Generic RESTful Framework, RestMS spec, RestMS-AMQP interoperability
-
 - Change: Etag must include the the MIME type as part of the calculation
+- Change: Remove the Slug header and move that property to the document 'name=' attribute
+- Change: use plain text error response bodies, not HTML (and specify this)
+
+Pending
+- Change: the generic data model example should not be <restms>, that is confusing
 - Clarify: URIs can be relative coming from client, always absolute from server
 - Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
 - Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
-- Change: the generic data model example should not be <restms>, that is confusing
 - Add: list all error responses (in RestMS spec)
-- Change: use plain text error response bodies, not HTML (and specify this)
-- Change: Remove the Slug header and move that property to the document 'name=' attribute
 - Clarify: add rules explaining how clients should handle unknown elements
 - Clarify: server MAY decode content before sending if encoding is "base64", http://tools.ietf.org/html/rfc4648
-- Add: security on feeds, using passwords defined at feed create time
 - Clarify: for OOB contents, what headers are preserved
+
+- Add: security on feeds, using passwords defined at feed create time
