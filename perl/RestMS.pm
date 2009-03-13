@@ -7,6 +7,8 @@
 #
 #   Revision 2009/02/06.23
 #   Modules we need to use ('sudo cpan; install XML::Simple')
+#   To install, copy *.pm into somedir and define PERLLIB=somedir
+#
 use LWP::UserAgent ();
 use HTTP::Request::Common ();
 use XML::Simple ();
