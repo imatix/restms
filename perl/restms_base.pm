@@ -149,19 +149,17 @@ sub delete {
 }
 
 #   Posts document to server, using resource URI
-#   my $location = $resource->post (document => xmlstring, slug => name, expect => undef);
+#   my $location = $resource->post (document => xmlstring, expect => undef);
 #
 sub post {
     my $self = attr shift;
     my %argv = (
         document => undef,
         document_type => $mimetype,
-        slug => undef,
         expect => undef,
         @_
     );
     $request = HTTP::Request->new (POST => $URI);
-    $request->header (Slug => $argv {slug}) if $argv {slug};
     $request->content ($argv {document});
     $request->content_type ($argv {document_type});
     $response = $ua->request ($request);

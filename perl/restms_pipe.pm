@@ -72,7 +72,7 @@ sub create {
         }
     }
     #   Create new pipe, ignore requested name
-    $URI = $DOMAIN->post (document => $self->document, slug => $NAME);
+    $URI = $DOMAIN->post (document => $self->document);
     if ($URI) {
         $self->parse ($DOMAIN->body);
     }
@@ -91,7 +91,7 @@ sub document {
     return <<EOF;
 <?xml version="1.0"?>
 <restms xmlns="http://www.imatix.com/schema/restms">
-  <pipe type="$TYPE" title="$TITLE" />
+  <pipe type="$TYPE" name="$NAME" title="$TITLE" />
 </restms>
 EOF
 }

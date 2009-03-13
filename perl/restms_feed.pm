@@ -64,7 +64,7 @@ sub license {
 #
 sub create {
     my $self = attr shift;
-    $URI = $DOMAIN->post (document => $self->document, slug => $NAME);
+    $URI = $DOMAIN->post (document => $self->document);
     if (!$URI) {
         $DOMAIN->trace (verbose => 1);
         $DOMAIN->croak ("'Location:' missing after POST feed to domain");
@@ -81,7 +81,7 @@ sub document {
     return <<EOF;
 <?xml version="1.0"?>
 <restms xmlns="http://www.imatix.com/schema/restms">
-  <feed type="$TYPE" title="$TITLE" license="$LICENSE" />
+  <feed type="$TYPE" name="$NAME" title="$TITLE" license="$LICENSE" />
 </restms>
 EOF
 }
