@@ -3,7 +3,7 @@
 #   Hello World application for RestMS
 #
 use RestMS ();
-my $domain = RestMS::Domain->new (hostname => "localhost:8080");
+my $domain = RestMS::Domain->new (hostname => "live.zyre.com");
 $domain->verbose (1);
 my $feed = $domain->feed (name => "ping", type => "fanout");
 my $pipe = $domain->pipe ();
