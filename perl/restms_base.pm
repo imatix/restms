@@ -225,7 +225,7 @@ sub trace {
         $self->carp ("\nClient:");
         $self->carp ("-------------------------------------------------");
         my $headers = $request->headers_as_string;
-        $self->carp ($request->method . " " . $request->uri);
+        $self->carp ($request->method . " " . $request->uri . " HTTP/1.1");
         $self->carp ($headers);
         $self->carp ($request->content) if $request->content;
 
