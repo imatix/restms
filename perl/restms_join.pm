@@ -50,7 +50,7 @@ sub create {
     my $self = attr shift;
     $URI = $pipe->post (document => $self->document);
     if (!$URI) {
-        $pipe->trace (verbose => 1);
+        $pipe->trace_request (verbose => 1);
         $pipe->croak ("'Location:' missing after POST join to pipe");
     }
     $self->parse ($pipe->body);

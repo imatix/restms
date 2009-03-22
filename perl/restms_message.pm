@@ -234,7 +234,7 @@ sub send {
         $content_uri = $feed->post (
             document => $CONTENT, document_type => $CONTENT_TYPE, expect => 201);
         if (!$content_uri) {
-            $feed->trace (verbose => 1);
+            $feed->trace_request (verbose => 1);
             $feed->croak ("'Location:' missing after POST content to feed");
         }
     }
@@ -253,15 +253,17 @@ sub read {
         if ($content_uri) {
             #   Fetch content resource
             $request = HTTP::Request->new (GET => $content_uri);
+            $self->trace_request;
             $response = $ua->request ($request);
-            $self->trace;
+            $self->trace_response;
             $self->assert ($argv {expect});
             $CONTENT      = $response->content;
             $CONTENT_TYPE = $response->content_type;
             #   Delete content resource
             $request = HTTP::Request->new (DELETE => $content_uri);
+            $self->trace_request;
             $response = $ua->request ($request);
-            $self->trace;
+            $self->trace_response;
             $self->assert ($argv {expect});
         }
     }

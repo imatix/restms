@@ -107,8 +107,9 @@ sub read {
     );
     $request = HTTP::Request->new (GET => $URI);
     $request->header (Accept => $mimetype);
+    $self->trace_request;
     $response = $ua->request ($request);
-    $self->trace;
+    $self->trace_response;
     #   500 can be treated as a timeout
     $self->assert ($argv {expect}) unless ($self->code == 500);
     return $self->code;
@@ -126,8 +127,9 @@ sub update {
     $request = HTTP::Request->new (PUT => $URI);
     $request->content ($self->document);
     $request->content_type ($mimetype);
+    $self->trace_request;
     $response = $ua->request ($request);
-    $self->trace;
+    $self->trace_response;
     $self->assert ($argv {expect});
     return $self->code;
 }
@@ -142,8 +144,9 @@ sub delete {
         @_
     );
     $request = HTTP::Request->new (DELETE => $URI);
+    $self->trace_request;
     $response = $ua->request ($request);
-    $self->trace;
+    $self->trace_response;
     $self->assert ($argv {expect});
     return $self->code;
 }
@@ -162,8 +165,9 @@ sub post {
     $request = HTTP::Request->new (POST => $URI);
     $request->content ($argv {document});
     $request->content_type ($argv {document_type});
+    $self->trace_request;
     $response = $ua->request ($request);
-    $self->trace;
+    $self->trace_response;
     $self->assert ($arg {expect});
     return $response->header ("Location");
 }
@@ -211,10 +215,10 @@ sub body {
     return $response->content;
 }
 
-#   Trace the request and response, if verbose
-#   $resource->trace;
+#   Trace the request, if verbose
+#   $resource->trace_request;
 #
-sub trace {
+sub trace_request {
     my $self = attr shift;
     my %argv = (
         verbose => undef,
@@ -228,7 +232,20 @@ sub trace {
         $self->carp ($request->method . " " . $request->uri ->path. " HTTP/1.1");
         $self->carp ($headers);
         $self->carp ($request->content) if $request->content;
+    }
+}
 
+#   Trace the response, if verbose
+#   $resource->trace_response;
+#
+sub trace_response {
+    my $self = attr shift;
+    my %argv = (
+        verbose => undef,
+        @_
+    );
+    $VERBOSE = $argv {verbose} if $argv {verbose};
+   if ($VERBOSE) {
         $self->carp ("Server:");
         $self->carp ("-------------------------------------------------");
         $self->carp ("HTTP/1.1 " . $response->status_line);

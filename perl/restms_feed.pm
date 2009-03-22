@@ -66,7 +66,7 @@ sub create {
     my $self = attr shift;
     $URI = $DOMAIN->post (document => $self->document);
     if (!$URI) {
-        $DOMAIN->trace (verbose => 1);
+        $DOMAIN->trace_request (verbose => 1);
         $DOMAIN->croak ("'Location:' missing after POST feed to domain");
     }
     $self->parse ($DOMAIN->body);
