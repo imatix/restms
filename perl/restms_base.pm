@@ -226,12 +226,11 @@ sub trace_request {
     );
     $VERBOSE = $argv {verbose} if $argv {verbose};
    if ($VERBOSE) {
-        $self->carp ("\nClient:");
+        $self->carp ("Client:");
         $self->carp ("-------------------------------------------------");
-        my $headers = $request->headers_as_string;
         $self->carp ($request->method . " " . $request->uri ->path. " HTTP/1.1");
-        $self->carp ($headers);
-        $self->carp ($request->content) if $request->content;
+        $self->carp ($request->headers_as_string);
+        $self->carp ($request->content."\n") if $request->content;
     }
 }
 
@@ -249,9 +248,8 @@ sub trace_response {
         $self->carp ("Server:");
         $self->carp ("-------------------------------------------------");
         $self->carp ("HTTP/1.1 " . $response->status_line);
-        my $headers = $response->headers_as_string;
-        $self->carp ($headers);
-        $self->carp ($response->content) if $response->content;
+        $self->carp ($response->headers_as_string);
+        $self->carp ($response->content."\n") if $response->content;
     }
 }
 

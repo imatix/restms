@@ -29,6 +29,12 @@ sub new {
     $self->{FEEDS} = [];
     $self->{PIPES} = [];
 
+    #   Minimal implementation of pipe cache
+    open (FILE, ".restms_pipe");
+    local @pipes = <FILE>;
+    $self->{cached_pipe} = $pipes [0];
+    close (FILE);
+
     return $self;
 }
 
@@ -80,9 +86,20 @@ sub feed {
 #
 sub pipe {
     my $self = attr shift;
-    $feed = RestMS::Pipe->new ($self, @_);
-    $feed->verbose ($self->verbose);
-    return $feed;
+    my %argv = (
+        name => $self->{cached_pipe},
+        @_
+    );
+    $pipe = RestMS::Pipe->new ($self, name => $self->{cached_pipe}, @_);
+    $self->carp ("CACHED:".$self->{cached_pipe});
+    undef ($self->{cached_pipe});
+
+    open (FILE, ">.restms_pipe");
+    print FILE $pipe->name;
+    close (FILE);
+
+    $pipe->verbose ($self->verbose);
+    return $pipe;
 }
 
 #   Test domain

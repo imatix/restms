@@ -104,14 +104,14 @@ sub selftest {
     );
     $self->verbose ($argv {verbose}) if $argv {verbose};
     $self->read;
-    $self->update (expect => 400);
+    $self->update (expect => 403);
     $self->delete;
     $self->read (expect => 404);
     $self->delete;
 
     $self->create;
     $self->read;
-    $self->update (expect => 400);
+    $self->update (expect => 403);
     $self->delete;
 }
 

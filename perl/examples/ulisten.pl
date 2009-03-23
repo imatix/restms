@@ -9,14 +9,8 @@
 use RestMS ();
 my $domain = RestMS::Domain->new (hostname => "localhost:8080");
 my $feed = $domain->feed (name => "ublog", type => "fanout");
-
-#   Cache the pipe name to reuse existing pipes (polite!)
-#   This also ensures we'll catch on whatever we missed...
-open (FILE, "ulisten.cfg"); @config = <FILE>; close (FILE);
-my $pipe = $domain->pipe (name => $config [0]);
-open (FILE, ">ulisten.cfg"); print FILE $pipe->name; close (FILE);
-
-#   In any case, connect our pipe to the ublog feed
+#   Create pipe and join it to the ublog feed
+my $pipe = $domain->pipe ();
 my $join = $feed->join (pipe => $pipe);
 
 #   Now listen and print whatever people say

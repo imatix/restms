@@ -60,6 +60,7 @@ sub title {
 sub create {
     my $self = attr shift;
 
+    #   If we're doing pipe caching, check if pipe still exists
     if ($NAME) {
         $URI = "http://$HOSTNAME/restms/resource/$NAME";
         $request = HTTP::Request->new (GET => $URI);
@@ -138,21 +139,17 @@ sub recv {
     my $self = attr shift;
 
     #   If pipe has no more messages, fetch it again
-$self->carp ("RECV1 - " . scalar (@MESSAGES));
     $self->read if (scalar (@MESSAGES) == 0);
     $self->croak ("broken pipe") if (scalar (@MESSAGES) == 0);
     my $message_item = shift (@MESSAGES);
     my $message = RestMS::Message->new (hostname => $self->hostname);
     $message->timeout ($self->timeout);
     $message->verbose ($self->verbose);
-$self->carp ("RECV2");
     if ($message->read ($message_item->{href}) == 500) {
-$self->carp ("RECV - undef");
         return undef;
     }
     else {
         #   Remove message from server
-$self->carp ("RECV - delete");
         $message->delete;
         return $message;
     }
