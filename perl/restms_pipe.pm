@@ -20,7 +20,7 @@ sub new {
         expect => undef,
         @_
     );
-    my $self = $class->SUPER::new (hostname => $domain->hostname);
+    my $self = $class->SUPER::new (hostname => $domain->hostname, @_);
     bless ($self, $class);
 
     #   Set pipe properties as specified
@@ -62,6 +62,7 @@ sub create {
 
     #   If we're doing pipe caching, check if pipe still exists
     if ($NAME) {
+$self->carp ("CACHED: $NAME");
         $URI = "http://$HOSTNAME/restms/resource/$NAME";
         $request = HTTP::Request->new (GET => $URI);
         $request->header (Accept => $mimetype);

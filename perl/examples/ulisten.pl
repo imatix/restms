@@ -7,10 +7,10 @@
 #   with no conditions or restrictions.
 #
 use RestMS ();
-my $domain = RestMS::Domain->new (hostname => "localhost:8080");
+my $hostname = (shift or "live.zyre.com");
+my $domain = RestMS::Domain->new (hostname => $hostname, verbose => 0);
 my $feed = $domain->feed (name => "ublog", type => "fanout");
-#   Create pipe and join it to the ublog feed
-my $pipe = $domain->pipe ();
+my $pipe = $domain->pipe (cached => 1);
 my $join = $feed->join (pipe => $pipe);
 
 #   Now listen and print whatever people say

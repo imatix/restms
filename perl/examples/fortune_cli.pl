@@ -6,24 +6,21 @@
 #   with no conditions or restrictions.
 #
 use RestMS ();
-my $hostname = shift;
-$hostname = "live.zyre.com" unless $hostname;
-my $domain = RestMS::Domain->new (hostname => $hostname);
-$domain->verbose (1);
+my $hostname = (shift or "live.zyre.com");
+my $domain = RestMS::Domain->new (hostname => $hostname, verbose => 0);
 
 #   Grab a reference to the 'default' feed, so we can get our replies
 my $default = $domain->feed (name => "default");
 
-#   Create an unnamed pipe and bind it to the default feed
+#   Create a pipe for our replies
 my $pipe = $domain->pipe ();
-my $join = $pipe->join (feed => $default);
 
 #   Grab a reference to the 'fortune' feed
 my $fortune = $domain->feed (name => "fortune", type => "service");
 
 #   Send a request to the fortune feed
 my $request = RestMS::Message->new;
-$request->send ($fortune, $reply_to => $pipe->name);
+$request->send ($fortune, reply_to => $pipe->name);
 
 #   Wait for the response, and print it
 my $response = $pipe->recv;

@@ -3,8 +3,8 @@
 #   Hello World application for RestMS
 #
 use RestMS ();
-my $domain = RestMS::Domain->new (hostname => "live.zyre.com");
-$domain->verbose (1);
+my $hostname = (shift or "live.zyre.com");
+my $domain = RestMS::Domain->new (hostname => $hostname, verbose => 1);
 my $feed = $domain->feed (name => "ping", type => "fanout");
 my $pipe = $domain->pipe ();
 my $join = $feed->join (pipe => $pipe);

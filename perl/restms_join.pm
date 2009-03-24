@@ -24,7 +24,7 @@ sub new {
     $argv {pipe}->hostname eq $argv {feed}->hostname or
                     RestMS::Join->croak ("RestMS::Join->new() pipe and feed on different hosts");
 
-    my $self = $class->SUPER::new (hostname => $argv {pipe}->hostname);
+    my $self = $class->SUPER::new (hostname => $argv {pipe}->hostname, @_);
     bless ($self, $class);
 
     #   Set join properties as specified

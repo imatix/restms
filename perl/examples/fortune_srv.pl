@@ -6,16 +6,14 @@
 #   with no conditions or restrictions.
 #
 use RestMS ();
-my $hostname = shift;
-$hostname = "live.zyre.com" unless $hostname;
-my $domain = RestMS::Domain->new (hostname => $hostname);
-$domain->verbose (1);
+my $hostname = (shift or "live.zyre.com");
+my $domain = RestMS::Domain->new (hostname => $hostname, verbose => 0);
 
 #   Create a feed called 'fortune' for clients to send requests to
 my $fortune = $domain->feed (name => "fortune", type => "service");
 
 #   Create an unnamed pipe and bind it to the feed
-my $pipe = $domain->pipe ();
+my $pipe = $domain->pipe (cached => 1);
 my $join = $pipe->join (feed => $fortune);
 
 #   Grab a reference to the default feed, to send replies to
@@ -31,9 +29,9 @@ while (1) {
     #   Create a new response message
     my $response = RestMS::Message->new;
 
-    #   Grab a fortune via the shell and echo for logging
+    #   Grab a fortune via the shell (hopefully fortune is on path)
     $response->content (`fortune`);
-    print $response->content;
+    $response->content_type ("text/plain");
 
     #   Send the response back via the direct feed
     #   We use the reply-to address provided in the request

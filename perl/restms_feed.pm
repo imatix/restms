@@ -20,7 +20,7 @@ sub new {
         expect => undef,
         @_
     );
-    my $self = $class->SUPER::new (hostname => $domain->hostname);
+    my $self = $class->SUPER::new (hostname => $domain->hostname, @_);
     bless ($self, $class);
 
     #   Set feed properties as specified

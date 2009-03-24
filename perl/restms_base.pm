@@ -16,6 +16,7 @@ sub new {
     my $class = (ref ($proto) or $proto);
     my %argv = (
         hostname => undef,
+        verbose => 0,
         @_
     );
     my $self = {
@@ -26,11 +27,12 @@ sub new {
         mimetype => "application/restms+xml",
         HOSTNAME => undef,
         URI      => undef,
-        VERBOSE  => 0,
+        VERBOSE  => undef,
         DATETIME => 0,
     };
     bless ($self, $class);
     $self->hostname ($argv {hostname});
+    $self->verbose ($argv {verbose});
     return $self;
 }
 

@@ -17,7 +17,7 @@ sub new {
         name => "default",
         @_
     );
-    my $self = $class->SUPER::new (hostname => $argv {hostname});
+    my $self = $class->SUPER::new (hostname => $argv {hostname}, @_);
     bless ($self, $class);
 
     #   Set in constructor only
@@ -28,12 +28,6 @@ sub new {
     $self->{TITLE} = undef;
     $self->{FEEDS} = [];
     $self->{PIPES} = [];
-
-    #   Minimal implementation of pipe cache
-    open (FILE, ".restms_pipe");
-    local @pipes = <FILE>;
-    $self->{cached_pipe} = $pipes [0];
-    close (FILE);
 
     return $self;
 }
@@ -82,22 +76,27 @@ sub feed {
 }
 
 #   Create new pipe in domain
-#   my $pipe = $domain->pipe (type => "fifo", expect => undef);
+#   my $pipe = $domain->pipe (type => "fifo", cached => 0/1, expect => undef);
 #
 sub pipe {
     my $self = attr shift;
-    my %argv = (
-        name => $self->{cached_pipe},
-        @_
-    );
-    $pipe = RestMS::Pipe->new ($self, name => $self->{cached_pipe}, @_);
-    $self->carp ("CACHED:".$self->{cached_pipe});
-    undef ($self->{cached_pipe});
+    my %argv = (@_);
+    my @cache;
+    my $pipe;
 
-    open (FILE, ">.restms_pipe");
-    print FILE $pipe->name;
-    close (FILE);
-
+    #   Minimal implementation of pipe cache
+    if ($argv {cached} == 1) {
+        open (FILE, ".restms_pipe");
+        @cache = <FILE>;
+        close (FILE);
+        $pipe = RestMS::Pipe->new ($self, name => $cache [0], @_);
+        open (FILE, ">.restms_pipe");
+        print FILE $pipe->name."\n";
+        close (FILE);
+    }
+    else {
+        $pipe = RestMS::Pipe->new ($self, @_);
+    }
     $pipe->verbose ($self->verbose);
     return $pipe;
 }
