@@ -239,6 +239,7 @@ sub send {
         }
     }
     $feed->post (document => $self->document, expect => 201);
+    $self->{content_uri} = undef;
     return $feed->code;
 }
 
