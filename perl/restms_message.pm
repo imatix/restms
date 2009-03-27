@@ -297,6 +297,10 @@ sub parse {
     $CONTENT_TYPE       = $restms->{message}{content}{type};
     $ENCODING           = $restms->{message}{content}{encoding};
     $content_uri        = $restms->{message}{content}{href};
+
+    if ($ENCODING eq "base64") {
+        $CONTENT = MIME::Base64::decode ($CONTENT);
+    }
     #   There's presumably a way to pass the entire hash as argument
     #   to $self->headers() but I don't have the time to figure this
     #   out right now... so here goes stupid and simple
