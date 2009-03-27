@@ -17,5 +17,5 @@ my $join = $pipe->join (feed => $newsfeed, address => "rec.pets.*");
 #   Receive and print messages
 while (1) {
     my $message = $pipe->recv;
-    $message->carp ($message->content);
+    $message->carp ($message->address.": ".$message->content);
 }
