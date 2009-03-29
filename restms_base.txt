@@ -14,15 +14,22 @@ This document is licensed under the [http://wiki.amqp.org/main:intellectual-prop
 
 This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
 
-++ Related documents
+++ Goals and structure of this document
 
-This document is part of the [[[spec:7 |RestMS specification]]].  It provides a guide to using RestMS in applications.  The specification is described in more detail by these separate documents:
+This document defines the generic RESTful layers that form the basis of RestMS.  We cover:
+
+# A generic representation for structure documents;
+# A generic RESTful resource access framework.
+
+This document is part of the [[[spec:7 |RestMS specification]]].  The specification is described in more detail by these separate documents:
 
 * [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
 * [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
 * [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
 
-++ Generic structured document syntax
+++ Generic representation for structure documents
+
+RestMS resources are mainly specified and represented as XML or JSON documents.  These documents follow a regular structure which supports all the needs of a RESTful interface.  While we define this structure for RestMS, it would work for any RESTful API.
 
 +++ Overview
 
@@ -236,7 +243,7 @@ Content-Type: audio/mpeg-3
 ...opaque binary content...
 [[/code]]
 
-++ Generic RESTful framework
+++ Generic RESTful resource access framework
 
 RestMS defines a generic framework by which clients issue HTTP methods to work with server-side resources as follows:
 
@@ -259,14 +266,14 @@ The lifecycle and visibility of resources is related, as follows:
 
 * Configured resources are always public while dynamic resources are by default private.
 * Applications can modify and delete dynamic resources, if they know their URIs, while they may not modify or delete configured resources.
-* The URI for a public resource is derived from its type and slug (which may be empty), while the URI for a private resource is provided by the server.
+* The URI for a public resource is derived from its type and name (which may be empty), while the URI for a private resource is provided by the server.
 * Public resources are named, and discoverable through navigation of parent resources.  Private resources are unnamed, and undiscoverable through navigation.
 * Dynamic resources may in some cases be created by the server.
 
-The URI for a public resource is derived from the resource type and slug as follows:
+The URI for a public resource is derived from the resource type and name as follows:
 
 [[code]]
-http://{server-name}[:{port}]/restms/{resource type}/{resource slug}
+http://{server-name}[:{port}]/restms/{resource type}/{resource name}
 [[/code]]
 
 The URI for a private resource takes this form:
@@ -279,7 +286,7 @@ http://{server-name}[:{port}]/restms/resource/{resource hash}
 
 RestMS resources may be propagated to foreign messaging networks (particularly AMQP networks).  In this case, these rules apply:
 
-* Public resources are propagated using the resource slug value.  It is responsibility of the client application to ensure that the values used are unique.  Implementations MAY enforce uniqueness, at the cost of interoperability.
+* Public resources are propagated using the resource name value.  It is responsibility of the client application to ensure that the values used are unique.  Implementations MAY enforce uniqueness, at the cost of interoperability.
 * Private resources are propagated using the resource hash value.  It is the responsibility of the implementation to ensure that these hash values are unique.
 
 +++ Creating a new resource
@@ -288,7 +295,7 @@ The creation of a new dynamic resource follows these rules:
 
 * The new resource will always be the child of another resource (the 'parent') identified with a URI.
 * The client creates the resource by sending a POST method on the parent URI and providing the specifications for the new resource as the POST content body.
-* The client can request a public or a private resource.  Public resources are named by a Slug header, while private resources named by a server-generated hash.
+* The client can request a public or a private resource.  Public resources are named explicitly, while private resources named by a server-generated hash.
 * The server replies, if there was no error, with a "200 OK" or "201 Created" reply status, a Location: header that provides a URI to the new resource, and a content body that represents the created resource.
 
 [[code]]
@@ -315,17 +322,16 @@ User-Agent: {user agent}
 Authorization: {credentials}
 Content-Type: application/restms+xml
 Content-Length: {size of content}
-Slug: {name for public resource}
 
 <?xml version="1.0"?>
 <restms xmlns="http://www.imatix.com/schema/restms">
-  <{resource type}>
+  <{resource type} [name = "{name for public resource}"]>
     {resource specifications}
   </{resource type}>
 </restms>
 [[/code]]
 
-If allowed by the resource type, and if the Slug header is specified, the new dynamic resource will be public, otherwise it will be private.  This is the general form of a server response for a created resource:
+If allowed by the resource type, and if the name is specified, the new dynamic resource will be public, otherwise it will be private.  This is the general form of a server response for a created resource:
 
 [[code]]
 HTTP/1.1 201 Created
@@ -586,13 +592,15 @@ The asynclet model gives the client full choice between a synchronous polling di
 
 The asynclet design addresses a similar problem as the Comet "When-Modified-After"[((bibcite comet))] HTTP extension header does, but without extending the HTTP protocol and allowing clients to wait for specific resources within a parent resource context.
 
-+++ Cacheing
++++ Caching
 
 RestMS assumes that all resources may be cached.  We define two types of cache.  First, the "end cache", is held in the browser or HTTP client layer.  Second, the "proxy cache" is a service that sits between the client and the server.
 
 The server can allow, or disallow, both types of cache from holding content.  It does this by adding a "Cache-Control: No-cache" header to the response.
 
-The client can inform the server or proxy cache that it has cacheable content for a resource by specifying either one of, or both of, the If-Modified-Since and If-None-Match header.  Usually, specifying both headers will give best results.
+The client can inform the server or proxy cache that it has cacheable content for a resource by specifying either one of, or both of, the If-Modified-Since and If-None-Match header together with an ETag.  Usually, specifying both conditional headers will give best results.
+
+ETags are calculated by the server.  The ETag value for resources that can have multiple MIME representations MUST depend on the MIME type of the returned resource specification.  Thus a resource returned as XML will have a different ETag than the same resource returned as JSON.
 
 Note that if a proxy cache is enabled, clients will not be guaranteed to receive the freshest version of a resource for a GET method.  There is no mechanism to push resource updates to proxy servers.
 
@@ -612,6 +620,9 @@ The client may send requests in parallel, which is called "pipelining".  RFC 261
 
 RestMS clients MAY pipeline GET, PUT and DELETE methods, but SHOULD NOT pipeline POST methods.
 
++++ Error responses
+
+When the server returns an error response, the content body MUST be in plain text, and the MIME type MUST be "text/plain".
 
 ++ References
 

@@ -26,6 +26,16 @@ This document is part of the [[[spec:7 |RestMS specification]]].  It provides a 
 
 [((bibcite amqp))]
 
++++ Integration with AMQP networks
+
+RestMS is designed to be able to interoperate with AMQP.  This happens as follows:
+
+* RestMS implementations MAY be fully stand-alone, or may implement a federation model.
+* If a RestMS server is federated with an AMQP server, a RestMS domain maps to an AMQP network.  The actual mapping of a domain to an AMQP network (defined as an AMQP server and connection credentials) is a configuration issue.
+* A feed may map to an AMQP exchange or shared queue, depending on the feed type.
+* A message posted by a RestMS application to a mapped feed will be sent to the AMQP server where it can be accessed by AMQP applications via the AMQP mechanims of bindings and queues.
+* A message posted by an AMQP application to a mapped feed will be sent to the RestMS server where it can be accessed by RestMS application via the RestMS mechanisms of joins and pipes.
+
 ++ AMQP functional interoperability
 
 RestMS deliberately invents new nomenclature but for those familiar with AMQP, a feed corresponds to an exchange and/or shared queue, an address corresponds to a routing key, a pipe is analogous to a private queue, and a join to an AMQP binding.  If it helps to understand RestMS, these are the main shifts that RestMS makes from the AMQP/0.9.1 semantic model:
