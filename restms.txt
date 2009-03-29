@@ -26,10 +26,10 @@ This document is an introduction and cover sheet for the rest of the specificati
 
 The specification is described in more detail by these separate documents:
 
-* [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
-* [[[spec:10|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
-* [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
+* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
+* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
+* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
 
 ++ Background to messaging
 

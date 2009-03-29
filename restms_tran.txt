@@ -1,10 +1,10 @@
-RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document defines a generic RESTful framework for documents and methods, for RestMS implementors.
+RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.
 
-* Name: 10-RESTMS-BASE@wiki.amqp.org
+* Name: 10-RESTMS-TRAN@wiki.amqp.org
 * Version: draft/3
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
-* Resources: http://www.restms.org.
+* Resources: http://www.music.org.
 
 ++ License
 
@@ -16,71 +16,83 @@ This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite co
 
 ++ Goals and structure of this document
 
-This document defines the generic RESTful layers that form the basis of RestMS.  We cover:
+This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.  RestTL is a foundation for RestMS but can be used for arbitrary RESTful protocols.  RestTL consists of:
 
-# A generic representation for structure documents;
-# A generic RESTful resource access framework.
+# A standard structure for XML or JSON documents that represent server-held resources;
+# A standard RESTful method framework that lets a client access and work with these resources.
 
 This document is part of the [[[spec:7 |RestMS specification]]].  The specification is described in more detail by these separate documents:
 
-* [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
-* [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
+* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
+* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
 
-++ Generic representation for structure documents
+++ Why define a RESTful Transport Layer?
 
-RestMS resources are mainly specified and represented as XML or JSON documents.  These documents follow a regular structure which supports all the needs of a RESTful interface.  While we define this structure for RestMS, it would work for any RESTful API.
+Existing RESTful specifications such as AtomPub[((bibcite atompub))] use a regular document and method structure but this is implied in the specification, not explicitly defined.  For example, how does an application delete a resource?  Rather than explain the syntax of the DELETE method for each resource, we prefer to define this a single time.
 
-+++ Overview
+The RESTful Transport Layer (RestTL) defines the common framework used to represent and work with resources.  This is:
 
-RestMS defines a generic document syntax for resources, based on these principles:
+* What resources actually look like in terms of XML or JSON documents;
+* How resources are structured, so that applications can navigate them;
+* Rules for naming and addressing resources;
+* A standard mechanism for creating new resources (the POST method);
+* A standard mechanism for retrieving resources (the GET method);
+* A standard mechanism for modifying resources (the PUT method);
+* A standard mechanism for deleting resources (the DELETE method).
+
+++ RestTL structured documents
+
+When you need to specify or work with a server-held resource, you do so using XML or JSON documents.  These documents follow a regular structure which supports all the needs of a RESTful interface.
+
+The general principles for RestTL structured documents are:
 
 * Resources are typed, and the type names form the main element names in the document.
 * A resource may, or may not, be a container for other resources depending on its type.
 * The document syntax is fully neutral with respect to the resource hierarchy.  That is, when the protocol is changed to add new resources, remove resources, or modify resources, nothing in this section will change.
 * There is a single root resource that contains all other resources.
 * Clients can navigate the resource hierarchy with no specific knowledge except the type and URI of the root resource.
-* Documents can include opaque binary resources, which themselves cannot contain further RestMS resources.
+* Documents can include opaque binary resources, which themselves cannot contain further RestTL resources.
 
 Our goals with this design are:
 
-* To define a generic syntax that can be implemented, understood, and reused without needing specific knowledge of the RestMS resources and their semantics.
+* To define a generic syntax that can be implemented, understood, and reused without needing specific knowledge of the RestTL resources and their semantics.
 * To define a document syntax that is easily mapped to arbitrary representations including XML and JSON.  We document the use of these two representations but do not exclude others.
 * To provide documents that are navigable and discoverable with mimimum prior knowledge.
 * To deliver most of the benefits of structured representations (such as cheap parsing) without the cost of formalised validation.
 * To allow unilateral extensibility of the resource hierarchy by server implementations.
-* To keep things as simple as possible for RestMS users: this means being able to read and create RestMS documents with minimum libraries, extensions, addons, and other complexities.
+* To keep things as simple as possible for RestTL users: this means being able to read and create RestTL documents with minimum libraries, extensions, addons, and other complexities.
 * To allow for future evolution in structured data representation.
 
 +++ Basic syntax rules
 
-RestMS documents obey these basic rules:
+Transport Layer documents obey these basic rules:
 
-* All RestMS documents have a "document root" element called "restms".
+* All RestTL documents have a "document root" element named according to the schema.
 * This document root contains one or more "resource roots".
 * The resource root elements contains other elements, each which can itself contain elements.
-* All elements except the document root element correspond to RestMS resources, with the name of the element equal to the resource type.
+* All elements except the document root element correspond to RestTL resources, with the name of the element equal to the resource type.
 * All elements except the document root may have attributes, corresponding to resource properties.
 * All elements except the document root may repeat 0 or more times.
 
 Further, for XML documents:
 
-* The Content-type MUST be "application/restms+xml".
-* The document root has a single attribute, xmlns="http://www.imatix.com/schema/restms".
+* The Content-type MUST be "application/{schema-name}+xml".
+* The document root has a single attribute, xmlns="http://www.imatix.com/schema/{schema-name}".
 * The following character MUST be escaped in attribute values:
  * " (escaped by writing &quot;)
 
 And for JSON documents:
 
-* The Content-type MUST be "application/restms+json".
+* The Content-type MUST be "application/{schema-name}+json".
 * The following character MUST be escaped in value strings:
  * " (escaped by writing \")
 
-Here is an example of a RestMS document in XML:
+Here is an example of a RestTL document in XML:
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <playlist>
     <album
       artist="Echobelly"
@@ -101,7 +113,7 @@ Here is an example of a RestMS document in XML:
       <track title="Worms and Angels" length="2:38" />
     </album>
   </playlist>
-</restms>
+</music>
 [[/code]]
 
 The resource hierarchy in our example is:
@@ -118,7 +130,7 @@ Here is the same document in JSON:
 
 [[code]]
 {
-"restms": {
+"music": {
   "playlist": [ { "name":"default",
     "album": [ { "artist":"Echobelly", "title":"On", "released":"1995-10-17",
       "track": [
@@ -143,7 +155,7 @@ Here is the same document in JSON:
 
 +++ Navigation and discovery
 
-RestMS documents use the following rule to allow navigation and discovery:
+RestTL documents use the following rule to allow navigation and discovery:
 
 * The attribute "href", if present, holds the URI for the resource that the element represents.
 * The URI for the root resource is known to both client and server by common agreement.
@@ -154,47 +166,47 @@ Here is an example of a client retrieving a public playlist resource using a HTT
 
 [[code]]
 Client:
-GET /restms/playlist/default HTTP/1.1
+GET /music/playlist/default HTTP/1.1
 
 Server:
 HTTP/1.1 200 OK
 Date: Mon Jan 12 12:05:01 2009
 Content-Length: 440
-Content-Type: application/restms+xml
+Content-Type: application/music+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <playlist name="default">
     <album
         artist="Echobelly"
         title="On"
-        href="http://host.com/restms/resource/A1023" />
+        href="http://host.com/music/resource/A1023" />
     <album
         artist="Muse"
         title="Showbiz"
-        href="http://host.com/restms/resource/A0911" />
+        href="http://host.com/music/resource/A0911" />
     <album
         artist="Toumani Diabate"
         title="Djelika"
-        href="http://host.com/restms/resource/A0023" />
+        href="http://host.com/music/resource/A0023" />
   </playlist>
-</restms>
+</music>
 [[/code]]
 
 To retrieve a specific album, the client uses the URI provided by the server, for example:
 
 [[code]]
 Client:
-GET /restms/resource/A1023 HTTP/1.1
+GET /music/resource/A1023 HTTP/1.1
 
 Server:
 HTTP/1.1 200 OK
 Date: Mon Jan 12 12:05:02 2009
 Content-Length: 1440
-Content-Type: application/restms+xml
+Content-Type: application/music+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
     <album
         artist="Echobelly"
         title="On"
@@ -225,10 +237,10 @@ Content-Type: application/restms+xml
       <track title="Worms and Angels" length="2:38"
         href="http://music.host.com/resource/A1023/12" />
     </album>
-</restms>
+</music>
 [[/code]]
 
-To retrieve a specific track, the client once again uses the URI provided by the server.  Note that in this case the server delivers a content of type "audio/mpeg-3", which the client should process accordingly (and not as RestMS XML or JSON):
+To retrieve a specific track, the client once again uses the URI provided by the server.  Note that in this case the server delivers a content of type "audio/mpeg-3", which the client should process accordingly (and not as RestTL XML or JSON):
 
 [[code]]
 Client:
@@ -245,22 +257,22 @@ Content-Type: audio/mpeg-3
 
 ++ Generic RESTful resource access framework
 
-RestMS defines a generic framework by which clients issue HTTP methods to work with server-side resources as follows:
+RestTL defines a generic framework by which clients issue HTTP methods to work with server-side resources as follows:
 
 * Clients use the GET method to retrieve the representation of a known resource.
 * Clients use the POST method to create a new, dynamically named resource.
 * Clients use the PUT method to edit a known resource (not to create resources).
 * Clients use the DELETE method to remove a known resource.
 
-All methods work orthogonally on all types of RestMS resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, implemented, or permitted.
+All methods work orthogonally on all types of RestTL resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, implemented, or permitted.
 
 This framework draws heavily on the design of AtomPub[((bibcite atompub))] and that specification may be helpful as a background to the mechanics of implementing a RESTful dialog over a HTTP transport.
 
-In this section we use XML as the document language, but the reader may note that RestMS allows a choice of representations for structured data.
+In this section we use XML as the document language, but the reader may note that RestTL allows a choice of representations for structured data.
 
 +++ Resource lifecycles and visibility
 
-RestMS distinguishes between resources that are created automatically by the server ("configured resources") and resources that are created at runtime by applications ("dynamic resources").  It also distinguishes between resources that are named and visible to all applications ("public resources") and resources that are unnamed and accessible only by a (by default) secret hash ("private resources").
+RestTL distinguishes between resources that are created automatically by the server ("configured resources") and resources that are created at runtime by applications ("dynamic resources").  It also distinguishes between resources that are named and visible to all applications ("public resources") and resources that are unnamed and accessible only by a (by default) secret hash ("private resources").
 
 The lifecycle and visibility of resources is related, as follows:
 
@@ -273,18 +285,18 @@ The lifecycle and visibility of resources is related, as follows:
 The URI for a public resource is derived from the resource type and name as follows:
 
 [[code]]
-http://{server-name}[:{port}]/restms/{resource type}/{resource name}
+http://{server-name}[:{port}]/music/{resource type}/{resource name}
 [[/code]]
 
 The URI for a private resource takes this form:
 
 [[code]]
-http://{server-name}[:{port}]/restms/resource/{resource hash}
+http://{server-name}[:{port}]/music/resource/{resource hash}
 [[/code]]
 
 +++ Resource propagation
 
-RestMS resources may be propagated to foreign messaging networks (particularly AMQP networks).  In this case, these rules apply:
+RestTL resources may be propagated to foreign messaging networks (particularly AMQP networks).  In this case, these rules apply:
 
 * Public resources are propagated using the resource name value.  It is responsibility of the client application to ensure that the values used are unique.  Implementations MAY enforce uniqueness, at the cost of interoperability.
 * Private resources are propagated using the resource hash value.  It is the responsibility of the implementation to ensure that these hash values are unique.
@@ -320,15 +332,15 @@ POST /{parent uri} HTTP/1.1
 Host: {hostname}
 User-Agent: {user agent}
 Authorization: {credentials}
-Content-Type: application/restms+xml
+Content-Type: application/music+xml
 Content-Length: {size of content}
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <{resource type} [name = "{name for public resource}"]>
     {resource specifications}
   </{resource type}>
-</restms>
+</music>
 [[/code]]
 
 If allowed by the resource type, and if the name is specified, the new dynamic resource will be public, otherwise it will be private.  This is the general form of a server response for a created resource:
@@ -337,16 +349,16 @@ If allowed by the resource type, and if the name is specified, the new dynamic r
 HTTP/1.1 201 Created
 Date: {response date}
 Content-Length: {size of content}
-Content-Type: application/restms+xml
-Location: http://{hostname}[{port}]/restms/resource/{hash}
+Content-Type: application/music+xml
+Location: http://{hostname}[{port}]/music/resource/{hash}
 ETag: "{resource entity tag}"
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <{resource type} name="{resource name}"...>
     {resource contents}
   </{resource type}>
-</restms>
+</music>
 [[/code]]
 
 Private resources are accessed through their URI.  If the POST request actually created the resource the server responds with "201 Created".  If the resource already existed, and the specifications are correct, the server responds with "200 OK".  For both cases, the server provides a Location: header with the resource's URI.  If the POST failed, the server responds with a "400 Bad Request" or other suitable reply code.
@@ -387,16 +399,16 @@ And this is the general form of a server response:
 HTTP/1.1 200 OK
 Date: {response date}
 Content-Length: {size of content}
-Content-Type: application/restms+xml
+Content-Type: application/music+xml
 Date-Modified: {resource date and time}
 ETag: "{resource entity tag}"
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <{resource type} ...>
     {resource contents}
   </{resource type}>
-</restms>
+</music>
 [[/code]]
 
 If the client has previously retrieved the same resource and still has that ETag, it can use the If-None-Match: header, specifying the ETag value, and/or the If-Modified-Since: to do a conditional GET:
@@ -451,14 +463,14 @@ Host: {hostname}
 User-Agent: {user agent}
 Authorization: {credentials}
 Content-Length: {size of content}
-Content-Type: application/restms+xml
+Content-Type: application/music+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<music xmlns="http://www.imatix.com/schema/music">
   <{resource type} ...>
     {resource contents}
   </{resource type}>
-</restms>
+</music>
 [[/code]]
 
 And this is the general form of a server response:
@@ -539,18 +551,18 @@ Date: {response date}
 
 +++ MIME types
 
-When retrieving a document through the GET method a client MAY specify which MIME types it will accept using the Accept header.  While section 14.1 of RFC 2616 (the HTTP specification) defines a sophisticated format for the Accept header, RestMS currently allows these three possibilities:
+When retrieving a document through the GET method a client MAY specify which MIME types it will accept using the Accept header.  While section 14.1 of RFC 2616 (the HTTP specification) defines a sophisticated format for the Accept header, RestTL currently allows these three possibilities:
 
-* Accept: application/restms+xml
-* Accept: application/restms+json
+* Accept: application/music+xml
+* Accept: application/music+json
 * no Accept header, or any other value.
 
-If there is no Accept header, or it is not one of the allowed values, then it is assumed to be "application/restms+xml".
+If there is no Accept header, or it is not one of the allowed values, then it is assumed to be "application/music+xml".
 
-When creating a new resource using the POST method, or when modifying an existing resource using the PUT method, the client SHOULD specify the MIME type of the document that it is sending to the browser, using the Content-Type header.  For RestMS documents this MUST be one of these two:
+When creating a new resource using the POST method, or when modifying an existing resource using the PUT method, the client SHOULD specify the MIME type of the document that it is sending to the browser, using the Content-Type header.  For RestTL documents this MUST be one of these two:
 
-* Content-Type: application/restms+xml
-* Content-Type: application/restms+json
+* Content-Type: application/music+xml
+* Content-Type: application/music+json
 
 For the DELETE method, neither the Accept nor the Content-Type header have any significance, and if specified by the client, MUST BE ignored by the server.
 
@@ -558,7 +570,7 @@ If a server does not support the structured content type requested or provided b
 
 +++ Asynchronous access via asynclets
 
-HTTP is generally a synchronous protocol in which a client polls a server for resources.  This is undesirable in many architectures, both from a design and a performance perspective.  RestMS allows for asynchronous retrieval of resources with the concept of an "asynchronous resource instance", which we call an "asynclet".
+HTTP is generally a synchronous protocol in which a client polls a server for resources.  This is undesirable in many architectures, both from a design and a performance perspective.  RestTL allows for asynchronous retrieval of resources with the concept of an "asynchronous resource instance", which we call an "asynclet".
 
 A normal resource is identified in a parent resource by a href attribute, and other attributes:
 
@@ -594,7 +606,7 @@ The asynclet design addresses a similar problem as the Comet "When-Modified-Afte
 
 +++ Caching
 
-RestMS assumes that all resources may be cached.  We define two types of cache.  First, the "end cache", is held in the browser or HTTP client layer.  Second, the "proxy cache" is a service that sits between the client and the server.
+RestTL assumes that all resources may be cached.  We define two types of cache.  First, the "end cache", is held in the browser or HTTP client layer.  Second, the "proxy cache" is a service that sits between the client and the server.
 
 The server can allow, or disallow, both types of cache from holding content.  It does this by adding a "Cache-Control: No-cache" header to the response.
 
@@ -618,7 +630,7 @@ The client may send requests in parallel, which is called "pipelining".  RFC 261
 
 > Clients SHOULD NOT pipeline requests using non-idempotent methods or non-idempotent sequences of methods (see section 9.1.2). Otherwise, a premature termination of the transport connection could lead to indeterminate results. A client wishing to send a non-idempotent request SHOULD wait to send that request until it has received the response status for the previous request.
 
-RestMS clients MAY pipeline GET, PUT and DELETE methods, but SHOULD NOT pipeline POST methods.
+RestTL clients MAY pipeline GET, PUT and DELETE methods, but SHOULD NOT pipeline POST methods.
 
 +++ Error responses
 

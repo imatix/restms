@@ -6,9 +6,12 @@ Done
 - Change: Etag must include the the MIME type as part of the calculation
 - Change: Remove the Slug header and move that property to the document 'name=' attribute
 - Change: use plain text error response bodies, not HTML (and specify this)
+- Clarify: what encodings are allowed on embedded content
+- Clarify: why and how to do pipe caching
 
 Pending
-- Clarify: what encodings are allowed on embedded content
+- Change: the generic data model example should not be <restms>, that is confusing
+
 - Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
 - Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
 - Clarify: for OOB contents, what headers are preserved
@@ -21,21 +24,9 @@ Pending
 - Clarify: joins also have header entities.
 - Clarify: post not allowed on message (happens on feed)
 
-- Change: the generic data model example should not be <restms>, that is confusing
 - Clarify: URIs can be relative coming from client, always absolute from server
 - Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
 - Add: list all error responses (in RestMS spec)
 - Clarify: add rules explaining how clients should handle unknown elements
 
 - Add: security on feeds, using passwords defined at feed create time
-
-- Big issue: how to recover existing private pipes?
-    - cache them locally is simplest
-    - alternatively, discoverable via cache key
-    - private names for pipes
-        - my cache key is X, pipe name is Y
-        -> overkill, since most apps need 1 pipe
-    - document pipe caching in documentation
-    - implement pipe caching in API
-        .restms_pipe_cache
-

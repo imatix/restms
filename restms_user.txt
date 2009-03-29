@@ -16,7 +16,7 @@ This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite co
 
 ++ Goals and structure of this document
 
-This document is a guide for developers who wish to learn and use RestMS in their applications.  We cover:
+RestMS is an API expressed as HTTP requests and responses, often wrapped in higher-level class libraries.  This document is a guide for developers who wish to learn and use RestMS in their applications.  We cover:
 
 # A basic description of what RestMS is;
 # Using RestMS through a typical high-level class library;
@@ -26,9 +26,9 @@ This document is a guide for developers who wish to learn and use RestMS in thei
 
 This document is part of the [[[spec:7 |RestMS specification]]].  The specification is described in more detail by these separate documents:
 
-* [[[spec:10|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
-* [[[spec:11|RestMS-core]]] - technical specifications of RestMS, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
+* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
+* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
 
 ++ What is RestMS?
 

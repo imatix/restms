@@ -18,9 +18,9 @@ This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite co
 
 This document is part of the [[[spec:7 |RestMS specification]]].  It provides a guide to using RestMS in applications.  The specification is described in more detail by these separate documents:
 
-* [[[spec:9 |RestMS-user]]] - guide to using RestMS in applications, for RestMS users.
-* [[[spec:10|RestMS-base]]] - generic RESTful framework for documents and methods, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
+* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
+* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
 
 ++ RestMS protocol semantics
 
