@@ -8,13 +8,17 @@ Done
 - Change: use plain text error response bodies, not HTML (and specify this)
 - Clarify: what encodings are allowed on embedded content
 - Clarify: why and how to do pipe caching
-
-Pending
+- Clarify: URIs can be relative coming from client, always absolute from server
 - Change: the generic data model example should not be <restms>, that is confusing
 
+Pending
+
 - Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
+
 - Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
+
 - Clarify: for OOB contents, what headers are preserved
+
 - Clarify: POST on feeds, if xml/json -> message, else is content
     - see how zyre_feed handles POST
 - Clarify: on post content to feed, response with application/restms+xml, not text/xml
@@ -24,9 +28,10 @@ Pending
 - Clarify: joins also have header entities.
 - Clarify: post not allowed on message (happens on feed)
 
-- Clarify: URIs can be relative coming from client, always absolute from server
 - Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
 - Add: list all error responses (in RestMS spec)
 - Clarify: add rules explaining how clients should handle unknown elements
 
 - Add: security on feeds, using passwords defined at feed create time
+    - all resources should be deletable only by client that created them
+    - additionally, rw security can be layered on that

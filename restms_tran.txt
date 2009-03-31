@@ -4,7 +4,7 @@ RestMS provides web applications with enterprise-level messaging via an asynchro
 * Version: draft/3
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
-* Resources: http://www.music.org.
+* Resources: http://www.restms.org.
 
 ++ License
 
@@ -18,10 +18,10 @@ This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite co
 
 This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.  RestTL is a foundation for RestMS but can be used for arbitrary RESTful protocols.  RestTL consists of:
 
-# A standard structure for XML or JSON documents that represent server-held resources;
-# A standard RESTful method framework that lets a client access and work with these resources.
+# A set of HTTP requests and responses that let a client work with server-side resources in a RESTful way;
+# A grammar for XML or JSON documents to represent server-held resources.
 
-This document is part of the [[[spec:7 |RestMS specification]]].  The specification is described in more detail by these separate documents:
+The RestTL specification is developed as part of the [[[spec:7 |RestMS specification]]].  The RestMS specification is described in more detail by these separate documents:
 
 * [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
 * [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
@@ -29,56 +29,514 @@ This document is part of the [[[spec:7 |RestMS specification]]].  The specificat
 
 ++ Why define a RESTful Transport Layer?
 
-Existing RESTful specifications such as AtomPub[((bibcite atompub))] use a regular document and method structure but this is implied in the specification, not explicitly defined.  For example, how does an application delete a resource?  Rather than explain the syntax of the DELETE method for each resource, we prefer to define this a single time.
+REST is a design philosophy rather than a formal specification.  This means that architects have lattitude in how to implement (more or less) RESTful APIs.  This is useful for experimentation but not valuable for defining standards.  Standards must formalize best practice in a boring and uterly interoperable way.
 
-The RESTful Transport Layer (RestTL) defines the common framework used to represent and work with resources.  This is:
+The principle of Least Surprise applies: the implementer, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.
 
-* What resources actually look like in terms of XML or JSON documents;
-* How resources are structured, so that applications can navigate them;
-* Rules for naming and addressing resources;
-* A standard mechanism for creating new resources (the POST method);
-* A standard mechanism for retrieving resources (the GET method);
-* A standard mechanism for modifying resources (the PUT method);
-* A standard mechanism for deleting resources (the DELETE method).
+The best way to enforce the regularity of an API is to treat it as one of a class of APIs, and to specify separately the rules for all APIs of that class.  Thus for RestMS, we treat it as one of a class of RESTful APIs, and we specify separately - as RestTL - the rules for our class of RESTful APIs.
 
-++ RestTL structured documents
+With RestTL we do not claim to define the rules for all RESTful APIs, just for a certain class of which RestMS is currently the main member.  We aim however to make a specification that is reusable and useful to implementer of other RESTful APIs.
 
-When you need to specify or work with a server-held resource, you do so using XML or JSON documents.  These documents follow a regular structure which supports all the needs of a RESTful interface.
++++ RestTL overview
 
-The general principles for RestTL structured documents are:
+We speak of "the API" as being the RESTful protocol that we layer on top of RestTL.
+
+RestTL is built on HTTP/HTTPS and conforms to the HTTP/1.1 specifications.  It implements these HTTP methods: POST - create a new resource, GET - retrieve a resource, PUT - update a resource, DELETE - delete a resource.
+
+It uses these HTTP headers with their HTTP/1.1 meaning: Location, ETag, Data-Modified, If-Modified-Since, If-Unmodified-Since, If-Match, and If-None-Match.  All RestTL servers and clients are based on standard HTTP stacks that can handle headers such as Content-Length and Content-Type properly.
+
+API resources are either //public// (shared by many clients) or //private// (to a single client).  Public resources are named by formal or informal agreement, while the server is responsible for naming all private resources.  The URI of a resource is based on the resource name, so clients can know the URIs of public resources in advance, while the server provides the URIs of private resources at runtime.
+
+API resources are either //structured// or //opaque//.  A structured resource has properties that both client and server can access and modify.  Resources can contain references (URIs) to child resources.  An opaque resource has a MIME type and a binary content that the API never examines nor modifies.
+
+The API resource types form a static //type tree// attached to a root type.  The set of actual resources that a server holds form a dynamic //resource tree//, attached to a public root resource.  To navigate the resource tree, clients retrieve the root resource and inspecting it.  Not all resources are discoverable: to work with a private resource an client must have created it, and thus know its URI.
+
+The API represents structured resources as interchangeable XML or JSON //resource documents//, at the choice of the client.  These documents follow simple grammar rules for representing resources and their properties.
+
+Lastly the API has two mechanisms for asynchronous (event-driven) retrieval and delivery of resources, and one mechanism for event-driven monitoring of resource updates.  RESTful APIs, like HTTP, are nominally synchronous and use a request-response pattern for all resource actions.  The first mechanism is the //asynclet// resource, given a URI before it exists: the client retrieves the asynclet and receives the resource as soon as it comes into existence.  The second mechanism is more typical for HTTP: //streaming// of new resources to the client.  Lastly, using special HTTP headers a client can ask to be notified when a resource is changed.
+
+++ HTTP requests and responses
+
+Clients issue HTTP methods to work with server-side resources as follows:
+
+* the GET method to retrieve the representation of a known resource;
+* the POST method to create a new, dynamically named resource;
+* the PUT method to edit a known resource;
+* the DELETE method to remove a known resource.
+
+All methods work orthogonally on all types of API resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, permitted, or necessarily implemented.  This framework draws heavily on the design of AtomPub[((bibcite atompub))], which may be helpful as background material.
+
++++ Resource lifecycles, visibility, and addressing
+
+API resources can be created by various parties at different times: by the server at startup, by clients at runtime, or by the server as the consequence of other events, at runtime.   Only the party that created a resource can delete it, and it may place restrictions on other parties' right to work with the resource.
+
+RestTL distinguishes between resources that are named and visible to all applications ("public resources") and resources that are unnamed and accessed via server-defined URI ("private resources").
+
+The URI for a public resource is derived from the resource type and name as follows:
+
+[[code]]
+http://{server-name}[:{port}]/{schema}/{resource type}/{resource name}
+[[/code]]
+
+Where {schema} is the API schema name, e.g. 'restms'.  For example the RestMS default domain on http://live.zyre.com has the URI:
+
+[[code]]
+http://live.zyre.com/restms/domain/default
+[[/code]]
+
+The URI for a private resource is based on "resource" and a resource hash generated by the server:
+
+[[code]]
+http://{server-name}[:{port}]/{schema}/resource/{resource hash}
+[[/code]]
+
++++ Creating a resource
+
+The API lets clients create new resources as follows:
+
+* The client must know the URI of the parent for the new resource it wants to create.
+* The client POSTs a specification for the new resource to the parent URI.
+* The client creates a public resource by specifying a name.  Otherwise the server names the resource.
+* The server either returns 2xx with a resource document, or 4xx or 5xx with an error text.
+* The server when it creates the resource returns "201 Created" with the new URI in the Location: header.
+
+[[code]]
+Client                                     Server
+  |                                           |
+  |  1.) POST to parent URI                   |
+  |      Resource specifications              |
+  |------------------------------------------>|
+  |                                           |
+  |  2.) 201 Created                          |
+  |      Location: Resource URI               |
+  |<------------------------------------------|
+  |                                           |
+[[/code]]
+
+The content body of the created resource may be different than the content body provided by the client. While the client provides specifications for the resource, the server returns the actual resulting resource, which may have additional properties and/or children.
+
+This is the general form of a client HTTP request to create a dynamic resource, with the server response.  We ignore standard HTTP headers and we assume we're using XML rather than JSON:
+
+[[code]]
+Client:
+-------------------------------------------------
+POST /{parent uri} HTTP/1.1
+Content-Type: application/{schema}+xml
+
+<?xml version="1.0"?>
+<{schema} xmlns="http://www.restms.org/schema/{schema}">
+  <{resource type} [name = "{name for public resource}"]>
+    {resource specifications}
+  </{resource type}>
+</{schema}>
+
+Server:
+-------------------------------------------------
+HTTP/1.1 201 Created
+Content-Type: application/{schema}+xml
+Date-Modified: {resource date and time}
+ETag: {resource entity tag}
+Location: {resource URI}
+
+<?xml version="1.0"?>
+<{schema} xmlns="http://www.restms.org/schema/{schema}">
+  <{resource type} name="{resource name}"...>
+    {resource contents}
+  </{resource type}>
+</{schema}>
+[[/code]]
+
+The server may return these response codes specifically for a POST request:
+
+* 200 OK - the resource already existed as specified (only possible for public resources).
+* 201 Created - the server created the resource, and the Location: header provides the URI.
+* 400 Bad Request - the resource specification was incomplete or badly formatted.
+* 403 Forbidden - the POST method is not allowed on the parent URI.
+
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
+
+Creating public resources is //idempotent//, i.e. repeated requests to create the same public resource are allowed, and safe.  Clients should treat "200 OK" and "201 Created" as equally successful.
+
++++ Retrieving a resource
+
+The API lets clients retrieve resources as follows:
+
+* The client must know the URI of the resource that it wants to retrieve.
+* The client sends a GET method to the resource URI.
+* The client optionally specifies headers to do a conditional retrieval (caching).
+* The server either returns "200 OK" with a resource document, "304 Not Modified" with no content, or 4xx or 5xx with an error text.
+
+[[code]]
+Client                                     Server
+  |                                           |
+  |  1.) GET to Resource URI                  |
+  |------------------------------------------>|
+  |                                           |
+  |  2.) 200 Ok                               |
+  |      Resource representation              |
+  |<------------------------------------------|
+  |                                           |
+[[/code]]
+
+This is the general form of an unconditional client HTTP request to retrieve a resource, with the server response.  We ignore standard HTTP headers and we assume we're using XML rather than JSON:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /{resource uri} HTTP/1.1
+
+Server:
+-------------------------------------------------
+HTTP/1.1 200 OK
+Content-Type: application/{schema}+xml
+Date-Modified: {resource date and time}
+ETag: {resource entity tag}
+
+<?xml version="1.0"?>
+<{schema} xmlns="http://www.restms.org/schema/{schema}">
+  <{resource type} ...>
+    {resource contents}
+  </{resource type}>
+</{schema}>
+[[/code]]
+
+The server may return these response codes specifically for a GET request:
+
+* 200 OK - the resource already existed as specified (only for public resources).
+* 304 Not Modified - the client already has the latest copy of the resource.
+* 400 Bad Request - the resource document was incomplete or badly formatted.
+
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
+
+//Conditional retrieval// is used to cache resources and fetch them only if they have changed.  The API lets clients retrieve resources conditionally as follows:
+
+* The client must previously have retrieved the resource.
+* The client does a GET method with If-None-Match: and If-Modified-Since: headers.
+* The server returns "200 OK" and the resource document if the client's copy is out of date.
+* The server returns "304 Not Modified" with no content if the client's copy is up-to-date.
+
+This is the general form of a client HTTP request to conditionally retrieve a resource:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /{resource uri} HTTP/1.1
+If-None-Match: {resource entity tag}
+If-Modified-Since: {resource date and time}
+[[/code]]
+
+A conditional get only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK".  It is valid to send either of the If-None-Match: or If-Modified-Since: headers but for best results, use both.
+
+Retrieving a resource has //no side effects//, i.e. repeated requests to retrieve the same resource will provoke the same responses, unless a third party deletes or modifies the resource.
+
++++ Updating a resource
+
+The API lets clients update resources as follows:
+
+* The client must know the URI of the resource that it wants to update.
+* The client should have retrieved the resource before updating it.
+* The client sends a PUT method to the resource URI with the modified resource document.
+* The client optionally specifies headers to do a conditional update.
+* The server either returns 2xx with a resource document, or 4xx or 5xx with an error text.
+
+[[code]]
+Client                                     Server
+  |                                           |
+  |  1.) GET to Resource URI                  |
+  |------------------------------------------>|
+  |                                           |
+  |  2.) 200 OK                               |
+  |      Resource representation              |
+  |<------------------------------------------|
+  |                                           |
+  |  3.) PUT to Resource URI                  |
+  |      Modified resource representation     |
+  |------------------------------------------>|
+  |                                           |
+  |  4.) 200 OK                               |
+  |<------------------------------------------|
+[[/code]]
+
+This is the general form of a client HTTP request to unconditionally modify a resource, with the server response.  We ignore standard HTTP headers and we assume we're using XML rather than JSON:
+
+[[code]]
+Client:
+-------------------------------------------------
+PUT /{resource uri} HTTP/1.1
+Content-Type: application/{schema}+xml
+
+<?xml version="1.0"?>
+<{schema} xmlns="http://www.restms.org/schema/{schema}">
+  <{resource type} ...>
+    {resource contents}
+  </{resource type}>
+</{schema}>
+
+Server:
+-------------------------------------------------
+HTTP/1.1 200 OK
+Date: {response date}
+[[/code]]
+
+The server may return these response codes specifically for a PUT request:
+
+* 200 OK - the resource was successfully updated.
+* 204 No Content - the client provided no resource document but resource was updated in any case.
+* 400 Bad Request - the resource document was incomplete or badly formatted.
+* 403 Forbidden - the PUT method is not allowed on the resource.
+* 412 Precondition Failed - the client does not have the latest copy of the resource.
+
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
+
+//Conditional update// is used to detect and prevent update conflicts (when multiple clients try to update the same resource at the same time).  The API lets clients conditionally update resources conditionally as follows:
+
+* The client must previously have retrieved the resource.
+* The client does a DELETE method with If-Match: and If-Unmodified-Since: headers.
+* The server returns "412 Precondition Failed" if the client's copy is out of date.
+* The server returns "200 OK" and the new resource document if the client's copy was up-to-date.
+
+This is the general form of a client HTTP request to conditionally update a resource:
+
+[[code]]
+Client:
+-------------------------------------------------
+PUT /{resource uri} HTTP/1.1
+If-Match: {resource entity tag}
+If-Unmodified-Since: {resource date and time}
+[[/code]]
+
+A conditional PUT only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK".  It is valid to send either of the If-Match: or If-Unmodified-Since: headers but for best results, use both.
+
+Modifying resources is //idempotent//, i.e. repeated requests to modify the same resource are allowed, and safe, unless a third party modifies or deletes the resource.
+
++++ Deleting a resource
+
+The API lets clients delete resources as follows:
+
+* The client must know the URI of the resource that it wants to delete.
+* The client should have retrieved the resource before delete it.
+* The client sends a DELETE method to the resource URIt.
+* The client optionally specifies headers to do a conditional delete.
+* The server either returns "200 OK", or 4xx or 5xx with an error text.
+
+[[code]]
+Client                                     Server
+  |                                           |
+  |  1.) GET to Resource URI                  |
+  |------------------------------------------>|
+  |                                           |
+  |  2.) 200 OK                               |
+  |      Resource representation              |
+  |<------------------------------------------|
+  |                                           |
+  |  3.) DELETE to resource URI               |
+  |------------------------------------------>|
+  |                                           |
+  |  4.) 200 OK                               |
+  |<------------------------------------------|
+  |                                           |
+[[/code]]
+
+This is the general form of a client HTTP request to unconditionally delete a resource, with the server response.  We ignore standard HTTP headers:
+
+[[code]]
+Client:
+-------------------------------------------------
+DELETE /{resource uri} HTTP/1.1
+
+Server:
+-------------------------------------------------
+HTTP/1.1 200 OK
+[[/code]]
+
+The server may return these response codes specifically for a DELETE request:
+
+* 200 OK - the resource was successfully updated.
+* 403 Forbidden - the DELETE method is not allowed on the resource.
+* 412 Precondition Failed - the client does not have the latest copy of the resource.
+
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
+
+//Conditional delete// is used to detect and prevent delete conflicts (when multiple clients try to delete the same resource at the same time).  The API lets clients conditionally delete resources conditionally as follows:
+
+* The client must previously have retrieved the resource.
+* The client does a DELETE method with If-Match: and If-Unmodified-Since: headers.
+* The server returns "412 Precondition Failed" if the client's copy is out of date.
+* The server returns "200 OK" if the client's copy was up-to-date.
+
+This is the general form of a client HTTP request to conditionally delete a resource:
+
+[[code]]
+Client:
+-------------------------------------------------
+DELETE /{resource uri} HTTP/1.1
+If-Match: {resource entity tag}
+If-Unmodified-Since: {resource date and time}
+[[/code]]
+
+A conditional DELETE only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK".  It is valid to send either of the If-Match: or If-Unmodified-Since: headers but for best results, use both.
+
+Deleting resources is //idempotent//, i.e. repeated requests to delete the same resource are allowed, and safe.  Implementations may cache the URIs of deleted resources in order to differentiate between deletes on already-deleted resources, and deletes on resources that never existed.
+
++++ MIME types
+
+When the client retrieves a resource it MAY specify which MIME type it desires using the Accept header.  While the HTTP specification (RFC 2616 section 14.1) defines a complex format for the Accept header, RestTL allows these three possibilities:
+
+* "Accept: application/{schema}+xml"
+* "Accept: application/{schema}+json"
+* "Accept: text/xml", which is equivalent to no Accept: header.
+
+The server will respond with a resource document in the requested format and a Content-Type: header of the appropriate type.  Note that most browsers will display "text/xml" documents as XML, while they will not show "application/{schema}+xml".  Thus it is possible to embed RestTL resource URIs in, for example, HTML documents, with usable results.
+
+When a client creates a new resource or modifies an existing resource, it SHOULD specify the MIME type of the resource document that it is sending to the browser, using the Content-Type header.  RestTL allows the same three values as for the Accept: header:
+
+* "Content-Type: application/{schema}+xml"
+* "Content-Type: application/{schema}+json"
+* "Content-Type: text/xml", which is equivalent to no Content-Type: header.
+
+When a client deletes a resource neither the Accept: nor Content-Type: headers have any significance, and MUST be ignored by the server.
+
+If a server does not support the content type requested or provided by the client, it SHOULD return "501 Not Implemented."
+
++++ Asynchronous retrieval
+
+HTTP is generally a synchronous protocol in which a client polls a server for resources.  This is undesirable in many architectures, both from a design and a performance perspective.  RestTL allows three mechanisms for asynchronous non-polled resource delivery.  In each case, the client sends a GET to the server, which responds only when some condition (an event) is true.  Some sources call this "long polling".
+
+The three asynchronous delivery mechanisms are:
+
+# //Streaming//, in which a resource is delivered in segments, over time.  RestTL has no specific support for streaming: it is implemented using multipart contents, but otherwise looks like a conventional resource GET.
+# //Creation notification//, in which a resource is delivered only when it is created.  RestTL implements this using "asynclets".
+# //Update notification//, in which a resource is delivered only when it is changed.  RestTL implements this using the When-Modified-After: and When-None-Match: custom headers.
+
+++++ Creation notification via asynclets
+
+An asynclet is an "asynchronous resource instance", which is a resource that is given a URI identifier //before// it exists.  When the client retrieves the asynclet, the server will respond only when the resource has come into existence.
+
+Asynclets are used in a specific case: when resources sit in some kind of a queue that is retrieved and emptied by the client (using GET and DELETE in a loop).  The queue would be the parent resource, the container.  The queue then contains zero or more existing resources plus a single asynclet.
+
+A normal resource is identified in a parent resource by a href attribute, and other attributes:
+
+[[code]]
+    <some-type href="some-URI" ... />
+[[/code]]
+
+An asynclet has the href attribute and a second attribute 'async="1"', telling the client that this resource, though it has a URI, does not in fact yet exist:
+
+[[code]]
+    <some-type href="some-URI" async="1" />
+[[/code]]
+
+When the client retrieves an asynclet, the server waits until the resource is created, within that parent, and it then responds to the client with the contents of that new resource.
+
+When the client retrieves the asynclet container, the container resource holds all existing resources plus a single asynclet:
+
+[[code]]
+    <some-type href="some-URI-1" ... />
+    <some-type href="some-URI-2" ... />
+    <some-type href="some-URI-3" ... />
+    <some-type href="some-URI-4" ... />
+    <some-type href="some-URI-5" async="1" />
+[[/code]]
+
+At any time a new resource may 'arrive' and the URI held by a client for an asynclet will then refer to a real existing resource.  This is transparent to the client except that there will be no wait when the client issues a GET on that URI.
+
+++++ Update notification
+
+Applications can monitor specific resources for updates using two HTTP extension headers.  If the client has already retrieved the resource it specifies the resource ETag:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /{resource uri} HTTP/1.1
+When-None-Match: {resource entity tag}
+[[/code]]
+
+The client can also specify the last-known modified date and time, the current date and time, or a later date and time:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /{resource uri} HTTP/1.1
+When-Modified-After: {resource date and time}
+[[/code]]
+
+The server will respond with the new resource document when it is modified.  The client should be able to handle any HTTP error condition, such as "404 Not Found" or "501 Not Implemented".  If both headers are specified, the server will respond only when both conditions are true.
+
+The When-Modified-After: header was originally proposed in the Comet[((bibcite comet))] specification.
+
++++ Caching and ETags
+
+RestTL assumes that all resources may be cached.  We define two types of cache.  First, the "end cache", is held in the browser or HTTP client layer.  Second, the "proxy cache" is a service that sits between the client and the server.
+
+The server can disallow (or at least discourage) both types of cache from holding content.  It does this by adding a "Cache-Control: No-cache" header to the response.
+
+The client can inform the server or proxy cache that it has cacheable content for a resource by specifying either one of, or both of, the If-Modified-Since and If-None-Match header together with an ETag.  Usually, specifying both conditional headers gives best results.
+
+ETags are calculated by the server.  The ETag value for resources that can have multiple MIME representations MUST depend on the MIME type of the returned resource specification.  Thus a resource returned as XML will have a different ETag than the same resource returned as JSON.
+
+Note that if a proxy cache is enabled, clients will not be guaranteed to receive the freshest version of a resource for a GET method.  There is no mechanism to push resource updates to proxy servers.
+
++++ Idempotency and side-effects
+
+The GET, PUT, and DELETE methods are idempotent: the client can safely issue these more than once.  POST is idempotent when creating public resources.  POST to create private resources is not idempotent and will create one resource per successful execution.
+
+Idempotency allows the client to safely recover from failures where it did not get a response, yet could not sure the server did not receive the request.  For example, any failure in the network, the client, or an intermediary that happens after the server receives the request but before the client receives the response.  The client recovers by simply reissuing any GET, PUT, DELETE, and POST-public requests that were not completed.
+
+The GET method does not modify the state of any resource on the server.
+
++++ Pipelining
+
+The client may send requests in parallel, which is called "pipelining".  RFC 2616 section 8.1.2.2 says,
+
+> Clients SHOULD NOT pipeline requests using non-idempotent methods or non-idempotent sequences of methods (see section 9.1.2). Otherwise, a premature termination of the transport connection could lead to indeterminate results. A client wishing to send a non-idempotent request SHOULD wait to send that request until it has received the response status for the previous request.
+
+RestTL clients MAY pipeline GET, PUT, DELETE and POST-public methods, but SHOULD NOT pipeline POST-private methods.
+
++++ Error responses
+
+When the server returns an error response, the content body MUST be in plain text, and the MIME type MUST be "text/plain".
+
+++ RestTL resource document grammar
+
+Most, though not all, resources managed through a RestTL API are represented as structured resource documents.
+
+In generally, a client sends a resource document to the server when it wishes to create a new resource or update a resource.  The server sends a resource document to the client in response to a create, retrieve, or update request.  Certain resources may be represented as opaque MIME-type blobs, in which case they are posted and retrieved as such, not as structured resource documents.
+
+RestTL resource documents have a schema-independent regular grammar designed to support all the requirements of a RESTful API.  The grammar makes it possible for applications to navigate the API as follows:
 
 * Resources are typed, and the type names form the main element names in the document.
-* A resource may, or may not, be a container for other resources depending on its type.
-* The document syntax is fully neutral with respect to the resource hierarchy.  That is, when the protocol is changed to add new resources, remove resources, or modify resources, nothing in this section will change.
-* There is a single root resource that contains all other resources.
-* Clients can navigate the resource hierarchy with no specific knowledge except the type and URI of the root resource.
-* Documents can include opaque binary resources, which themselves cannot contain further RestTL resources.
+* A resource type may be a container for other resource types.
+* This hierarchy of resource types forms a //static type tree// attached to a single root type.
+* At runtime, the actual resources form a //dynamic resource tree// attached to a single root resource.
+* Clients navigate the resource tree by retrieving the root resource.
+* Resource documents may contain URI references to accessible child resources.
+* A private resource is accessible only to the client that created it, and knows its URI.
 
 Our goals with this design are:
 
-* To define a generic syntax that can be implemented, understood, and reused without needing specific knowledge of the RestTL resources and their semantics.
-* To define a document syntax that is easily mapped to arbitrary representations including XML and JSON.  We document the use of these two representations but do not exclude others.
+* To define a document syntax that is easily mapped to arbitrary structured languages including XML and JSON.
 * To provide documents that are navigable and discoverable with mimimum prior knowledge.
-* To deliver most of the benefits of structured representations (such as cheap parsing) without the cost of formalised validation.
+* To deliver the cheap parsing benefits of structured languages without the cost of formal validation.
 * To allow unilateral extensibility of the resource hierarchy by server implementations.
-* To keep things as simple as possible for RestTL users: this means being able to read and create RestTL documents with minimum libraries, extensions, addons, and other complexities.
+* To keep things as simple as possible for RestTL application developers.
 * To allow for future evolution in structured data representation.
 
 +++ Basic syntax rules
 
-Transport Layer documents obey these basic rules:
+RestTL resource documents obey these basic rules:
 
-* All RestTL documents have a "document root" element named according to the schema.
-* This document root contains one or more "resource roots".
-* The resource root elements contains other elements, each which can itself contain elements.
-* All elements except the document root element correspond to RestTL resources, with the name of the element equal to the resource type.
+* All resource documents in an API are part of a //schema// that defines the type tree.
+* The resource document has a //document root// element with the name of the schema.
+* The document root contains one or more //resource roots//.
+* The resource root elements may contain other elements.
+* All elements except the document root correspond to RestTL resources, with the name of the element equal to the resource type.
 * All elements except the document root may have attributes, corresponding to resource properties.
 * All elements except the document root may repeat 0 or more times.
 
 Further, for XML documents:
 
 * The Content-type MUST be "application/{schema-name}+xml".
-* The document root has a single attribute, xmlns="http://www.imatix.com/schema/{schema-name}".
+* The document root has a single attribute, xmlns="http://www.restms.org/schema/{schema-name}".
 * The following character MUST be escaped in attribute values:
  * " (escaped by writing &quot;)
 
@@ -88,16 +546,14 @@ And for JSON documents:
 * The following character MUST be escaped in value strings:
  * " (escaped by writing \")
 
-Here is an example of a RestTL document in XML:
+Here is an example of a RestTL document in XML, for a schema called "music":
 
 [[code]]
 <?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
+<music xmlns="http://www.restms.org/schema/music">
   <playlist>
     <album
-      artist="Echobelly"
-      title="On"
-      released="1995-10-17"
+      artist="Echobelly" title="On" released="1995-10-17"
       summary="Underrated, bittersweet guitar rock perfection">
       <track title="Car Fiction" length="2:31" />
       <track title="King of the Kerb" length="3:59" />
@@ -116,7 +572,7 @@ Here is an example of a RestTL document in XML:
 </music>
 [[/code]]
 
-The resource hierarchy in our example is:
+The resource tree for the music schema is:
 
 [[code]]
 playlist
@@ -133,6 +589,7 @@ Here is the same document in JSON:
 "music": {
   "playlist": [ { "name":"default",
     "album": [ { "artist":"Echobelly", "title":"On", "released":"1995-10-17",
+      "summary":"Underrated, bittersweet guitar rock perfection",
       "track": [
         { "title":"Car Fiction", "length":"2:31" },
         { "title":"King of the Kerb", "length":"3:59" },
@@ -146,8 +603,7 @@ Here is the same document in JSON:
         { "title":"In the Year", "length":"3:31" },
         { "title":"Dark Therapy", "length":"5:30" },
         { "title":"Worms and Angels", "length":"2:38" }
-      ],
-      "summary":"Underrated, bittersweet guitar rock perfection" }
+      ] }
     ] }
   ] }
 }
@@ -160,34 +616,31 @@ RestTL documents use the following rule to allow navigation and discovery:
 * The attribute "href", if present, holds the URI for the resource that the element represents.
 * The URI for the root resource is known to both client and server by common agreement.
 * The URIs for all non-root resources are generated by the server and may be stored by the client.
-* URIs may be relative or absolute.
+* All URIs provided by the server are absolute.  The client at the HTTP level should use URIs with no scheme or hostname.
 
-Here is an example of a client retrieving a public playlist resource using a HTTP GET method, with the server's response.  The server is at 'host.com':
+Here is an example of a client retrieving a public playlist resource using a HTTP GET method, with the server's response.  The server is at host.com:
 
 [[code]]
 Client:
+-------------------------------------------------
 GET /music/playlist/default HTTP/1.1
 
 Server:
+-------------------------------------------------
 HTTP/1.1 200 OK
-Date: Mon Jan 12 12:05:01 2009
-Content-Length: 440
 Content-Type: application/music+xml
 
 <?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
+<music xmlns="http://www.restms.org/schema/music">
   <playlist name="default">
     <album
-        artist="Echobelly"
-        title="On"
+        artist="Echobelly" title="On"
         href="http://host.com/music/resource/A1023" />
     <album
-        artist="Muse"
-        title="Showbiz"
+        artist="Muse" title="Showbiz"
         href="http://host.com/music/resource/A0911" />
     <album
-        artist="Toumani Diabate"
-        title="Djelika"
+        artist="Toumani Diabate" title="Djelika"
         href="http://host.com/music/resource/A0023" />
   </playlist>
 </music>
@@ -197,20 +650,18 @@ To retrieve a specific album, the client uses the URI provided by the server, fo
 
 [[code]]
 Client:
+-------------------------------------------------
 GET /music/resource/A1023 HTTP/1.1
 
 Server:
+-------------------------------------------------
 HTTP/1.1 200 OK
-Date: Mon Jan 12 12:05:02 2009
-Content-Length: 1440
 Content-Type: application/music+xml
 
 <?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
+<music xmlns="http://www.restms.org/schema/music">
     <album
-        artist="Echobelly"
-        title="On"
-        released="1995-10-17"
+        artist="Echobelly" title="On" released="1995-10-17"
         summary="Underrated, bittersweet guitar rock perfection"
       <track title="Car Fiction" length="2:31"
         href="http://music.host.com/resource/A1023/1" />
@@ -244,397 +695,17 @@ To retrieve a specific track, the client once again uses the URI provided by the
 
 [[code]]
 Client:
+-------------------------------------------------
 GET http://music.host.com/resource/A1023/5 HTTP/1.1
 
 Server:
+-------------------------------------------------
 HTTP/1.1 200 OK
-Date: Mon Jan 12 12:05:03 2009
 Content-Length: 2870112
 Content-Type: audio/mpeg-3
 
 ...opaque binary content...
 [[/code]]
-
-++ Generic RESTful resource access framework
-
-RestTL defines a generic framework by which clients issue HTTP methods to work with server-side resources as follows:
-
-* Clients use the GET method to retrieve the representation of a known resource.
-* Clients use the POST method to create a new, dynamically named resource.
-* Clients use the PUT method to edit a known resource (not to create resources).
-* Clients use the DELETE method to remove a known resource.
-
-All methods work orthogonally on all types of RestTL resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, implemented, or permitted.
-
-This framework draws heavily on the design of AtomPub[((bibcite atompub))] and that specification may be helpful as a background to the mechanics of implementing a RESTful dialog over a HTTP transport.
-
-In this section we use XML as the document language, but the reader may note that RestTL allows a choice of representations for structured data.
-
-+++ Resource lifecycles and visibility
-
-RestTL distinguishes between resources that are created automatically by the server ("configured resources") and resources that are created at runtime by applications ("dynamic resources").  It also distinguishes between resources that are named and visible to all applications ("public resources") and resources that are unnamed and accessible only by a (by default) secret hash ("private resources").
-
-The lifecycle and visibility of resources is related, as follows:
-
-* Configured resources are always public while dynamic resources are by default private.
-* Applications can modify and delete dynamic resources, if they know their URIs, while they may not modify or delete configured resources.
-* The URI for a public resource is derived from its type and name (which may be empty), while the URI for a private resource is provided by the server.
-* Public resources are named, and discoverable through navigation of parent resources.  Private resources are unnamed, and undiscoverable through navigation.
-* Dynamic resources may in some cases be created by the server.
-
-The URI for a public resource is derived from the resource type and name as follows:
-
-[[code]]
-http://{server-name}[:{port}]/music/{resource type}/{resource name}
-[[/code]]
-
-The URI for a private resource takes this form:
-
-[[code]]
-http://{server-name}[:{port}]/music/resource/{resource hash}
-[[/code]]
-
-+++ Resource propagation
-
-RestTL resources may be propagated to foreign messaging networks (particularly AMQP networks).  In this case, these rules apply:
-
-* Public resources are propagated using the resource name value.  It is responsibility of the client application to ensure that the values used are unique.  Implementations MAY enforce uniqueness, at the cost of interoperability.
-* Private resources are propagated using the resource hash value.  It is the responsibility of the implementation to ensure that these hash values are unique.
-
-+++ Creating a new resource
-
-The creation of a new dynamic resource follows these rules:
-
-* The new resource will always be the child of another resource (the 'parent') identified with a URI.
-* The client creates the resource by sending a POST method on the parent URI and providing the specifications for the new resource as the POST content body.
-* The client can request a public or a private resource.  Public resources are named explicitly, while private resources named by a server-generated hash.
-* The server replies, if there was no error, with a "200 OK" or "201 Created" reply status, a Location: header that provides a URI to the new resource, and a content body that represents the created resource.
-
-[[code]]
-Client                                     Server
-  |                                           |
-  |  1.) POST to parent URI                   |
-  |      Resource specifications              |
-  |------------------------------------------>|
-  |                                           |
-  |  2.) 201 Created                          |
-  |      Location: Resource URI               |
-  |<------------------------------------------|
-  |                                           |
-[[/code]]
-
-Note that the content body of a created resource may be different than the content body provided by the client: the client provides specifications for the resource, while the server provides the actual resulting resource contents.
-
-This is the general form of a client request to create a dynamic resource:
-
-[[code]]
-POST /{parent uri} HTTP/1.1
-Host: {hostname}
-User-Agent: {user agent}
-Authorization: {credentials}
-Content-Type: application/music+xml
-Content-Length: {size of content}
-
-<?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
-  <{resource type} [name = "{name for public resource}"]>
-    {resource specifications}
-  </{resource type}>
-</music>
-[[/code]]
-
-If allowed by the resource type, and if the name is specified, the new dynamic resource will be public, otherwise it will be private.  This is the general form of a server response for a created resource:
-
-[[code]]
-HTTP/1.1 201 Created
-Date: {response date}
-Content-Length: {size of content}
-Content-Type: application/music+xml
-Location: http://{hostname}[{port}]/music/resource/{hash}
-ETag: "{resource entity tag}"
-
-<?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
-  <{resource type} name="{resource name}"...>
-    {resource contents}
-  </{resource type}>
-</music>
-[[/code]]
-
-Private resources are accessed through their URI.  If the POST request actually created the resource the server responds with "201 Created".  If the resource already existed, and the specifications are correct, the server responds with "200 OK".  For both cases, the server provides a Location: header with the resource's URI.  If the POST failed, the server responds with a "400 Bad Request" or other suitable reply code.
-
-+++ Retrieving a known resource
-
-Retrieving a known resource follows these rules:
-
-* The client must know the URI of the resource.  If it does not know the URI of the resource, and the resource is public, it can discover this by retrieving the parent resource and examining its contents.  If the resource is private, the client must either have created the resource, or must receive the resource URI by an out-of-band communication (for example a message from an external resource management service application).
-* The client retrieves the resource by sending a GET method on the resource URI.
-* The client can optionally specify headers to control the caching of the resource both by itself and by proxies that sit between it and the server.  We explain caching below.
-* The server either returns a "200 OK" reply with the contents of the resource, or returns a reply code indicating why it did not return the resource contents.
-
-[[code]]
-Client                                     Server
-  |                                           |
-  |  1.) GET to Resource URI                  |
-  |------------------------------------------>|
-  |                                           |
-  |  2.) 200 Ok                               |
-  |      Resource representation              |
-  |<------------------------------------------|
-  |                                           |
-[[/code]]
-
-This is the general form of a client request to retrieve a resource:
-
-[[code]]
-GET /{resource uri} HTTP/1.1
-Host: {hostname}
-User-Agent: {user agent}
-Authorization: {credentials}
-[[/code]]
-
-And this is the general form of a server response:
-
-[[code]]
-HTTP/1.1 200 OK
-Date: {response date}
-Content-Length: {size of content}
-Content-Type: application/music+xml
-Date-Modified: {resource date and time}
-ETag: "{resource entity tag}"
-
-<?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
-  <{resource type} ...>
-    {resource contents}
-  </{resource type}>
-</music>
-[[/code]]
-
-If the client has previously retrieved the same resource and still has that ETag, it can use the If-None-Match: header, specifying the ETag value, and/or the If-Modified-Since: to do a conditional GET:
-
-[[code]]
-GET /{resource uri} HTTP/1.1
-...
-If-None-Match: "{resource entity tag}"
-If-Modified-Since: {resource date and time}
-[[/code]]
-
-If the resource has not changed - still has the same ETag and modification date - the server replies with a "304 Not Modified":
-
-[[code]]
-HTTP/1.1 304 Not Modified
-Date: {response date}
-[[/code]]
-
-+++ Modifying a known resource
-
-Modifying a known resource follows these rules:
-
-* The client must know the URI of the resource.  If it does not know the URI of the resource, it can discover this by examining the contents of the parent resource.
-* The client must have retrieved the resource using GET.
-* The client sends new resource contents by sending a PUT method on the resource URI with a modified resource content.
-* The client can optionally specify headers to control potential conflicts (two clients trying to modify the same resource at the same time).
-* The server either returns a "2xx OK" reply indicating success, or returns a reply code indicating why it did not modify the resource contents.
-
-[[code]]
-Client                                     Server
-  |                                           |
-  |  1.) GET to Resource URI                  |
-  |------------------------------------------>|
-  |                                           |
-  |  2.) 200 OK                               |
-  |      Resource representation              |
-  |<------------------------------------------|
-  |                                           |
-  |  3.) PUT to Resource URI                  |
-  |      Modified resource representation     |
-  |------------------------------------------>|
-  |                                           |
-  |  4.) 200 OK                               |
-  |<------------------------------------------|
-[[/code]]
-
-This is the general form of a client request to modify a resource:
-
-[[code]]
-PUT /{resource uri} HTTP/1.1
-Host: {hostname}
-User-Agent: {user agent}
-Authorization: {credentials}
-Content-Length: {size of content}
-Content-Type: application/music+xml
-
-<?xml version="1.0"?>
-<music xmlns="http://www.imatix.com/schema/music">
-  <{resource type} ...>
-    {resource contents}
-  </{resource type}>
-</music>
-[[/code]]
-
-And this is the general form of a server response:
-
-[[code]]
-HTTP/1.1 200 OK
-Date: {response date}
-[[/code]]
-
-The client can use the If-Match: and If-Unmodified-Since headers, specifying the resource's ETag value and last modification date, to do a conditional PUT:
-
-[[code]]
-PUT /{resource uri} HTTP/1.1
-...
-If-Match: "{resource entity tag}"
-If-Unmodified-Since: {resource date and time}
-[[/code]]
-
-If the resource held by the server has the same ETag and date (and if there are no other errors), the update will continue and the server will reply with "200 OK".  If the resource has changed at the server, and thus has a different ETag and/or date, the server does not update the resource, and replies with a "412 Precondition Failed":
-
-[[code]]
-HTTP/1.1 412 Precondition Failed
-Date: {response date}
-[[/code]]
-
-If the PUT request has no content (Content-Length is zero) then the server will respond, if the request was correctly handled, with "201 No Content".
-
-+++ Deleting a known resource
-
-Deleting a known resource follows these rules:
-
-* The client must know the URI of the resource.  If it does not know the URI of the resource, it can discover this by examining the contents of the parent resource.
-* The client sends a DELETE method on the resource URI.
-* The client can optionally specify headers to control potential conflicts.
-* The server either returns a "2xx OK" reply indicating success, or returns a reply code indicating why it did not delete the resource contents.
-
-[[code]]
-Client                                     Server
-  |                                           |
-  |  1.) DELETE to resource URI               |
-  |------------------------------------------>|
-  |                                           |
-  |  2.) 200 OK                               |
-  |<------------------------------------------|
-  |                                           |
-[[/code]]
-
-This is the general form of a client request to delete a resource:
-
-[[code]]
-DELETE /{resource uri} HTTP/1.1
-Host: {hostname}
-User-Agent: {user agent}
-Authorization: {credentials}
-[[/code]]
-
-And this is the general form of a server response when the resource is successfully deleted:
-
-[[code]]
-HTTP/1.1 200 OK
-Date: {response date}
-[[/code]]
-
-If the client previously read the resource, it can can use the If-Match: header, specifying the resource's ETag value, to do a conditional DELETE:
-
-[[code]]
-DELETE /{resource uri} HTTP/1.1
-...
-If-Match: "{resource entity tag}"
-[[/code]]
-
-If the resource held by the server has the same ETag (and if there are no other errors), the delete will continue and the server will reply with "200 OK".  If the resource has changed at the server, and thus has a different ETag, the server does not delete the resource, and replies with a "412 Precondition Failed":
-
-[[code]]
-HTTP/1.1 412 Precondition Failed
-Date: {response date}
-[[/code]]
-
-+++ MIME types
-
-When retrieving a document through the GET method a client MAY specify which MIME types it will accept using the Accept header.  While section 14.1 of RFC 2616 (the HTTP specification) defines a sophisticated format for the Accept header, RestTL currently allows these three possibilities:
-
-* Accept: application/music+xml
-* Accept: application/music+json
-* no Accept header, or any other value.
-
-If there is no Accept header, or it is not one of the allowed values, then it is assumed to be "application/music+xml".
-
-When creating a new resource using the POST method, or when modifying an existing resource using the PUT method, the client SHOULD specify the MIME type of the document that it is sending to the browser, using the Content-Type header.  For RestTL documents this MUST be one of these two:
-
-* Content-Type: application/music+xml
-* Content-Type: application/music+json
-
-For the DELETE method, neither the Accept nor the Content-Type header have any significance, and if specified by the client, MUST BE ignored by the server.
-
-If a server does not support the structured content type requested or provided by the client, it SHOULD return a response code "501 Not Implemented.
-
-+++ Asynchronous access via asynclets
-
-HTTP is generally a synchronous protocol in which a client polls a server for resources.  This is undesirable in many architectures, both from a design and a performance perspective.  RestTL allows for asynchronous retrieval of resources with the concept of an "asynchronous resource instance", which we call an "asynclet".
-
-A normal resource is identified in a parent resource by a href attribute, and other attributes:
-
-[[code]]
-    <some-type href="some-URI" ... />
-[[/code]]
-
-An asynclet has the href attribute and a second attribute 'async="1"', telling the client that this resource, though it has a URI, does not in fact yet exist:
-
-[[code]]
-    <some-type href="some-URI" async="1" />
-[[/code]]
-
-When the client retrieves an asynclet, the server waits until a resource of the right type is created, within that parent, and it then responds to the client with the contents of that new resource.
-
-In those cases where asynclets are meaningful, and implemented, the representation for a parent resource will list all existing resources plus a single asynclet:
-
-[[code]]
-    <some-type href="some-URI-1" ... />
-    <some-type href="some-URI-2" ... />
-    <some-type href="some-URI-3" ... />
-    <some-type href="some-URI-4" ... />
-    <some-type href="some-URI-5" async="1" />
-[[/code]]
-
-When the server returns the document for an asynclet, it always defines an attribute "next" which contains the URI of a new asynclet that represents the next resource which will be created.
-
-At any time, of course, a new resource may 'arrive' and the URI held by a client for an asynclet will then refer to a real existing resource.  This is transparent to the client except that there will be no wait when the client issues a GET on that URI.
-
-The asynclet model gives the client full choice between a synchronous polling dialog (in which it would fetch the parent each time), or an event-driven dialog (in which case it would fetch an asynclet each time).
-
-The asynclet design addresses a similar problem as the Comet "When-Modified-After"[((bibcite comet))] HTTP extension header does, but without extending the HTTP protocol and allowing clients to wait for specific resources within a parent resource context.
-
-+++ Caching
-
-RestTL assumes that all resources may be cached.  We define two types of cache.  First, the "end cache", is held in the browser or HTTP client layer.  Second, the "proxy cache" is a service that sits between the client and the server.
-
-The server can allow, or disallow, both types of cache from holding content.  It does this by adding a "Cache-Control: No-cache" header to the response.
-
-The client can inform the server or proxy cache that it has cacheable content for a resource by specifying either one of, or both of, the If-Modified-Since and If-None-Match header together with an ETag.  Usually, specifying both conditional headers will give best results.
-
-ETags are calculated by the server.  The ETag value for resources that can have multiple MIME representations MUST depend on the MIME type of the returned resource specification.  Thus a resource returned as XML will have a different ETag than the same resource returned as JSON.
-
-Note that if a proxy cache is enabled, clients will not be guaranteed to receive the freshest version of a resource for a GET method.  There is no mechanism to push resource updates to proxy servers.
-
-+++ Idempotency and side-effects
-
-The GET, PUT, and DELETE methods are idempotent: the client can safely issue these more than once.  The POST method is not idempotent and if issued more than once, will create a corresponding number of new resources.
-
-Idempotency allows the client to safely recover from failures where it did not get a response, yet could not sure the server did not receive the request.  For example, any failure in the network, the client, or an intermediary that happens after the server receives the request but before the client receives the response.  The client recovers by simply reissuing any GET, PUT and DELETE requests that were not completed.
-
-The GET method does not modify the state of any resource on the server.
-
-+++ Pipelining
-
-The client may send requests in parallel, which is called "pipelining".  RFC 2616 section 8.1.2.2 says,
-
-> Clients SHOULD NOT pipeline requests using non-idempotent methods or non-idempotent sequences of methods (see section 9.1.2). Otherwise, a premature termination of the transport connection could lead to indeterminate results. A client wishing to send a non-idempotent request SHOULD wait to send that request until it has received the response status for the previous request.
-
-RestTL clients MAY pipeline GET, PUT and DELETE methods, but SHOULD NOT pipeline POST methods.
-
-+++ Error responses
-
-When the server returns an error response, the content body MUST be in plain text, and the MIME type MUST be "text/plain".
 
 ++ References
 

@@ -323,7 +323,7 @@ Date: Mon, 16 Mar 2009 20:34:12 UTC
 Content-length: 274
 
 <?xml version="1.0"?>
-<restms xmlns = "http://www.imatix.com/schema/restms">
+<restms xmlns = "http://www.restms.org/schema/restms">
     <domain name = "default" title = "Default domain">
         <feed type = "direct" name = "default" title = "Default feed"
            href = "http://nb200901/restms/feed/default" />
@@ -375,7 +375,7 @@ POST /restms/domain/default HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe type="fifo" />
 </restms>
 
@@ -390,7 +390,7 @@ Content-Type: application/restms+xml
 Last-Modified: Wed, 18 Mar 2009 12:30:36 UTC
 
 <?xml version="1.0"?>
-<restms xmlns = "http://www.imatix.com/schema/restms">
+<restms xmlns = "http://www.restms.org/schema/restms">
     <pipe type = "fifo" name = "ZYRE-6DS1YYTN-184">
         <join address = "ZYRE-6DS1YYTN-184" feed = "http://localhost:8080/restms/feed/default" href = "http://localhost:8080/restms/resource/ZYRE-YSS0EDOU-185" />
         <message href = "http://localhost:8080/restms/resource/ZYRE-BCQ4UMWM-186" async = "1" />
@@ -422,7 +422,7 @@ Content-Type: application/restms+xml
 Last-Modified: Wed, 18 Mar 2009 12:30:36 UTC
 
 <?xml version="1.0"?>
-<restms xmlns = "http://www.imatix.com/schema/restms">
+<restms xmlns = "http://www.restms.org/schema/restms">
     <pipe type = "fifo" name = "ZYRE-6DS1YYTN-184">
         <join address = "ZYRE-6DS1YYTN-184" feed = "http://localhost:8080/restms/feed/default" href = "http://localhost:8080/restms/resource/ZYRE-YSS0EDOU-185" />
         <message href = "http://localhost:8080/restms/resource/ZYRE-BCQ4UMWM-186" async = "1" />
@@ -441,7 +441,7 @@ PUT /restms/resource/ZYRE-6DS1YYTN-184 HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe title="Example pipe" />
 </restms>
 
@@ -542,7 +542,7 @@ Content-Type: application/restms+xml
 Last-Modified: Tue, 17 Mar 2009 12:24:44 UTC
 
 <?xml version="1.0"?>
-<restms xmlns = "http://www.imatix.com/schema/restms">
+<restms xmlns = "http://www.restms.org/schema/restms">
     <content type = "video/avi" length = "88490188" />
 </restms>
 [[/code]]
@@ -556,7 +556,7 @@ POST /restms/feed/cats HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message>
     <content href="http://localhost:8080/restms/resource/ZYRE-73YV82DW-1532" />
   </message>
@@ -574,7 +574,7 @@ POST /restms/feed/ping HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message>
     <content>Hello World</content>
   </message>
@@ -588,7 +588,7 @@ POST /restms/feed/ping HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message>
     <content encoding="base64">
 VGhpcyBpcyBub3QgcmVhbGx5IG15IHByaXZhdGUga2V5LiBJZiB5b3UgZ290IHRoaXMgZmFyLCB5
@@ -607,7 +607,7 @@ POST /restms/feed/ping HTTP/1.1
 Content-Type: application/restms+xml
 
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message><content>Goodbye</content></message>
   <message><content>cruel</content></message>
   <message><content>world!</content></message>
@@ -782,7 +782,7 @@ A domain holds a collection of feeds and pipes.  The RestMS server always create
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <domain title="{domain description}">
     [ <feed
         title="{feed description}"
@@ -804,7 +804,7 @@ A feed is the resource that accepts messages from your applications and distribu
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <feed
     [ type="{feed type}" ]
     [ name="{public name}" ]
@@ -827,7 +827,7 @@ A pipe is the resource that queues messages on behalf of a receiving application
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe type="fifo|stream|ondemand" />
 </restms>
 [[/code]]
@@ -836,7 +836,7 @@ This is how a pipe looks in XML when you retrieve it from the server:
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe type="{pipe type}" reply_to="{string}">
     [ <join href="{join URI}" address="{address pattern}" feed="{feed URI}" /> ] ...
     [ <message href="{message URI}" address="{address literal}" /> ] ...
@@ -858,7 +858,7 @@ A join routes messages from a feed into a pipe.  When you define a join you spec
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <join address="{address pattern}" feed="{feed URI}">
     [ <header name="{header name}" value="{header value}" /> ] ...
   </join>
@@ -876,7 +876,7 @@ A message is the envelope that carries content from one application to another. 
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
     [ reply_to="{address literal}" ]

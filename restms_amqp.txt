@@ -99,7 +99,7 @@ In RestMS, the message envelope and message content are split into two distinct 
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message address="{address literal}"
     [ delivery_mode = "{delivery-mode}" ]
     [ priority = "{priority}" ]
@@ -120,6 +120,13 @@ In RestMS, the message envelope and message content are split into two distinct 
 
 * The priority is a value from 0 to 9.
 * The timestamp is formatted according to the HTTP/1.1 specifications for date/time formats.[((bibcite rfc2616))]
+
++++ Resource propagation
+
+RestTL resources may be propagated to foreign messaging networks (particularly AMQP networks).  In this case, these rules apply:
+
+* Public resources are propagated using the resource name value.  It is responsibility of the client application to ensure that the values used are unique.  Implementations MAY enforce uniqueness, at the cost of interoperability.
+* Private resources are propagated using the resource hash value.  It is the responsibility of the implementation to ensure that these hash values are unique.
 
 +++ RestMS to AMQP application routing
 

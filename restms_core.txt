@@ -107,7 +107,7 @@ A domain document specifies the domain properties, and has references to all pub
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <domain title="{domain description}">
     [ <feed
         name="{feed name}"
@@ -141,7 +141,7 @@ The XML specification provided by the client when creating a new feed has this f
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <feed
     [ type="{feed type}" ]                  default is "topic"
     [ title="{short title}" ]               optional title
@@ -154,7 +154,7 @@ The XML description of a feed returned by the server has this format:
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <feed
       name="{feed name}"                    Name or hash
       type="{feed type}"                    actual feed type
@@ -184,7 +184,7 @@ The XML specification provided by the client when creating a new pipe has this f
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe
     [ type="{pipe type}" ]                  default is "fifo"
     [ title="{short title}" ]               optional title
@@ -196,7 +196,7 @@ The XML description of a pipe returned by the server has this format:
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <pipe
       name="{pipe name}"                    server hash
       type="{pipe type}"                    actual pipe type
@@ -232,7 +232,7 @@ The XML specification provided by the client when creating a new join has this f
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <join
     address="{address pattern}"             depends on feed type
     feed="{feed URI}"                       the feed to pull from
@@ -257,7 +257,7 @@ The XML specification provided by the client when posting a message to a feed ha
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
     [ reply_to="{address literal}" ]
@@ -274,7 +274,7 @@ The XML description of a message returned by the server has this format:
 
 [[code]]
 <?xml version="1.0"?>
-<restms xmlns="http://www.imatix.com/schema/restms">
+<restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
     [ reply_to="{address literal}" ]
