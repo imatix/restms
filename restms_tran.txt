@@ -1,6 +1,8 @@
+- xml-json mapping
+
 RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.
 
-* Name: 10-RESTMS-TRAN@wiki.amqp.org
+* Name: 10-RESTTL@wiki.amqp.org
 * Version: draft/3
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
@@ -16,12 +18,12 @@ This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite co
 
 ++ Goals and structure of this document
 
-This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.  RestTL is a foundation for RestMS but can be used for arbitrary RESTful protocols.  RestTL consists of:
+This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion over a standard HTTP client-server network.  RestTL is a foundation for RestMS but can be used for arbitrary RESTful protocols.  RestTL consists of:
 
 # A set of HTTP requests and responses that let a client work with server-side resources in a RESTful way;
 # A grammar for XML or JSON documents to represent server-held resources.
 
-The RestTL specification is developed as part of the [[[spec:7 |RestMS specification]]].  The RestMS specification is described in more detail by these separate documents:
+This specification is part of the overall [[[spec:7 |RestMS specification]]], described in more detail by these separate documents:
 
 * [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
 * [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
@@ -31,11 +33,11 @@ The RestTL specification is developed as part of the [[[spec:7 |RestMS specifica
 
 REST is a design philosophy rather than a formal specification.  This means that architects have lattitude in how to implement (more or less) RESTful APIs.  This is useful for experimentation but not valuable for defining standards.  Standards must formalize best practice in a boring and uterly interoperable way.
 
-The principle of Least Surprise applies: the implementer, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.
+The principle of Least Surprise applies: the implementor, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.
 
 The best way to enforce the regularity of an API is to treat it as one of a class of APIs, and to specify separately the rules for all APIs of that class.  Thus for RestMS, we treat it as one of a class of RESTful APIs, and we specify separately - as RestTL - the rules for our class of RESTful APIs.
 
-With RestTL we do not claim to define the rules for all RESTful APIs, just for a certain class of which RestMS is currently the main member.  We aim however to make a specification that is reusable and useful to implementer of other RESTful APIs.
+With RestTL we do not claim to define the rules for all RESTful APIs, just for a certain class of which RestMS is currently the main member.  We aim however to make a specification that is reusable and useful to implementor of other RESTful APIs.
 
 +++ RestTL overview
 
@@ -378,9 +380,11 @@ A conditional DELETE only takes effect if there were no other errors, i.e. if th
 
 Deleting resources is //idempotent//, i.e. repeated requests to delete the same resource are allowed, and safe.  Implementations may cache the URIs of deleted resources in order to differentiate between deletes on already-deleted resources, and deletes on resources that never existed.
 
+If the resource to be deleted contains other resources, these are implicitly and silently deleted along with the resource.
+
 +++ MIME types
 
-When the client retrieves a resource it MAY specify which MIME type it desires using the Accept header.  While the HTTP specification (RFC 2616 section 14.1) defines a complex format for the Accept header, RestTL allows these three possibilities:
+When the client retrieves a resource it MAY specify which MIME type it desires using the Accept header.  While the HTTP specification (RFC 2616 section 14.1[((bibcite rfc2616))]) defines a complex format for the Accept header, RestTL allows these three possibilities:
 
 * "Accept: application/{schema}+xml"
 * "Accept: application/{schema}+json"
@@ -486,7 +490,7 @@ The GET method does not modify the state of any resource on the server.
 
 +++ Pipelining
 
-The client may send requests in parallel, which is called "pipelining".  RFC 2616 section 8.1.2.2 says,
+The client may send requests in parallel, which is called "pipelining".  RFC 2616[((bibcite rfc2616))] section 8.1.2.2 says,
 
 > Clients SHOULD NOT pipeline requests using non-idempotent methods or non-idempotent sequences of methods (see section 9.1.2). Otherwise, a premature termination of the transport connection could lead to indeterminate results. A client wishing to send a non-idempotent request SHOULD wait to send that request until it has received the response status for the previous request.
 
@@ -713,4 +717,5 @@ Content-Type: audio/mpeg-3
 : coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
 : atompub : "The Atom Syndication Format" - [http://www.ietf.org/rfc/rfc4287.txt ietf.org]
 : comet : "A Standards Based Approach to Comet Communication with REST" [http://cometdaily.com/2008/01/17/proposal-for-native-comet-support-for-browsers/ cometdaily.com]
+: rfc2616 : "HTTP/1.1 Protocol Parameters" - http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html w3.org]
 [[/bibliography]]

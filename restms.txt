@@ -14,142 +14,13 @@ This document is licensed under the [http://wiki.amqp.org/main:intellectual-prop
 
 This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
 
-++ Goals and structure of this document
+++ Structure of the RestMS specification
 
-This document is an introduction and cover sheet for the rest of the specification.  If you are new to RestMS, this is the place to start.  We cover:
+This document is a formal specification of the resources that RestMS implements, and how they work.  These further documents form part of the overall specifications:
 
-# What messaging is and why it is important;
-# The need for a web messaging and why it was necessary to build RestMS;
-# The aspects that in our view make RestMS a satisfactory solution;
-# How RestMS interoperates with AMQP;
-# The language and terminology used in the rest of the specification.
+* The HTTP method patterns and resource document grammar that underpin RestMS are specified in the [[[spec:9|9-RESTTL@wiki.amqp.org]]] RESTful transport layer (RestTL) specifications.  A conformant RestMS implementation MUST properly implement the RestTL patterns on the RestMS resources.
 
-The specification is described in more detail by these separate documents:
-
-* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
-* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
-* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
-
-++ Background to messaging
-
-Whereas up to two decades ago, there were fears of a global software shortage[((bibcite brooks))], today's software engineers are able to create new applications rapidly and cheaply.  This is thanks to the emergence of thousands of hyperactive software communities, based on free and open source software licenses, producing the languages, operating systems, frameworks, databases, and libraries needed to build a modern application.
-
-Open source and free software licenses enable large-scale collaborative projects, and the cheap global Internet, based on a stack of thousands of free and open digital standards, amplifies this productivity.  The software crisis of the 80's and 90's is definitely over.  But one area of software construction remains expensive, slow, and mostly non-standardized.  That is the messaging 'middleware' that connects these numerous applications together.
-
-The need for messaging is inevitable, as applications scale beyond the abilities of one system.  Messaging can be as simple as a front-end login program asking a back-end credentials server to check a password.  Or as complex as a real-time market data streaming service, where hundreds of terminals can subscribe to complex selections of data coming off stockmarkets.
-
-Messaging is much easier to describe than to implement.  One has a set of applications distributed over some network.  The applications send each other messages.  This lets them "talk" to each other in interesting ways that would not be possible if one application simply included another.  (Including pieces of code, as libraries, is the most common way of constructing applications out of existing pieces.)  Depending on how good the messaging is, it becomes possible to add and remove pieces easily; to upgrade pieces independently of each other; to share work among several pieces; to create "services" that specialize in particular domains; and to promote flows of messages into first-class entities typically called "feeds" so that applications can subscribe to these and receive a stream of messages in near real-time.
-
-We define three fundamental messaging patterns that form the basis for all messaging:
-
-* The //Housecat// pattern, in which a sender addresses a receiver.  A sends a message to B.
-* The //Wolfpack// pattern, in which a sender addresses a service that is handled discretely by multiple receivers.  A sends a message to service B, which distributes its messages in a round-robin fashion to B1, B2, and B3.
-* The //Flamingo// pattern, in which a sender addresses a feed that is replicated into queues belonging to multiple receivers.  A sends a stream of messages to a routing point B which copies the messages to queues B1, B2, and B3.
-
-We classify messaging into three grand families based on use:
-
-* "Data center messaging" that connects components of a locally-distributed application.  This serves applications that are too large for one system.  Such messaging aims for microsecond latencies and capacities of millions of messages per second.  Examples are supercomputing interconnects and market data distribution.
-
-* "Enterprise messaging" that connects multiple applications in a private network.  This serves large businesses which construct their data processing out of a mix of old and new pieces, usually on diverse platforms and built with a mix of technologies.  Such messaging aims for millisecond latencies and capacities of tens of thousands of messages per second.  Examples are traditional message queues and transaction processing systems.
-
-* "Web messaging" that connects arbitrary applications across public networks.  This serves walk-up-and-use collaborations between service providers and their clients, suppliers, and partners.  Such messaging aims for second latencies and capacities of messages per second.  Examples are web services, and syndication feeds.
-
-Our estimate of the significance of these three families is that they cover 10%, 20%, and 70% respectively of actual or potential messaging use cases, and overall messaging traffic.  That is, while a real-time stock market data service may appear to be high volume, it is less significant than say, the public use of Google APIs for mapping.
-
-In all three families, we see closed and open technologies, and standards development.  Across all three families, the best designs are, in our opinion, those that are:
-
-* Asynchronous, so they promote the use of robust event-driven architectures.  This means providing queues and ways to work with queues.
-* Decoupled, so they encourage architectures where the cost of change is minimized.  This means providing abstract addressing and dynamic wiring.
-* Generic, so they can be used for all three messaging patterns;
-
-And these further features are desirable in all technologies
-
-* Scalable, so they can be used for large as well as small projects;
-* Simple, so they are easy to implement, and thus become more widely used;
-* Open, so they can be improved by any party with a minimum of formality;
-* Unencumbered, so they can be used in free and open source implementations;
-* Portable, so they can be used on all platforms, operating systems, and languages;
-* Extensible, so they can evolve gradually over time as knowledge improves;
-* Layered, so they can be improved in a decoupled fashion by different teams over time;
-* Standardized, so they promote interoperability and competition between vendors.
-
-Security, efficiency, and performance are also important but these will emerge naturally from a healthy open standardization process.
-
-++ The need for web messaging
-
-We would arguable that a majority of new applications today are written as web applications, often as browser-side JavaScript.  These applications need messaging as much as do in-house Java applications.  Web messaging would allow these applications to participate fully in a global real-time information network.
-
-Certainly from an economic point of view, the most valuable technologies are those that bring together the most diverse parties in an open market.  So while enterprise messaging can improve the value of one firm, web messaging can improve the value of many firms at once.
-
-New enterprise messaging technologies like AMQP[((bibcite amqp))] have redefined the way messaging is viewed.  While AMQP has proven a solid performer for enterprise messaging, and satisfies our list of requirements, it is not in our estimation designed for, nor ready for, public Internet use.  To list the pertinent points:
-
-* AMQP has an immature security model, being too complex and unproven in real-life Internet use.
-* it does not support the most popular web application architecture (AJAX), not having a JavaScript API implementation.
-* it does not use the web caching architecture that forms the basis of the scalable Internet.
-* it uses a port (5672) that is alien to network managers and firewalls.
-* its infrastructure is not designed to handle Internet-style traffic[[footnote]]Including the unwelcome kind[[/footnote]]
-* it is complex, and thus expensive for non-enterprise developers to learn.
-
-A web developer, comparing AMQP and an HTTP-based option like XML/RPC, for an application that carries a few messages per second, will very likely choose the HTTP option.  This is a shame because it means doing without queueing or decoupled routing.  But those concepts are too abstract and their benefits too intangible to be worth the learning curve that AMQP demands.
-
-So what other standards are available in the area of web messaging?  We know of these:
-
-* SOAP, the "simple object access protocol".  SOAP is not simple, and it is not asynchronous.  While SOAP has had some success as an enterprise messaging system, it is not popular for web messaging.  SOAP works for simple cases (at an extortionate cost) and is useless for high-volume work.
-* XML/RPC and similar standards, which do much the same as SOAP but is much simpler.  These are popular for web messaging but they are not decoupled, nor asynchronous.  They work for simple cases and are useless for high-volume work.
-* RSS and AtomPub, which are aimed specifically at the distribution of news articles.  These protocols are decoupled but not asynchronous, and are not generic.  One might be able to force them to act as a kind of generic messaging bus, but the results would be slow and clumsy.
-
-Looking at the explosion of web applications and the value of connecting these together in ad-hoc messaging networks, we can conclude first that web messaging is a real need, and secondly, there are no satisfactory answers.  Our challenge therefore is to propose a way of doing web messaging that satisfies the criteria we listed above.
-
-Looking at the Internet and existing web messaging, we see that REST[((bibcite rest))] offers arguably the simplest and most scalable pattern for client-server interactions across the public Internet.  RESTful patterns underly the world-wide web and the specification of HTTP.  Roy Fielding, the designer of the REST pattern and one of the authors of the HTTP specification, describes it thus:
-
-> All REST interactions are stateless. That is, each request contains all of the information necessary for a connector to understand the request, independent of any requests that may have preceded it.
-
-This statelessness is the key to building scalable architectures.  It means that no matter how many proxies, caches, and other layers sit between the client and the server, and no matter how late, out of order, or repeatedly a request arrives, it can be intelligently handled by the server.
-
-For the developers reading this, an analogy is a traditional source control system (SCS) like CVS or Subversion, compared to a distributed source control system like Mercurial or Git.  In a traditional SCS every commit must be sequenced exactly right, and clients must be precisely synchronized with the server state.  In a distributed SCS, each patch contains enough information to be intelligently handled, independently of any patches that may have preceded it.
-
-Today, the Linux kernel has switched to Git, Mozilla has switched to Mercurial, and all leading-edge open source projects are doing likewise, due to the overwhelming advantages of being able to handle patches as independent units of work.  Similarly, we believe that RESTful APIs are the future of distributed computing, due to the overwhelming advantages of being able to treat each request as an independent unit of work.
-
-++ Constructing RestMS
-
-We have examined the value of a web messaging architecture that is asynchronous, decoupled, scalable, simple, generic, open, unencumbered, portable, extensible, layered, and standardized.  We have argued that such an architecture would be economically valuable.  We have found no existing architecture that meets our requirements.
-
-Pure invention always carries a high risk of failure and/or rejection and it is more sensible to evolve existing technologies.  Looking at the challenge of web messaging, we see that AMQP offers a usable architecture for messaging, but lacks a client-server pattern that is suitable for use on the web.  Meanwhile, RESTful protocols like AtomPub offer a usable client-server pattern, but lack a generic, decoupled, asynchronous messaging architecture.
-
-By conclusion, mixing the messaging architecture of AMQP with the client-server patterns of REST should in theory give us a good architecture for web messaging.  This is the basis for RestMS.
-
-We will take each of requirement in turn and examine how RestMS satisfies it:
-
-* //Asynchronous//: the RestMS server delivers incoming messages to the recipient immediately as these arrive, and if the recipient is busy, holds messages on a "pipe" until it can deliver them.  REST does not inherently offer asynchronous resource access, but RestMS adds the concept of an asynchronous resource (//asynclet//) that makes it possible.
-
-* //Decoupled//: RestMS uses an abstract addressing model and dynamic wiring so that senders and recipients can be added and removed at any time.  Senders send to "feeds", receivers read from "pipes", and receivers "join" their pipes to one or more feeds in order to receive messages.
-
-* //Scalable//: RestMS is as scalable as HTTP, using the same technologies: caching, proxies, multiple front-ends.  The limits of HTTP scalability are well known and the solutions also well known.  A RestMS network could deliver messages to millions of receivers in parallel.
-
-* //Simple//: RestMS uses standard HTTP methods and headers, so works with existing HTTP skills and libraries.  For example, RestMS messages are formatted using the standard HTTP content syntax.  It is possible to do simple RestMS by hand using a TELNET client.  RestMS uses JSON as well as XML, making compatible with more web applications.
-
-* //Generic//: RestMS provides the three basic messaging patterns (Request, Fanout and Collect), reusing the semantics of AMQP in large part.  Thus RestMS can be used for any type of messaging over a public Internet network.
-
-* //Open//: RestMS is fully open and developed using the "Consensus Oriented Specification System" (COSS) originally proposed by the Digital Standards Organization[((bibcite digistan))] which guarantees the right of any user to improve the specification with or without approval from the original authors.
-
-* //Unencumbered//: RestMS uses existing designs that are free of patents, and is developed via an intellectual property framework that guarantees freedom from patent claims by all contributors.
-
-* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  While RestMS comes with sample implementations and class libraries in various languages, these are pure examples.
-
-* //Extensible//: RestMS is built as a set of resources and methods that can be extended with new functionality as needed.  It is much easier to extend RestMS than AMQP, mainly to its layered design and its use of a standard HTTP syntax for methods and headers.
-
-* //Layered//: RestMS is composed as several layers, each can be improved over time.  It also uses existing HTTP layers such as Basic and Digest for authentication and HTTPS (SSL/TLS) for encryption.
-
-* //Standardized//: we define RestMS as a contract between a client and a server, which gives RestMS users a basis on which to demand interoperability from vendors.  The RestMS sample class libraries include regression tests that validate implementations of the protocol.
-
-++ RestMS as an HTTP-to-AMQP proxy
-
-As we explained, AMQP works well for enterprise messaging but is inadequate and too complex for web messaging.  RestMS is not only inspired by AMQP's messaging architecture, it is explicitly compatible with it.  That is, a RestMS server can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
-
-We believe this to be a natural and advantageous architecture, especially when it becomes necessary to expand an existing enterprise messaging network to include external parties.
-
-RestMS semantics for working with resources and transferring messages can be mapped to and from AMQP semantics, and we provide rules for this mapping so that any RestMS server can work with any AMQP server, if both respect those rules.   Thus, RestMS is explicitly designed to be interoperable with AMQP.  RestMS may be interoperable with other messaging architectures but that is not proven.
+* RestMS-to-AMQP interoperability is defined in the [[[spec:10|10-RESTMS-AMQP@wiki.amqp.org]]] RestMS-to-AMQP interoperability specification.  Conformant RestMS implementations MAY implement AMQP interoperability according to these specifications.
 
 ++ Language
 
@@ -167,22 +38,281 @@ These terms are introduced by, or have specific meaning, in this specification:
 * Content - an opaque binary payload, with a MIME type and encoding.
 * Asynclet - a resource that can be retrieved before it exists, resulting in a "long poll".
 
-These important terms are defined in other specifications:
+++ RestMS resource types
 
-* Resource - a server-held object that can be accessed across the network.
-* Exchange (AMQP) - a destination for messages published by applications.
-* Queue (AMQP) - a source of messages delivered to applications.
-* Binding (AMQP) - a relationship between a queue and an exchange.
-* Attribute (XML) - an XML element attribute.  Interchangeable with "property".
++++ Domains
 
-These terms are used with less formality:
+Domains follow these rules:
 
-* Subscriber - an application that receives data matching some requested criteria.
-* Publisher - an application that publishes data, usually for subscribers.
-* Reader - an application that receives data.
-* Writer - an application that publishes data, usually to a reader.
-* Service - an application that implements some named service.
-* Long poll - a retrieval operation that can wait indefinitely.
+* A domain is a public collection of feeds and pipes and the child resources they contain.
+* The server MAY implement multiple domains and MAY allow routing of messages between domains.
+* Domains are configured resources: clients do not create or destroy domains.
+* Domains act as namespaces for pipes and feeds.
+* Client and servers must agree in advance on the domains that exist.
+* RestMS servers SHOULD implement a default public domain named "default".
+
+The URI for a domain is:
+
+[[code]]
+http://{server-name}[:{port}]/restms/domain/{domain-name}
+[[/code]]
+
+The URI for the default domain is:
+
+[[code]]
+http://{server-name}[:{port}]/restms/domain/default
+[[/code]]
+
+RestMS allows these methods on a domain URI:
+
+* GET - retrieves the domain representation.
+* POST - creates a new feed or pipe within the domain.
+
+A domain document specifies the domain properties, and has references to all public feeds and pipes that the domain contains.  The XML format of this document is:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <domain title="{domain description}">
+    [ <feed
+        name="{feed name}"
+        title="{feed description}"
+        type="{feed type}"
+        license="{license}"
+        href="{feed URI}" /> ] ...
+    [ <pipe
+        name="{pipe name}"
+        title="{pipe description}"
+        type="{pipe type}"
+        href="{pipe URI}" /> ] ...
+  </domain>
+</restms>
+[[/code]]
+
+The domain document does not necessarily list all feeds and pipes: clients may create these as private and thus make them inaccessible through discovery.
+
++++ Feeds
+
+Feeds follow these rules:
+
+* A feed is a //write-only// ordered stream of messages received from one or more writers.
+* The order of messages in a feed is stable per writer.
+* Feeds deliver messages into pipes, according to the joins defined on the feed.
+* Clients can create dynamic feeds for their own use.
+* To create a new feed the client POSTs a feed document to the parent domain URI.
+* The server MAY implement a set of configured public feeds.
+* The server SHOULD implement a default public feed called "default" of type "direct"..
+
+RestMS allows these methods on a feed URI:
+
+* GET - retrieves the feed.
+* PUT - updates the feed.  The feed name and type cannot be modified.
+* DELETE - deletes the feed.
+* POST - sends a message to the feed or stage a content on the feed.
+
+The XML specification for a feed this format:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <feed
+      name="{feed name}"                    mandatory feed name
+    [ type="{feed type}" ]                  optional type, default is "topic"
+    [ title="{short title}" ]               optional title
+    [ license="{license name}" ]            optional license name
+    />
+</restms>
+[[/code]]
+
+The feed type defines the routing semantics of the feed.  We explain the feed type semantics later.  If the client attempts to create a feed with an unknown type, the server responds with "400 Bad Request".  If the client does not specify a feed type, the type defaults to "topic".
+
++++ Pipes
+
+Pipes follow these rules:
+
+* A pipe is a //read-only// ordered stream of messages meant for a single reader.
+* The order of messages in a pipe is stable only for a single feed.
+* Pipes receive messages from pipes, according to the joins defined between the pipe and the feed.
+* Clients MUST create pipes for their own use: all pipes are private and dynamic.
+* To create a new pipe the client POSTs a pipe document to the parent domain's URI.
+* The server MAY do garbage collection on unused, or overflowing pipes.
+
+RestMS allows these methods on a pipe URI:
+
+* GET - retrieves the pipe representation.
+* DELETE - deletes the pipe.
+* POST - creates a new join for the pipe.
+
+The XML specification for a new pipe has this format:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <pipe
+    [ type="{pipe type}" ]                  optional type, default is "fifo"
+    [ title="{short title}" ]               optional title
+    />
+</restms>
+[[/code]]
+
+The XML description of an existing pipe has this format:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <pipe
+      name="{pipe name}"                    server-generated hash
+      type="{pipe type}"                    actual pipe type
+    [ title="{short title}" ]               title, if specified
+    >
+    [ <join href="{join URI}" address="{address pattern}" feed="{feed URI}" /> ] ...
+    [ <message href="{message URI}" address="{address literal}" /> ] ...
+    [ <message href="{message URI}" async="1" /> ]
+  </pipe>
+</restms>
+[[/code]]
+
+The pipe type defines the routing semantics of the pipe.  We explain the pipe type semantics later.  If the client attempts to create a pipe with an unknown type, the server responds with "400 Bad Request".  If the client does not specify a pipe type, the type defaults to "fifo".
+
+Pipes are not shareable: if more than one client accesses the same pipe, the results will be unpredictable and none of the clients will receive the full set of messages, nor any cleanly defined subset.  The proper way to distribute messages between clients (Wolfpack pattern) is to use a service or rotator feed, and a set of ondemand pipes, one per client.
+
+Pipes on service or rotator feeds should be cached: if a client creates a new pipe each time it starts, messages can be left unprocessed (and thus lost) in unused pipes.  Clients should therefore record the URI of the pipe they are using, and attempt to use this pipe when re-starting.  If the pipe no longer exists, they should create a new pipe and record that URI.
+
++++ Joins
+
+Joins follow these rules:
+
+* Joins specify criteria by which feeds route messages into pipes.
+* Joins are always dynamic and always private.
+* Clients MAY create joins at runtime, after creating pipes.
+* To create a new join the client POSTs a join specification to the parent pipe URI.
+* The server SHOULD create a join from each new pipe to the default feed.
+* If either the feed or the pipe for a join is deleted, the join is also deleted.
+
+RestMS allows these methods on a join URI:
+
+* GET - retrieves the join representation.
+* DELETE - deletes the join.
+
+The XML specification or description for a join has this format:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <join
+    address="{address pattern}"             depends on feed type
+    feed="{feed URI}"                       the feed to pull from
+    />
+</restms>
+[[/code]]
+
+The default join implements a guaranteed Housecat pattern on every pipe.  If clients attempt to delete the default join, or create other joins onto the default feed, the server MUST respond with "403 Forbidden".
+
++++ Messages and contents
+
+Messages and contents are tightly coupled resources that follow these rules:
+
+* Messages are envelopes that can optionally carry contents.
+* Contents are blobs of data with a MIME type set by the sender.
+* Contents MAY be embedded in the message resource OR carried as separate resources.
+
+Message/content publication and delivery are distinct processes with no overlap.  The use of message and content resources is the only area in RestMS that deviates from the standard resource access model defined by RestTL.  Specifically, in the RestTL model a client creates and then works with a resource within the same container resource.  However, message and content resources are created in one container (feed), and retrieved from a different container (pipe).
+
+++++ Publication
+
+Publication works thus: the client stages zero or more contents, and then posts a message that refers to those contents.
+
+To stage a content the client does an HTTP POST to the feed URI, providing a typed opaque binary content.  That is, the body of the POST request provides the content body, and the Content-Type: header specifies the MIME type of the content.  The server replies with (if there were no other errors) "201 Created" with the URI for the staged content in the Location: header.
+
+[[code]]
+Client                                     Server
+  |                                           |
+  |  1.) POST to feed URI                     |
+  |      Content-type: {MIME-type}            |
+  |      POST body is content                 |
+  |------------------------------------------>|
+  |                                           |
+  |  2.) 201 Created                          |
+  |      Location: Resource URI               |
+  |<------------------------------------------|
+  |                                           |
+[[/code]]
+
+The Content-Type: MUST not be a structured document type ("application/restms+xml", "application/restms+xml", or "text/xml").  If the Content-Type: is a structured document type, the server will interpret the POST as providing a message, not a content.
+
+Once the client has staged the zero or more necessary contents, it publishes the message by POSTing a message specification to the feed URI.  The XML format for this specification is:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <message
+    [ address="{address literal}" ]
+    [ reply_to="{address literal}" ]
+    [ <header name="{header name}" value="{header value}" /> ] ...
+    [ <content href="{content URI}" ... />
+    | <content type="{MIME type} encoding="{encoding}">{content value}</content> ]
+  </message> ...
+</restms>
+[[/code]]
+
+The specification can contain multiple message elements: clients can stage multiple contents and then publish them in a single operation.
+
+A message specification consists of a set of properties (attributes of the message element), a set of header elements, a set of content references, and a set of embedded contents.  These work as follows:
+
+* The address is used in routing, and has feed-specific semantics.
+* The headers may used in routing, and to carry arbitrary information.
+* The reply_to tells an eventual recipient where to send a reply message.
+* The content hrefs refer to previously staged contents.
+* The content elements, if they have an element value, hold embedded contents.
+* Implementations may add other properties with implementation-defined meaning.
+
+Clients may publish any mix of staged and embedded contents.  Implementations MAY set arbitrary limits on this.  Embedded contents are encoded either as "plain" or as "base64".
+
+The server processes each message element by routing the message+content, using the feed semantics, and the defined joins, into zero or more pipes.  It then automatically deletes the staged contents.
+
+If a client attempts to publish the same staged content more than once the server MUST reply with "404 Not Found", and not route the message.  If a client attempts to publish a message referring to contents that were staged to a different feed, the server MUST reply with "403 Forbidden", and not route the message.  The server SHOULD verify the content URIs of all messages in the request before routing any message in the request.
+
+It the server successfully processes the request, it replies with "200 OK".  It does not return a Location: header nor a content body, unlike for a usual RestTL POST operation.
+
+++++ Delivery
+
+Delivery works thus: the client retrieves a message, then retrieves zero or more contents, and then deletes the message.
+
+To retrieve a message the client must first have retrieved the pipe to know the message URI.  The message will often be an asynclet as defined in RestTL.  The client retrieves a message using the GET method.
+
+The XML description of a message returned by the server has this format:
+
+[[code]]
+<?xml version="1.0"?>
+<restms xmlns="http://www.restms.org/schema/restms">
+  <message
+    [ address="{address literal}" ]
+    [ reply_to="{address literal}" ]
+    [ feed="{originating feed URI}" ] >
+    [ <header name="{header name}" value="{header value}" /> ] ...
+    [ <content href="{content URI}" ... />
+    | <content type="{MIME type} encoding="{encoding}">{content value}</content> ]
+  </message>
+</restms>
+[[/code]]
+
+This is identical to the message specification posted to a feed, with the addition of a 'feed' property.  The server SHOULD set the feed property to the name of the feed to which the message was published.
+
+The message description contains zero or more content elements; the receiver MAY retrieve the contents which have a href URI, using separate GET methods.  The Content-Type: of the retrieved content will be the same as the Content-Type: of the published content.
+
+During routing, the server MAY reformat staged contents as encoded, and vice-versa.  The 'type' attribute of the embedded content corresponds one-for-one to the Content-Type: header of a staged content.  Staged contents are not encoded: if a server reformats a base64-encoded content to a staged content it MUST decode the embedded content according to IETF RFC 4648 [((bibcite base64))].  Similarly, if a server reformats a staged content to an encoded content it MUST encode the content as base64 unless the content contains only plain text characters.
+
+After it has processed a message the client MUST send a DELETE request on the message URI.  When the server deletes a message it also deletes any contents that message contains.
+
+RestMS allows these methods on a message that is held in a pipe:
+
+* GET - retrieves the message representation.
+* DELETE - deletes the message //and all older messages// from the pipe.
+
+RestMS allows these methods on a content that is part of a delivered message:
+
+* GET - retrieve the content.
+* DELETE - deletes the content.
 
 ++ References
 
@@ -193,4 +323,5 @@ These terms are used with less formality:
 : rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
 : brooks : Fred Brooks, "No Silver Bullet - Essence and Accidents of Software Engineering" -  [http://en.wikipedia.org/wiki/No_Silver_Bullet Wikipedia]
 : digistan : The Digital Standards Organization - [http://www.digistan.org]
+: base64 : "IETF RFC 4648" - [http://tools.ietf.org/html/rfc4648]
 [[/bibliography]]

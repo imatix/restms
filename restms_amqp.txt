@@ -1,6 +1,6 @@
 RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document provides AMQP-to-RestMS interoperability specifications, for RestMS implementors.
 
-* Name: 12-RESTMS-AMQP@wiki.amqp.org
+* Name: 10-RESTMS-AMQP@wiki.amqp.org
 * Version: draft/3
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
@@ -14,13 +14,7 @@ This document is licensed under the [http://wiki.amqp.org/main:intellectual-prop
 
 This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
 
-++ Related documents
-
-This document is part of the [[[spec:7 |RestMS specification]]].  It provides a guide to using RestMS in applications.  The specification is described in more detail by these separate documents:
-
-* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
-* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
-* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
+This document is an optional extension to the [[[spec:7 |RestMS specification]]].
 
 ++ AMQP
 
@@ -156,6 +150,14 @@ We look at the interoperability of the messaging products, i.e. how to connect a
 * How the RestMS server mirrors resources to and from the AMQP server
 * How the RestMS server routes messages to and from the AMQP server
 * How the RestMS server exchanges multi-content messages with AMQP.
+
+
+All feeds will be propagated to the AMQP network.  A feed maps to an AMQP exchange or shared queue.  The AMQP exchange or queue names can be derived by convention from the feed URI, as previously explained in the section "Resource propagation".
+
+The RestMS server SHOULD also provide a configured default feed with type "direct" that acts as the routing point for service requests and responses.  This feed maps directly to the AMQP default exchange and routes on a literal address string.
+
+All pipes are propagated to the AMQP network.
+
 
 +++ The RestMS extension class
 

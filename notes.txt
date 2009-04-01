@@ -10,12 +10,12 @@ Done
 - Clarify: why and how to do pipe caching
 - Clarify: URIs can be relative coming from client, always absolute from server
 - Change: the generic data model example should not be <restms>, that is confusing
+- Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
+- Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
 
 Pending
 
-- Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
 
-- Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
 
 - Clarify: for OOB contents, what headers are preserved
 

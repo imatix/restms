@@ -1,22 +1,12 @@
-RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document is a guide to using RestMS in applications, for RestMS users.
-
-* Name: 9-RESTMS-USER@wiki.amqp.org
-* Version: draft/3
-* Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
-* Resources: http://www.restms.org.
+This document is a user guide to RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.
 
 ++ License
 
-This document is licensed under the [http://wiki.amqp.org/main:intellectual-property-policy Intellectual Property Policy] of the wiki.amqp.org site.
-
-++ Change process
-
-This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
+This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0 or later.
 
 ++ Goals and structure of this document
 
-RestMS is an API expressed as HTTP requests and responses, often wrapped in higher-level class libraries.  This document is a guide for developers who wish to learn and use RestMS in their applications.  We cover:
+RestMS[((bitcite restms))] is an API expressed as HTTP requests and responses, often wrapped in higher-level class libraries.  This document is a guide for developers who wish to learn and use RestMS in their applications.  We cover:
 
 # A basic description of what RestMS is;
 # Using RestMS through a typical high-level class library;
@@ -24,11 +14,7 @@ RestMS is an API expressed as HTTP requests and responses, often wrapped in high
 # An explanation of the different RestMS resources;
 # A set of worked examples.
 
-This document is part of the [[[spec:7 |RestMS specification]]].  The specification is described in more detail by these separate documents:
-
-* [[[spec:10|RestMS-tran]]] - RESTful Transport Layer (RestTL), for RestMS implementors.
-* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
+Implementors should refer to the [http://wiki.amqp.org/spec:7 RestMS specifications].
 
 ++ What is RestMS?
 
@@ -80,7 +66,7 @@ We will look at common messaging patterns that form the basis of most real life 
 
 * //Housecat//, in which a sender addresses a receiver.  A sends a message to B.  Has a variation called "Reverse Housecat".
 * //Wolfpack//, pattern, in which a sender addresses a service that is handled discretely by multiple receivers.  A sends a message to service B, which distributes its messages in a round-robin fashion to B1, B2, and B3.
-* //Flamingo//, in which a sender addresses a feed that is replicated into queues belonging to multiple receivers.  A sends a stream of messages to a routing point B which copies the messages to queues B1, B2, and B3.
+* //Parrot//, in which a sender addresses a feed that is replicated into queues belonging to multiple receivers.  A sends a stream of messages to a routing point B which copies the messages to queues B1, B2, and B3.
 
 +++ The Housecat pattern
 
@@ -175,14 +161,14 @@ But it is even better to queue messages in the Feed with one queue per writer, w
 
 A classic messaging architecture is Reverse Housecat over Wolfpack, also called "request-response".  Here, A will send a request to a Wolfpack consisting of B1...Bn.  In the request, A specifies its own return address.  Whichever B processes the request knows to do a Housecat back to A.
 
-+++ The Flamingo pattern
++++ The Parrot pattern
 
-While Housecat lets us send information to a network node, and Wolfpack lets us distribute work between network nodes, the third major pattern is for distributing data across network nodes, the so-called "publish-subscribe" architecture.  We call this the //Flamingo// pattern, mainly because a flock of flamingos foraging for Spirulina in an alkaline lake reminds us of the mass media.
+While Housecat lets us send information to a network node, and Wolfpack lets us distribute work between network nodes, the third major pattern is for distributing data across network nodes, the so-called "publish-subscribe" architecture.  We call this the //Parrot// pattern.
 
-Here is how Flamingo works:
+Here is how Parrot works:
 
 * we have a set of writers, each writing to a set of feeds
-* we have a set of readers (the Flamingos) that each create a pipe
+* we have a set of readers (the Parrots) that each create a pipe
 * each reader creates joins from its pipe to many feeds
 * the join specifies the subscription criteria for that pipe and feed
 * as a feed receives messages it passes them to all matching pipes
@@ -217,7 +203,7 @@ Here is how Flamingo works:
 
 +++ Feeds, pipes, and joins
 
-What the above diagrams of Housecat, Wolfpack and Flamingo don't show is that there are various types of feed and pipe.
+What the above diagrams of Housecat, Wolfpack and Parrot don't show is that there are various types of feed and pipe.
 
 Starting with feeds: each type of feed routes messages in a different way.  For some feed types, messages are routed exclusively to one join or another.  For other feed types, messages are copied to each join that requests them.  And each feed uses specific rules to decide whether or not to route a message to a join.
 
@@ -240,8 +226,10 @@ Additionally, RestMS defines these optional feed types:
 * **text**: routes message to all joins that match on message address, using a full-text search algorithm.
 * **fulltext**: routes message to all joins that match on message content, using a full-text search algorithm.
 * **cartesian**: routes message to all joins that match on message address, using a latitude and longitude coordinate match to a specified degree of accuracy.
+* **random**: routes message to all joins that match on specified probability index.
+* **scatter**: routes message to a single join using a random selection algorithm.
 
-Housecat mainly uses direct feeds but can also use fanout feeds.  Wolfpack sticks with rotator and service feeds.  Flamingo can use all feed types except rotator and service, but it really prefers topic and headers.
+Housecat mainly uses direct feeds but can also use fanout feeds.  Wolfpack sticks with rotator and service feeds.  Parrot can use all feed types except rotator and service, but it really prefers topic and headers.
 
 The above feed types are defined formally in the RestMS technical specificaitons.  Implementations can define (and if they lack proper ethics, patent) further feed types.
 
@@ -251,7 +239,7 @@ RestMS defines three pipe types, each of which queues and/or delivers messages i
 * **stream**: holds messages until deleted, delivers as multipart stream.
 * **ondemand**: fetches and delivers one message at a time, on demand.
 
-Housecat usually uses fifo pipes, Wolfpack usually uses ondemand pipes, and Flamingo usually uses fifo or stream pipes.
+Housecat usually uses fifo pipes, Wolfpack usually uses ondemand pipes, and Parrot usually uses fifo or stream pipes.
 
 +++ RestMS resources
 
@@ -296,7 +284,7 @@ $message = $pipe->recv;
 print $message->content."\n";
 [[/code]]
 
-//Quick check: does this Hello World application use a Housecat, a Wolfpack, or a Flamingo?//[[footnote]]The answer is: it's a Housecat by elimination.  There is no distribution of work, nor of data, to many parties.  If it's not a flock or a pack, it's a Housecat.[[/footnote]]
+//Quick check: does this Hello World application use a Housecat, a Wolfpack, or a Parrot?//[[footnote]]The answer is: it's a Housecat by elimination.  There is no distribution of work, nor of data, to many parties.  If it's not a flock or a pack, it's a Housecat.[[/footnote]]
 
 Note that the example uses the **live.zyre.com** service.  This is a public RestMS service provided by iMatix, which relieves you of the need to run your own RestMS implementation at least for getting started.  So you can try the above example with only the RestMS.pm class to install.
 
@@ -719,10 +707,10 @@ If you're an RSS user, you may see sites that ban RSS readers which poll too fre
 RestMS does not use polling.  Instead, it uses an //asynclet//, which is a resource that gets a URI before it actually exists.  In the XML description of a pipe from the previous example, we see an asynclet:
 
 [[code]]
-    <pipe type = "fifo" name = "ZYRE-6DS1YYTN-184">
-        ...
-        <message href = "http://localhost:8080/restms/resource/ZYRE-BCQ4UMWM-186" async = "1" />
-    </pipe>
+<pipe type = "fifo" name = "ZYRE-6DS1YYTN-184">
+    ...
+    <message href = "http://localhost:8080/restms/resource/ZYRE-BCQ4UMWM-186" async = "1" />
+</pipe>
 [[/code]]
 
 You retrieve the asynclet using a standard GET method:
@@ -913,7 +901,7 @@ This works well for almost everything.  One area where it does not work neatly i
 
 A naive RestMS client connects, creates a pipe and uses it, and then disappears, either because its work is done, or because it was interrupted.  Unless the client terminates cleanly and deleted its pipe, the pipe will hang around until the RestMS server decides to garbage collect it.
 
-Depending on the messaging pattern, this is either fine, or not.  A Housecat or Flamingo pattern is robust against such "dangling" pipes.  But a Wolfpack pattern is not.  When a member of the wo9fpack disappears but leaves a dangling pipe, we get this:
+Depending on the messaging pattern, this is either fine, or not.  A Housecat or Parrot pattern is robust against such "dangling" pipes.  But a Wolfpack pattern is not.  When a member of the wo9fpack disappears but leaves a dangling pipe, we get this:
 
 [[code]]
 .--------.      .--------.      .--------.
@@ -1064,7 +1052,7 @@ In this example we show how to implement a topic-based newsfeed service that dis
 * A news publisher sends a stream of news covering various categories.
 * Clients subscribe to and receive messages from specific news categories.
 
-It is a typical Flamingo pattern with one publisher talking to an arbitrary number of clients.  Here is the example news category tree:
+It is a typical Parrot pattern with one publisher talking to an arbitrary number of clients.  Here is the example news category tree:
 
 [[code]]
 rec
@@ -1159,12 +1147,10 @@ rec.pets.cats: Superiority: it comes naturally
 ++ References
 
 [[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: rfc2616 : "HTTP/1.1 Protocol Parameters" - http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html w3.org]
+: restms : "The RESTful Messaging Service" - [http://wiki.amqp.org/spec:7 wiki.amqp.org]
 : amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
 : coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
 : rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
 : atompub : "The Atom Syndication Format" - [http://www.ietf.org/rfc/rfc4287.txt ietf.org]
-: comet : "A Standards Based Approach to Comet Communication with REST" [http://cometdaily.com/2008/01/17/proposal-for-native-comet-support-for-browsers/ cometdaily.com]
 : digistan : The Digital Standards Organization - [http://www.digistan.org]
 [[/bibliography]]
