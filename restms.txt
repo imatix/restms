@@ -165,8 +165,13 @@ The XML description of an existing pipe has this format:
       type="{pipe type}"                    actual pipe type
     [ title="{short title}" ]               title, if specified
     >
-    [ <join href="{join URI}" address="{address pattern}" feed="{feed URI}" /> ] ...
-    [ <message href="{message URI}" address="{address literal}" /> ] ...
+    [ <join href="{join URI}"
+        address="{address pattern}"
+        feed="{feed URI}" /> ] ...
+    [ <message
+        href="{message URI}"
+        address="{address literal}"
+        message_id = "{identifier}" /> ] ...
     [ <message href="{message URI}" async="1" /> ]
   </pipe>
 </restms>
@@ -202,7 +207,9 @@ The XML specification or description for a join has this format:
   <join
     address="{address pattern}"             depends on feed type
     feed="{feed URI}"                       the feed to pull from
-    />
+    >
+    [ <header name="{header name}" value="{header value}" /> ] ...
+  </join>
 </restms>
 [[/code]]
 
@@ -228,7 +235,7 @@ To stage a content the client does an HTTP POST to the feed URI, providing a typ
 Client                                     Server
   |                                           |
   |  1.) POST to feed URI                     |
-  |      Content-type: {MIME-type}            |
+  |      Content-Type: {MIME-type}            |
   |      POST body is content                 |
   |------------------------------------------>|
   |                                           |
@@ -238,7 +245,13 @@ Client                                     Server
   |                                           |
 [[/code]]
 
-The Content-Type: MUST not be a structured document type ("application/restms+xml", "application/restms+xml", or "text/xml").  If the Content-Type: is a structured document type, the server will interpret the POST as providing a message, not a content.
+Note that although the message is nominally the container for contents, the client does not POST a content to a message.  There is, in fact, no message resource at publication time, only at delivery time.
+
+The Content-Type: on the content post request MUST not be a structured document type ("application/restms+xml", "application/restms+xml", or "text/xml").  If the Content-Type: is a structured document type, the server will interpret the POST as providing a message, not a content.
+
+The response MUST have no Content-Type: header, and if it has a Content-Length: header, the value of that header must be 0.
+
+On staged contents, //only// the Content-Type: header is preserved through to delivery.  To send content properties, the sending client MUST define these in the message resource.
 
 Once the client has staged the zero or more necessary contents, it publishes the message by POSTing a message specification to the feed URI.  The XML format for this specification is:
 
@@ -247,10 +260,13 @@ Once the client has staged the zero or more necessary contents, it publishes the
 <restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
+    [ message_id = "{identifier}" ]
     [ reply_to="{address literal}" ]
     [ <header name="{header name}" value="{header value}" /> ] ...
     [ <content href="{content URI}" ... />
-    | <content type="{MIME type} encoding="{encoding}">{content value}</content> ]
+    | <content
+        type="{MIME type}"
+        encoding="{encoding}">{content value}</content> ]
   </message> ...
 </restms>
 [[/code]]
@@ -261,6 +277,7 @@ A message specification consists of a set of properties (attributes of the messa
 
 * The address is used in routing, and has feed-specific semantics.
 * The headers may used in routing, and to carry arbitrary information.
+* The message_id is an application-assigned identifier string.
 * The reply_to tells an eventual recipient where to send a reply message.
 * The content hrefs refer to previously staged contents.
 * The content elements, if they have an element value, hold embedded contents.
@@ -273,6 +290,11 @@ The server processes each message element by routing the message+content, using 
 If a client attempts to publish the same staged content more than once the server MUST reply with "404 Not Found", and not route the message.  If a client attempts to publish a message referring to contents that were staged to a different feed, the server MUST reply with "403 Forbidden", and not route the message.  The server SHOULD verify the content URIs of all messages in the request before routing any message in the request.
 
 It the server successfully processes the request, it replies with "200 OK".  It does not return a Location: header nor a content body, unlike for a usual RestTL POST operation.
+
+RestMS allows these methods on a staged content:
+
+* GET - retrieve the content.
+* DELETE - deletes the content.
 
 ++++ Delivery
 
@@ -287,6 +309,7 @@ The XML description of a message returned by the server has this format:
 <restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
+    [ message_id = "{identifier}" ]
     [ reply_to="{address literal}" ]
     [ feed="{originating feed URI}" ] >
     [ <header name="{header name}" value="{header value}" /> ] ...
@@ -313,6 +336,27 @@ RestMS allows these methods on a content that is part of a delivered message:
 
 * GET - retrieve the content.
 * DELETE - deletes the content.
+
+++ Response status codes
+
+In RestMS these server reply codes have specific significance:
+
+* 200 OK - the request completed normally.
+* 201 Created - a POST request succeeded.
+* 204 No Content - an empty PUT request completed, with no effect.
+* 304 Not Modified - a conditional GET request completed, with no effect.
+* 400 Bad Request - a resource document was invalid.
+* 403 Forbidden - a requested method was not allowed on a resource.
+* 404 Not Found - the resource did not exist.
+* 412 Precondition Failed - a conditional PUT or DELETE was not carried out.
+
+Additionally, clients should be able to handle all HTTP errors, including:
+
+* 401 Unauthorized - authentication is required.
+* 413 Too Large - the request was too large.
+* 500 Internal Error - the server suffered an internal error.
+* 501 Not Implemented - the requested functionality is not implemented.
+* 503 Overloaded - the server was overloaded.
 
 ++ References
 

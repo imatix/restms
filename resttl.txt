@@ -283,7 +283,7 @@ Date: {response date}
 The server may return these response codes specifically for a PUT request:
 
 * 200 OK - the resource was successfully updated.
-* 204 No Content - the client provided no resource document but resource was updated in any case.
+* 204 No Content - the client provided no resource document and the update request had no effect.
 * 400 Bad Request - the resource document was incomplete or badly formatted.
 * 403 Forbidden - the PUT method is not allowed on the resource.
 * 412 Precondition Failed - the client does not have the latest copy of the resource.
@@ -710,6 +710,12 @@ Content-Type: audio/mpeg-3
 
 ...opaque binary content...
 [[/code]]
+
++++ Handling unknown elements
+
+Resource documents may contain elements, and unknown attributes on known elements. This is especially likely when the client and server implement different versions of the API, or if the API is extended by a particular client or server implementatoin.
+
+Clients and servers should tolerate and ignore unknown elements.
 
 ++ References
 

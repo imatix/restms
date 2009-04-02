@@ -2,35 +2,29 @@ Pending tasks for RestMS
 
 Done
 - Fix: any references to ;type=xxx should be removed
-- Change: break the specification into four sections: Using RestMS, Generic RESTful Framework, RestMS spec, RestMS-AMQP interoperability
-- Change: Etag must include the the MIME type as part of the calculation
-- Change: Remove the Slug header and move that property to the document 'name=' attribute
+- Change: break specification into easier to read documents
+- Change: Etag must include MIME type as part of calculation
+- Change: Remove Slug header and move to document 'name=' attribute
 - Change: use plain text error response bodies, not HTML (and specify this)
 - Clarify: what encodings are allowed on embedded content
 - Clarify: why and how to do pipe caching
 - Clarify: URIs can be relative coming from client, always absolute from server
-- Change: the generic data model example should not be <restms>, that is confusing
+- Change: generic data model example should not be <restms>, that is confusing
 - Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
 - Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
+- Clarify: for OOB contents, what headers are preserved (answer: none)
+- Clarify: POST on feeds, if xml/json -> message, else is content
+- Clarify: on post content to feed, response has no content
+- Clarify: on post content to feed, GET and DELETE allowed on that content
+- Clarify: on arrived messages, GET and DELETE allowed on those messages
+- Clarify: joins may also have header entities.
+- Add: message_id also shown on pipe summary of messages
+- Clarify: add rules explaining how clients should handle unknown elements
+- Add: list all error responses (in RestMS spec)
 
 Pending
 
-
-
-- Clarify: for OOB contents, what headers are preserved
-
-- Clarify: POST on feeds, if xml/json -> message, else is content
-    - see how zyre_feed handles POST
-- Clarify: on post content to feed, response with application/restms+xml, not text/xml
-- Clarify: on post content to feed, GET and DELETE allowed on that content
-- Clarify: on arrived messages, GET and DELETE allowed on those messages
-- Add: message_id also shown on pipe summary of messages
-- Clarify: joins also have header entities.
-- Clarify: post not allowed on message (happens on feed)
-
 - Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
-- Add: list all error responses (in RestMS spec)
-- Clarify: add rules explaining how clients should handle unknown elements
 
 - Add: security on feeds, using passwords defined at feed create time
     - all resources should be deletable only by client that created them
