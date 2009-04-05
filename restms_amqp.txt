@@ -3,7 +3,6 @@ RestMS provides web applications with enterprise-level messaging via an asynchro
 * Name: 10-RESTMS-AMQP@wiki.amqp.org
 * Version: draft/3
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
 * Resources: http://www.restms.org.
 
 ++ License

@@ -1,5 +1,8 @@
 This document is a user guide to RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.
 
+* Editor: Pieter Hintjens <ph@imatix.com>
+* Resources: http://www.restms.org.
+
 ++ License
 
 This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0 or later.

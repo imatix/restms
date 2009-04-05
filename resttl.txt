@@ -1,5 +1,3 @@
-- xml-json mapping
-
 RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.
 
 * Name: 10-RESTTL@wiki.amqp.org
@@ -498,7 +496,7 @@ RestTL clients MAY pipeline GET, PUT, DELETE and POST-public methods, but SHOULD
 
 +++ Error responses
 
-When the server returns an error response, the content body MUST be in plain text, and the MIME type MUST be "text/plain".
+When the server returns an error response (4xx or 5xx), the content body MUST be in plain text, and the MIME type MUST be "text/plain".  The client can print and log the content body as a text with no parsing or decoding.
 
 ++ RestTL resource document grammar
 
@@ -531,10 +529,10 @@ RestTL resource documents obey these basic rules:
 
 * All resource documents in an API are part of a //schema// that defines the type tree.
 * The resource document has a //document root// element with the name of the schema.
-* The document root contains one or more //resource roots//.
+* The document root contains zero or more //resource roots//.
 * The resource root elements may contain other elements.
 * All elements except the document root correspond to RestTL resources, with the name of the element equal to the resource type.
-* All elements except the document root may have attributes, corresponding to resource properties.
+* Resource properties are represented as element attributes, not as child elements.
 * All elements except the document root may repeat 0 or more times.
 
 Further, for XML documents:
@@ -555,7 +553,7 @@ Here is an example of a RestTL document in XML, for a schema called "music":
 [[code]]
 <?xml version="1.0"?>
 <music xmlns="http://www.restms.org/schema/music">
-  <playlist>
+  <playlist name = "default">
     <album
       artist="Echobelly" title="On" released="1995-10-17"
       summary="Underrated, bittersweet guitar rock perfection">
@@ -613,6 +611,8 @@ Here is the same document in JSON:
 }
 [[/code]]
 
+Note that it is possible to map between JSON and XML without loss.  The key issue for XML documents is that properties are represented as element attributes, not as child elements.
+
 +++ Navigation and discovery
 
 RestTL documents use the following rule to allow navigation and discovery:
@@ -668,29 +668,29 @@ Content-Type: application/music+xml
         artist="Echobelly" title="On" released="1995-10-17"
         summary="Underrated, bittersweet guitar rock perfection"
       <track title="Car Fiction" length="2:31"
-        href="http://music.host.com/resource/A1023/1" />
+        href="http://host.com/music/resource/A1023/1" />
       <track title="King of the Kerb" length="3:59"
-        href="http://music.host.com/resource/A1023/2" />
+        href="http://host.com/music/resource/A1023/2" />
       <track title="Great Things" length="3:31"
-        href="http://music.host.com/resource/A1023/3" />
+        href="http://host.com/music/resource/A1023/3" />
       <track title="Natural Animal" length="3:27"
-        href="http://music.host.com/resource/A1023/4" />
+        href="http://host.com/music/resource/A1023/4" />
       <track title="Go Away" length="2:44"
-        href="http://music.host.com/resource/A1023/5" />
+        href="http://host.com/music/resource/A1023/5" />
       <track title="Pantyhose and Roses" length="3:26"
-        href="http://music.host.com/resource/A1023/6" />
+        href="http://host.com/music/resource/A1023/6" />
       <track title="Something Hot in a Cold Country" length="4:01"
-        href="http://music.host.com/resource/A1023/7" />
+        href="http://host.com/music/resource/A1023/7" />
       <track title="Four Letter Word" length="2:51"
-        href="http://music.host.com/resource/A1023/8" />
+        href="http://host.com/music/resource/A1023/8" />
       <track title="Nobody Like You" length="3:52"
-        href="http://music.host.com/resource/A1023/9" />
+        href="http://host.com/music/resource/A1023/9" />
       <track title="In the Year" length="3:31"
-        href="http://music.host.com/resource/A1023/10" />
+        href="http://host.com/music/resource/A1023/10" />
       <track title="Dark Therapy" length="5:30"
-        href="http://music.host.com/resource/A1023/11" />
+        href="http://host.com/music/resource/A1023/11" />
       <track title="Worms and Angels" length="2:38"
-        href="http://music.host.com/resource/A1023/12" />
+        href="http://host.com/music/resource/A1023/12" />
     </album>
 </music>
 [[/code]]
@@ -700,7 +700,7 @@ To retrieve a specific track, the client once again uses the URI provided by the
 [[code]]
 Client:
 -------------------------------------------------
-GET http://music.host.com/resource/A1023/5 HTTP/1.1
+GET http://host.com/music/resource/A1023/5 HTTP/1.1
 
 Server:
 -------------------------------------------------
@@ -715,7 +715,7 @@ Content-Type: audio/mpeg-3
 
 Resource documents may contain elements, and unknown attributes on known elements. This is especially likely when the client and server implement different versions of the API, or if the API is extended by a particular client or server implementatoin.
 
-Clients and servers should tolerate and ignore unknown elements.
+Clients and servers should tolerate and ignore unknown elements.  Neither the client nor the server should maintain unknown elements.
 
 ++ References
 

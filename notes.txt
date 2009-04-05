@@ -21,10 +21,9 @@ Done
 - Add: message_id also shown on pipe summary of messages
 - Clarify: add rules explaining how clients should handle unknown elements
 - Add: list all error responses (in RestMS spec)
+- Clarify: describe rules for XML and JSON mapping (in RestTL)
 
 Pending
-
-- Clarify: describe entities as generic structures, with rules for XML and JSON mapping (in Generic Framework)
 
 - Add: security on feeds, using passwords defined at feed create time
     - all resources should be deletable only by client that created them
