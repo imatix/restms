@@ -1,0 +1,37 @@
+This document discusses a set of extensions to RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.
+
+* Editor: Pieter Hintjens <ph@imatix.com>
+* Resources: http://www.restms.org.
+
+++ License
+
+This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0 or later.
+
+++ Goals and structure of this document
+
+This document is an informal specification of a number of extensions to RestMS.  These extensions are documented here to:
+
+# Act as prior art in case of patent claims by extension implementors.
+# Provide a basis for implementors and eventual formal specification.
+
+Implementors should refer to the [http://wiki.amqp.org/spec:7 RestMS specifications].
+
+++ Message filtering algorithms
+
+These message filtering algorithms could be implemented as RestMS feed types or in the future, in other parts of the specification where messages are selected for routing or other forms of processing:
+
+* Regular expression on address - the server compares each message address with a filter that is specified as a regular expression.
+
+* XQuery on contents - the server compares each message's XML contents with a filter that is specified as an XPath.
+
+* Soundex on address - the server compares each message address with a filter using a Soundex comparison.
+
+* Full text on address - the server applies a full text search to the message address using the filter as the search string.
+
+* Full text on contents - the server applies a full text search to the message contents using the filter as the search string.
+
+* Cartesian on address - the server compares each message address with a filter specified as latitude and longitude coordinates, to a degree of accuracy specified by the filter.
+
+* Random - the server filters using a randomized probability that is specified by the filter.
+
+* Range - the server compares each message address, represented as a numeric value, with a range specified by the filter.
