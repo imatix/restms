@@ -48,8 +48,8 @@ Domains follow these rules:
 * The server MAY implement multiple domains and MAY allow routing of messages between domains.
 * Domains are configured resources: clients do not create or destroy domains.
 * Domains act as namespaces for pipes and feeds.
-* Client and servers must agree in advance on the domains that exist.
-* RestMS servers SHOULD implement a default public domain named "default".
+* The client and server must agree in advance on the domains that exist.
+* The server SHOULD implement a default public domain named "default".
 
 The URI for a domain is:
 
@@ -357,6 +357,36 @@ Additionally, clients should be able to handle all HTTP errors, including:
 * 500 Internal Error - the server suffered an internal error.
 * 501 Not Implemented - the requested functionality is not implemented.
 * 503 Overloaded - the server was overloaded.
+
+++ Standard feed types
+
+These feed types implement the Wolfpack pattern and are used to share work between a set of end-points:
+
+* The **rotator** feed type routes the message to at most one pipe, using a round-robin algorithm to choose the next join from those attached to the feed.  Does not apply any filtering.  If the feed has no attached joins, the server queues the message for an arbitrary period.  The server MAY implement the rotator feed type.
+
+* The **service** feed type works as the rotator feed, with the additional property of self-deleting when the the number of joins attached to it drops from 1 to zero.  This means that the presence or absence of the feed indicates the availability of the "service" it represents.   The server MAY implement the service feed type.
+
+This feed type implements the Housecat pattern and is used to send messages to specific end-points:
+
+* The **direct** feed type routes the message to //each// join attached to the feed that has an address pattern that is identical to the message address.  One message can be routed to multiple pipes.  The server MUST implement the direct feed type.  The default feed (with URI path "/restms/feed/default") is a configured direct feed.
+
+These feed types implement the Parrot pattern and are used to distribute copies of messages to a set of end-points:
+
+* The **fanout** feed type routes the message to all joins attached to the feed without filtering.  The server SHOULD implement the fanout feed type.
+
+* The **topic** feed type routes the message to all joins attached to the feed using a topic matching algorithm.   The topic matching algorithm works as follows: the message address is a string of topic names, separated by dots.  The join address pattern is a string of topic names mixed with wild cards.  "*" matches a single topic name and "#" matches zero or more topic names.  The server MAY implement the topic feed type.
+
+* The **headers** feed type routes the message to all joins attached to the feed using a header matching algorithm.  The header matching algorithm works as follows: the join specifies a set of header elements.  The message matches if it has identical values for the header elements specified in the join.  The server MAY implement the headers feed type.
+
+++ Standard pipe types
+
+* The **fifo** pipe type delivers messages to the client one by one as discrete <message> resources, and holds each message until a client deletes it.  The server MUST implement the fifo pipe type.
+
+* The **ondemand** pipe type works as the fifo pipe type, but contains at most one message at a time.  The action of retrieving a message asynclet will fetch a message from the feed.  The server MAY validate that ondemand pipes are joined only to rotator or service feeds.  The server MAY implement the ondemand pipe type.
+
+* The **stream** pipe type delivers messages to the cient as a single <message> resource with multipart content, and deletes each message as soon as it is delivered.  The server MAY implement the stream pipe type.
+
+* The **loopback** pipe type delivers received messages to the feed specified with the "feed" property of the pipe.  The feed property is URI which can be on the same or a different domain and server.  Loopback pipes are //always// empty from the perspective of the client - they do not contain messages, nor asynclets.  The server MAY implement the loopback pipe type.
 
 ++ References
 
