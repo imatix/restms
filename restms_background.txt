@@ -119,6 +119,19 @@ We will take each of requirement in turn and examine how RestMS satisfies it:
 
 * //Standardized//: we define RestMS as a contract between a client and a server, which gives RestMS users a basis on which to demand interoperability from vendors.  The RestMS sample class libraries include regression tests that validate implementations of the protocol.
 
+++ The RESTful Transport Layer
+
+In order to provide a formal answer to "what is REST?", at least within the context of RestMS, and in order to answer in one place questions that crop up repeatedly when designing RestMS, we created a RESTful transport layer, RestTL.
+
+Though developed for, and as part of, RestMS, RestTL is a stand-alone answer to two major questions:
+
+# How do we work with resources in a RESTful fashion, across an HTTP connection?
+# What do those resources look like, as structured documents?
+
+To both questions there are many answers, but we have chosen those we found simplest, least surprising, and most generic.  RestTL can be used as the basis for any RESTful protocol that uses HTTP as its basic transport.  It conforms fully to the HTTP specifications.
+
+RestMS, therefore, implements RestTL and anyone seeking to implement a RestMS server or client should understand the RestTL design.
+
 ++ RestMS as an HTTP-to-AMQP proxy
 
 As we explained, AMQP works well for enterprise messaging but is inadequate and too complex for web messaging.  RestMS is not only inspired by AMQP's messaging architecture, it is explicitly compatible with it.  That is, a RestMS server can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
