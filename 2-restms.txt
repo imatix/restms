@@ -149,7 +149,7 @@ The XML specification for a feed this format:
 </restms>
 [[/code]]
 
-The feed type defines the routing semantics of the feed.  The allowed feed types depend on the profiles that the server implements.   The semantics of each feed type is defined in the relevant profile specification.  If the client attempts to create a feed with an unknown type, the server responds with "400 Bad Request".
+The feed type defines the storage and routing semantics of the feed.  The allowed feed types depend on the profiles that the server implements.   If the client attempts to create a feed with an unknown type, the server responds with "400 Bad Request".
 
 +++ Pipes
 
@@ -192,18 +192,18 @@ The XML description of an existing pipe has this format:
     >
     [ <join href="{join URI}"
         type="{join type}"
-        where="{address pattern}"
+        address="{address pattern}"
         feed="{feed URI}" /> ] ...
     [ <message
         href="{message URI}"
-        where="{address literal}"
+        address="{address literal}"
         message_id = "{identifier}" /> ] ...
     [ <message href="{message URI}" async="1" /> ]
   </pipe>
 </restms>
 [[/code]]
 
-The pipe type defines the routing semantics of the pipe.  We explain the pipe type semantics later.  If the client attempts to create a pipe with an unknown type, the server responds with "400 Bad Request".
+The pipe type defines the routing semantics of the pipe.  The allowed pipe types depend on the profiles that the server implements.   If the client attempts to create a pipe with an unknown type, the server responds with "400 Bad Request".
 
 Pipes are not shareable: if more than one client accesses the same pipe, the results will be unpredictable and none of the clients will receive the full set of messages, nor any cleanly defined subset.  The proper way to distribute messages between clients is to use a service or rotator feed, and a set of ondemand pipes, one per client.
 
@@ -231,13 +231,15 @@ The XML specification or description for a join has this format:
 <restms xmlns="http://www.restms.org/schema/restms">
   <join
   [ type="{join type}" ]                    optional type
-    where="{address pattern}"
+    address="{address pattern}"
     feed="{feed URI}"                       the feed to pull from
     >
     [ <header name="{header name}" value="{header value}" /> ] ...
   </join>
 </restms>
 [[/code]]
+
+The join type defines the selection semantics of the join.  The allowed join types depend on the profiles that the server implements.   If the client attempts to create a join with an unknown type, the server responds with "400 Bad Request".
 
 +++ Messages and contents
 
