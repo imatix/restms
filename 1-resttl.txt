@@ -1,49 +1,78 @@
-RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion.
+This document defines the RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
 
-* Name: 10-RESTTL@wiki.amqp.org
-* Version: draft/3
+* Name: www.restms.org/spec:1/RESTTL
+* Version: draft/4
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
-* Resources: http://www.restms.org.
 
 ++ License
 
-This document is licensed under the [http://wiki.amqp.org/main:intellectual-property-policy Intellectual Property Policy] of the wiki.amqp.org site.
+Copyright (c) 2009 by the Editor and Contributors.
 
-++ Change process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+++ Change Process
+
+This document is governed by the Digital Standard Organization's [htttp://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
 ++ Goals and structure of this document
 
-This document defines the RESTful Transport Layer (RestTL), a generic way to represent structured resources and work with them in a RESTful fashion over a standard HTTP client-server network.  RestTL is a foundation for RestMS but can be used for arbitrary RESTful protocols.  RestTL consists of:
+This document defines the RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
+
+RestTL is a foundation for arbitrary RESTful APIs including, but not limited to, RestMS.  We describe:
 
 # A set of HTTP requests and responses that let a client work with server-side resources in a RESTful way;
 # A grammar for XML or JSON documents to represent server-held resources.
 
-This specification is part of the overall [[[spec:7 |RestMS specification]]], described in more detail by these separate documents:
+++ Language
 
-* [[[spec:9 |RestMS-user]]] - using RestMS in applications, for RestMS users.
-* [[[spec:11|RestMS-core]]] - RestMS core specifications, for RestMS implementors.
-* [[[spec:12|RestMS-amqp]]] - RestMS-to-AMQP interoperability guide, for RestMS implementors.
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+
+These terms are introduced by, and have specific meaning, in this specification:
+
+* Asynclet - a resource that can be retrieved before it exists, resulting in a "long poll".
 
 ++ Why define a RESTful Transport Layer?
 
-REST is a design philosophy rather than a formal specification.  This means that architects have lattitude in how to implement (more or less) RESTful APIs.  This is useful for experimentation but not valuable for defining standards.  Standards must formalize best practice in a boring and uterly interoperable way.
+REST[((bibcite rest))] is a design pattern rather than a formal specification.  This means that architects have lattitude in how to implement more or less RESTful APIs.  This is useful for experimentation but problematic for defining standards.  Standards should formalize best practice in a regular way.
 
-The principle of Least Surprise applies: the implementor, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.
+The principle of Least Surprise applies: the implementor, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.  We do not want discussions over whether one updates a resource using PUT or POST.
 
-The best way to enforce the regularity of an API is to treat it as one of a class of APIs, and to specify separately the rules for all APIs of that class.  Thus for RestMS, we treat it as one of a class of RESTful APIs, and we specify separately - as RestTL - the rules for our class of RESTful APIs.
+The best way to enforce the regularity of such rules is to draw them out into a stand-alone specification, and document them clearly, removing redundant optionality so there is exactly one way to do anything, and no grey areas.  This is such a specification.
 
-With RestTL we do not claim to define the rules for all RESTful APIs, just for a certain class of which RestMS is currently the main member.  We aim however to make a specification that is reusable and useful to implementor of other RESTful APIs.
+While RestTL was designed to support [[[spec:2|RestMS]]], it is not restricted to that use case, and could be used to build other RESTful APIs.  At the same time, RestTL does not claim to be a universal RESTful transport: it abstracts sufficient design to support RestMS, and no more.
 
 +++ RestTL overview
 
 We speak of "the API" as being the RESTful protocol that we layer on top of RestTL.
 
-RestTL is built on HTTP/HTTPS and conforms to the HTTP/1.1 specifications.  It implements these HTTP methods: POST - create a new resource, GET - retrieve a resource, PUT - update a resource, DELETE - delete a resource.
+RestTL is built on HTTP/HTTPS and conforms to the HTTP/1.1 specifications.  It implements these HTTP methods:
 
-It uses these HTTP headers with their HTTP/1.1 meaning: Location, ETag, Data-Modified, If-Modified-Since, If-Unmodified-Since, If-Match, and If-None-Match.  All RestTL servers and clients are based on standard HTTP stacks that can handle headers such as Content-Length and Content-Type properly.
+* POST - create a new resource
+* GET - retrieve a resource
+* PUT - update a resource
+* DELETE - delete a resource
+
+It uses these HTTP headers with their HTTP/1.1 meaning:
+
+* Location - URI of newly created resource
+* ETag - opaque hash tag of that identifies a resource instance
+* Data-Modified - date and time that resource was modified
+* If-Modified-Since - conditional GET using resource date
+* If-None-Match - conditional GET using resource ETag
+* If-Unmodified-Since - conditional PUT or DELETE using resource date
+* If-Match - conditional PUT or DELETE using resource ETag
+
+Additionally, it uses two custom headers to allow event-driven work:
+
+* When-Modified-After - GET evented on resource date change
+* When-None-Match - GET evented on resource ETag change
+
+RestTL assumes the availability of standard HTTP client and server stacks that can handle headers such as Content-Length properly.
 
 API resources are either //public// (shared by many clients) or //private// (to a single client).  Public resources are named by formal or informal agreement, while the server is responsible for naming all private resources.  The URI of a resource is based on the resource name, so clients can know the URIs of public resources in advance, while the server provides the URIs of private resources at runtime.
 
@@ -53,7 +82,7 @@ The API resource types form a static //type tree// attached to a root type.  The
 
 The API represents structured resources as interchangeable XML or JSON //resource documents//, at the choice of the client.  These documents follow simple grammar rules for representing resources and their properties.
 
-Lastly the API has two mechanisms for asynchronous (event-driven) retrieval and delivery of resources, and one mechanism for event-driven monitoring of resource updates.  RESTful APIs, like HTTP, are nominally synchronous and use a request-response pattern for all resource actions.  The first mechanism is the //asynclet// resource, given a URI before it exists: the client retrieves the asynclet and receives the resource as soon as it comes into existence.  The second mechanism is more typical for HTTP: //streaming// of new resources to the client.  Lastly, using special HTTP headers a client can ask to be notified when a resource is changed.
+Lastly the API has two mechanisms for evented asynchronous retrieval and delivery of resources, and one mechanism for event-driven monitoring of resource updates.  RESTful APIs, like HTTP, are nominally synchronous and use a request-response pattern for all resource actions.  The first mechanism is the //asynclet// resource, given a URI before it exists: the client retrieves the asynclet and receives the resource as soon as it comes into existence.  The second mechanism is more typical for HTTP: //streaming// of new resources to the client.  Lastly, using special HTTP headers a client can ask to be notified when a resource is changed.
 
 ++ HTTP requests and responses
 
@@ -64,7 +93,7 @@ Clients issue HTTP methods to work with server-side resources as follows:
 * the PUT method to edit a known resource;
 * the DELETE method to remove a known resource.
 
-All methods work orthogonally on all types of API resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, permitted, or necessarily implemented.  This framework draws heavily on the design of AtomPub[((bibcite atompub))], which may be helpful as background material.
+All methods work orthogonally on all types of API resources, whether those resources contain or do not contain other resources.  Not all combinations of methods and resources are meaningful, permitted, or necessarily implemented in any eventual API based on RestTL.  This framework draws on the design of AtomPub[((bibcite atompub))], which may be helpful as background material.
 
 +++ Resource lifecycles, visibility, and addressing
 
@@ -75,16 +104,18 @@ RestTL distinguishes between resources that are named and visible to all applica
 The URI for a public resource is derived from the resource type and name as follows:
 
 [[code]]
-http://{server-name}[:{port}]/{schema}/{resource type}/{resource name}
+http://{server name}[:{port}]/{schema}/{resource type}/{resource name}
 [[/code]]
 
-Where {schema} is the API schema name, e.g. 'restms'.  For example the RestMS default domain on http://live.zyre.com has the URI:
+The fields have this meaning:
 
-[[code]]
-http://live.zyre.com/restms/domain/default
-[[/code]]
+* server name - name of host as for HTTP request
+* port - optional port as for HTTP request
+* schema - name of the API
+* resource type - name of the resource type
+* resource name - name of the resource itself
 
-The URI for a private resource is based on "resource" and a resource hash generated by the server:
+The URI for a private resource follows an identical format, where resource type is "resource" and resource name is a hash generated by the server:
 
 [[code]]
 http://{server-name}[:{port}]/{schema}/resource/{resource hash}
@@ -92,7 +123,7 @@ http://{server-name}[:{port}]/{schema}/resource/{resource hash}
 
 +++ Creating a resource
 
-The API lets clients create new resources as follows:
+Clients create new resources through the API as follows:
 
 * The client must know the URI of the parent for the new resource it wants to create.
 * The client POSTs a specification for the new resource to the parent URI.
@@ -159,7 +190,7 @@ Creating public resources is //idempotent//, i.e. repeated requests to create th
 
 +++ Retrieving a resource
 
-The API lets clients retrieve resources as follows:
+Clients retrieve resources through the API as follows:
 
 * The client must know the URI of the resource that it wants to retrieve.
 * The client sends a GET method to the resource URI.
@@ -208,7 +239,7 @@ The server may return these response codes specifically for a GET request:
 
 In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
 
-//Conditional retrieval// is used to cache resources and fetch them only if they have changed.  The API lets clients retrieve resources conditionally as follows:
+//Conditional retrieval// is used to cache resources and fetch them only if they have changed.   Clients retrieve resources conditionally as follows:
 
 * The client must previously have retrieved the resource.
 * The client does a GET method with If-None-Match: and If-Modified-Since: headers.
@@ -231,7 +262,7 @@ Retrieving a resource has //no side effects//, i.e. repeated requests to retriev
 
 +++ Updating a resource
 
-The API lets clients update resources as follows:
+Clients update resources through the API as follows:
 
 * The client must know the URI of the resource that it wants to update.
 * The client should have retrieved the resource before updating it.
@@ -288,7 +319,7 @@ The server may return these response codes specifically for a PUT request:
 
 In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
 
-//Conditional update// is used to detect and prevent update conflicts (when multiple clients try to update the same resource at the same time).  The API lets clients conditionally update resources conditionally as follows:
+//Conditional update// is used to detect and prevent update conflicts (when multiple clients try to update the same resource at the same time).  Clients conditionally update resources conditionally as follows:
 
 * The client must previously have retrieved the resource.
 * The client does a DELETE method with If-Match: and If-Unmodified-Since: headers.
@@ -311,7 +342,7 @@ Modifying resources is //idempotent//, i.e. repeated requests to modify the same
 
 +++ Deleting a resource
 
-The API lets clients delete resources as follows:
+Clients delete resources through the API as follows:
 
 * The client must know the URI of the resource that it wants to delete.
 * The client should have retrieved the resource before delete it.
@@ -357,7 +388,7 @@ The server may return these response codes specifically for a DELETE request:
 
 In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.  The client should be able to handle all normal HTTP errors, such as "401 Unauthorized", "404 Not Found", "413 Too Large", "500 Internal Error", and so on.
 
-//Conditional delete// is used to detect and prevent delete conflicts (when multiple clients try to delete the same resource at the same time).  The API lets clients conditionally delete resources conditionally as follows:
+//Conditional delete// is used to detect and prevent delete conflicts (when multiple clients try to delete the same resource at the same time).  Clients conditionally delete resources conditionally as follows:
 
 * The client must previously have retrieved the resource.
 * The client does a DELETE method with If-Match: and If-Unmodified-Since: headers.
@@ -408,7 +439,7 @@ The three asynchronous delivery mechanisms are:
 
 # //Streaming//, in which a resource is delivered in segments, over time.  RestTL has no specific support for streaming: it is implemented using multipart contents, but otherwise looks like a conventional resource GET.
 # //Creation notification//, in which a resource is delivered only when it is created.  RestTL implements this using "asynclets".
-# //Update notification//, in which a resource is delivered only when it is changed.  RestTL implements this using the When-Modified-After: and When-None-Match: custom headers.
+# //Update notification//, in which a resource is delivered only when it is changed.  RestTL implements this using the custom When-Modified-After: and When-None-Match: headers.
 
 ++++ Creation notification via asynclets
 
@@ -538,7 +569,7 @@ RestTL resource documents obey these basic rules:
 Further, for XML documents:
 
 * The Content-type MUST be "application/{schema-name}+xml".
-* The document root has a single attribute, xmlns="http://www.restms.org/schema/{schema-name}".
+* The document root has a single attribute, xmlns="http://www.restms.org/schema/{schema-name}".  Note that the schema does //not// need to exist.
 * The following character MUST be escaped in attribute values:
  * " (escaped by writing &quot;)
 
@@ -720,8 +751,9 @@ Clients and servers should tolerate and ignore unknown elements.  Neither the cl
 ++ References
 
 [[bibliography]]
-: coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
+: rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
 : atompub : "The Atom Syndication Format" - [http://www.ietf.org/rfc/rfc4287.txt ietf.org]
 : comet : "A Standards Based Approach to Comet Communication with REST" [http://cometdaily.com/2008/01/17/proposal-for-native-comet-support-for-browsers/ cometdaily.com]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
 : rfc2616 : "HTTP/1.1 Protocol Parameters" - http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html w3.org]
 [[/bibliography]]

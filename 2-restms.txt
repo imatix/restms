@@ -1,34 +1,40 @@
-This document introduces RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  RestMS applications can interoperate with AMQP networks.
+This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
 
-* Name: 7-RESTMS@wiki.amqp.org
-* Version: draft/3
+* Name: www.restms.org/spec:2/RESTMS
+* Version: draft/4
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
-* Resources: http://www.restms.org.
 
 ++ License
 
-This document is licensed under the [http://wiki.amqp.org/main:intellectual-property-policy Intellectual Property Policy] of the wiki.amqp.org site.
+Copyright (c) 2009 by the Editor and Contributors.
 
-++ Change process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-++ Structure of the RestMS specification
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-This document is a formal specification of the resources that RestMS implements, and how they work.  These further documents form part of the overall specifications:
+++ Change Process
 
-* The HTTP method patterns and resource document grammar that underpin RestMS are specified in the [[[spec:9|9-RESTTL@wiki.amqp.org]]] RESTful transport layer (RestTL) specifications.  A conformant RestMS implementation MUST properly implement the RestTL patterns on the RestMS resources.
+This document is governed by the Digital Standard Organization's [htttp://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-* RestMS-to-AMQP interoperability is defined in the [[[spec:10|10-RESTMS-AMQP@wiki.amqp.org]]] RestMS-to-AMQP interoperability specification.  Conformant RestMS implementations MAY implement AMQP interoperability according to these specifications.
+++ Goals and structure of this document
+
+This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
+
+We describe:
+
+* How the RESTful Transport Layer (RestTL) is used as the basis for RestMS
+* Each of the resource types that RestMS implements
+* How RestMS is extended by profiles
+* The set of response codes that a client should be able to handle.
 
 ++ Language
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
-++ Terminology
-
-These terms are introduced by, or have specific meaning, in this specification:
+These terms are introduced by, and have specific meaning, in this specification:
 
 * Domain - a set of resources managed by one RestMS server or virtual host.
 * Feed - a destination for messages published by applications.
@@ -36,7 +42,13 @@ These terms are introduced by, or have specific meaning, in this specification:
 * Join - a relationship between a pipe and a feed.
 * Message - a package of data consisting of an envelope and zero or more contents.
 * Content - an opaque binary payload, with a MIME type and encoding.
-* Asynclet - a resource that can be retrieved before it exists, resulting in a "long poll".
+* Profile - a set of feed, join, and pipe types that work together to solve a given functional domain.
+
+++ Using the Transport Layer
+
+[[[spec:1 | RestTL] specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
+
+Implementors should apply RestTL's rules to all resources and methods that RestMS defines, unless RestMS explicitly states otherwise.  For example there are certain resources (such as contents) and methods (such as POST on a feed) that do not follow the RestTL strictures.  These are clearly noted.  All others follow RestTL.
 
 ++ RestMS resource types
 
@@ -44,8 +56,9 @@ These terms are introduced by, or have specific meaning, in this specification:
 
 Domains follow these rules:
 
-* A domain is a public collection of feeds and pipes and the child resources they contain.
+* A domain is a public collection of profiles, feeds, and pipes.
 * The server MAY implement multiple domains and MAY allow routing of messages between domains.
+* Domains MAY be used to partition resources for authenticated access control.
 * Domains are configured resources: clients do not create or destroy domains.
 * Domains act as namespaces for pipes and feeds.
 * The client and server must agree in advance on the domains that exist.
@@ -73,23 +86,36 @@ A domain document specifies the domain properties, and has references to all pub
 [[code]]
 <?xml version="1.0"?>
 <restms xmlns="http://www.restms.org/schema/restms">
-  <domain title="{domain description}">
+  <domain title="{description}">
+    [ <profile
+        name="{name}"
+        title="{description}"
+        href="{URI}" /> ] ...
     [ <feed
-        name="{feed name}"
-        title="{feed description}"
-        type="{feed type}"
+        name="{name}"
+        title="{description}"
+        type="{type}"
         license="{license}"
-        href="{feed URI}" /> ] ...
+        href="{URI}" /> ] ...
     [ <pipe
-        name="{pipe name}"
-        title="{pipe description}"
-        type="{pipe type}"
-        href="{pipe URI}" /> ] ...
+        name="{name}"
+        title="{description}"
+        type="{type}"
+        href="{URI}" /> ] ...
   </domain>
 </restms>
 [[/code]]
 
 The domain document does not necessarily list all feeds and pipes: clients may create these as private and thus make them inaccessible through discovery.
+
++++ Profiles
+
+Profiles follow these rules:
+
+* A profile is a named set of semantics that the server MAY implement.
+* The client SHOULD check that the domain contains the profiles it needs.
+
+The URI for a profile points to a profile specification, which is a human-readable web page.  That URI can be fetched using the standard GET method.
 
 +++ Feeds
 
@@ -101,7 +127,6 @@ Feeds follow these rules:
 * Clients can create dynamic feeds for their own use.
 * To create a new feed the client POSTs a feed document to the parent domain URI.
 * The server MAY implement a set of configured public feeds.
-* The server SHOULD implement a default public feed called "default" of type "direct"..
 
 RestMS allows these methods on a feed URI:
 
@@ -117,14 +142,14 @@ The XML specification for a feed this format:
 <restms xmlns="http://www.restms.org/schema/restms">
   <feed
       name="{feed name}"                    mandatory feed name
-    [ type="{feed type}" ]                  optional type, default is "topic"
+    [ type="{feed type}" ]                  optional type
     [ title="{short title}" ]               optional title
     [ license="{license name}" ]            optional license name
     />
 </restms>
 [[/code]]
 
-The feed type defines the routing semantics of the feed.  We explain the feed type semantics later.  If the client attempts to create a feed with an unknown type, the server responds with "400 Bad Request".  If the client does not specify a feed type, the type defaults to "topic".
+The feed type defines the routing semantics of the feed.  The allowed feed types depend on the profiles that the server implements.   The semantics of each feed type is defined in the relevant profile specification.  If the client attempts to create a feed with an unknown type, the server responds with "400 Bad Request".
 
 +++ Pipes
 
@@ -149,7 +174,7 @@ The XML specification for a new pipe has this format:
 <?xml version="1.0"?>
 <restms xmlns="http://www.restms.org/schema/restms">
   <pipe
-    [ type="{pipe type}" ]                  optional type, default is "fifo"
+    [ type="{pipe type}" ]                  optional type
     [ title="{short title}" ]               optional title
     />
 </restms>
@@ -166,20 +191,21 @@ The XML description of an existing pipe has this format:
     [ title="{short title}" ]               title, if specified
     >
     [ <join href="{join URI}"
-        address="{address pattern}"
+        type="{join type}"
+        where="{address pattern}"
         feed="{feed URI}" /> ] ...
     [ <message
         href="{message URI}"
-        address="{address literal}"
+        where="{address literal}"
         message_id = "{identifier}" /> ] ...
     [ <message href="{message URI}" async="1" /> ]
   </pipe>
 </restms>
 [[/code]]
 
-The pipe type defines the routing semantics of the pipe.  We explain the pipe type semantics later.  If the client attempts to create a pipe with an unknown type, the server responds with "400 Bad Request".  If the client does not specify a pipe type, the type defaults to "fifo".
+The pipe type defines the routing semantics of the pipe.  We explain the pipe type semantics later.  If the client attempts to create a pipe with an unknown type, the server responds with "400 Bad Request".
 
-Pipes are not shareable: if more than one client accesses the same pipe, the results will be unpredictable and none of the clients will receive the full set of messages, nor any cleanly defined subset.  The proper way to distribute messages between clients (Wolfpack pattern) is to use a service or rotator feed, and a set of ondemand pipes, one per client.
+Pipes are not shareable: if more than one client accesses the same pipe, the results will be unpredictable and none of the clients will receive the full set of messages, nor any cleanly defined subset.  The proper way to distribute messages between clients is to use a service or rotator feed, and a set of ondemand pipes, one per client.
 
 Pipes on service or rotator feeds should be cached: if a client creates a new pipe each time it starts, messages can be left unprocessed (and thus lost) in unused pipes.  Clients should therefore record the URI of the pipe they are using, and attempt to use this pipe when re-starting.  If the pipe no longer exists, they should create a new pipe and record that URI.
 
@@ -191,7 +217,6 @@ Joins follow these rules:
 * Joins are always dynamic and always private.
 * Clients MAY create joins at runtime, after creating pipes.
 * To create a new join the client POSTs a join specification to the parent pipe URI.
-* The server SHOULD create a join from each new pipe to the default feed.
 * If either the feed or the pipe for a join is deleted, the join is also deleted.
 
 RestMS allows these methods on a join URI:
@@ -205,15 +230,14 @@ The XML specification or description for a join has this format:
 <?xml version="1.0"?>
 <restms xmlns="http://www.restms.org/schema/restms">
   <join
-    address="{address pattern}"             depends on feed type
+  [ type="{join type}" ]                    optional type
+    where="{address pattern}"
     feed="{feed URI}"                       the feed to pull from
     >
     [ <header name="{header name}" value="{header value}" /> ] ...
   </join>
 </restms>
 [[/code]]
-
-The default join implements a guaranteed Housecat pattern on every pipe.  If clients attempt to delete the default join, or create other joins onto the default feed, the server MUST respond with "403 Forbidden".
 
 +++ Messages and contents
 
@@ -358,44 +382,24 @@ Additionally, clients should be able to handle all HTTP errors, including:
 * 501 Not Implemented - the requested functionality is not implemented.
 * 503 Overloaded - the server was overloaded.
 
-++ Standard feed types
+++ RestMS Profiles
 
-These feed types implement the Wolfpack pattern and are used to share work between a set of end-points:
+This specification does not explain the semantics of feed, join, and pipe types.  These semantics are covered in separate profile specifications.  Profiles are the main area of extension and experimentation in RestMS.  Profiles follow these rules:
 
-* The **rotator** feed type routes the message to at most one pipe, using a round-robin algorithm to choose the next join from those attached to the feed.  Does not apply any filtering.  If the feed has no attached joins, the server queues the message for an arbitrary period.  The server MAY implement the rotator feed type.
+* The server MUST list all the profiles it supports, in the domain document.
+* Different profiles MAY use the same profile name but they MUST use different URIs.
+* Clients SHOULD use the profile URI to verify the exact version of the profile.
+* A server MUST NOT implement two profiles with the same name.
+* A server MUST NOT implement two profiles that have overlapping resource types.
 
-* The **service** feed type works as the rotator feed, with the additional property of self-deleting when the the number of joins attached to it drops from 1 to zero.  This means that the presence or absence of the feed indicates the availability of the "service" it represents.   The server MAY implement the service feed type.
+The type names that a profile uses are not namespaced, because this becomes clumsy.  However, a client having verified that a server implements a specific profile and having verified the profile URI, can be assured that a given resource type works as expected.
 
-This feed type implements the Housecat pattern and is used to send messages to specific end-points:
-
-* The **direct** feed type routes the message to //each// join attached to the feed that has an address pattern that is identical to the message address.  One message can be routed to multiple pipes.  The server MUST implement the direct feed type.  The default feed (with URI path "/restms/feed/default") is a configured direct feed.
-
-These feed types implement the Parrot pattern and are used to distribute copies of messages to a set of end-points:
-
-* The **fanout** feed type routes the message to all joins attached to the feed without filtering.  The server SHOULD implement the fanout feed type.
-
-* The **topic** feed type routes the message to all joins attached to the feed using a topic matching algorithm.   The topic matching algorithm works as follows: the message address is a string of topic names, separated by dots.  The join address pattern is a string of topic names mixed with wild cards.  "*" matches a single topic name and "#" matches zero or more topic names.  The server MAY implement the topic feed type.
-
-* The **headers** feed type routes the message to all joins attached to the feed using a header matching algorithm.  The header matching algorithm works as follows: the join specifies a set of header elements.  The message matches if it has identical values for the header elements specified in the join.  The server MAY implement the headers feed type.
-
-++ Standard pipe types
-
-* The **fifo** pipe type delivers messages to the client one by one as discrete <message> resources, and holds each message until a client deletes it.  The server MUST implement the fifo pipe type.
-
-* The **ondemand** pipe type works as the fifo pipe type, but contains at most one message at a time.  The action of retrieving a message asynclet will fetch a message from the feed.  The server MAY validate that ondemand pipes are joined only to rotator or service feeds.  The server MAY implement the ondemand pipe type.
-
-* The **stream** pipe type delivers messages to the cient as a single <message> resource with multipart content, and deletes each message as soon as it is delivered.  The server MAY implement the stream pipe type.
-
-* The **loopback** pipe type delivers received messages to the feed specified with the "feed" property of the pipe.  The feed property is URI which can be on the same or a different domain and server.  Loopback pipes are //always// empty from the perspective of the client - they do not contain messages, nor asynclets.  The server MAY implement the loopback pipe type.
+A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
 
 ++ References
 
 [[bibliography]]
-: amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
 : rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
-: brooks : Fred Brooks, "No Silver Bullet - Essence and Accidents of Software Engineering" -  [http://en.wikipedia.org/wiki/No_Silver_Bullet Wikipedia]
-: digistan : The Digital Standards Organization - [http://www.digistan.org]
 : base64 : "IETF RFC 4648" - [http://tools.ietf.org/html/rfc4648]
 [[/bibliography]]
