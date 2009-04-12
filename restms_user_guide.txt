@@ -872,6 +872,7 @@ A message is the envelope that carries content from one application to another. 
 <restms xmlns="http://www.restms.org/schema/restms">
   <message
     [ address="{address literal}" ]
+    [ message_id = "{identifier}" ]
     [ reply_to="{address literal}" ]
     [ <header name="{header name}" value="{header value}" /> ] ...
     [ <content href="{content URI}" ... />

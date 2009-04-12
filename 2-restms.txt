@@ -328,26 +328,7 @@ Delivery works thus: the client retrieves a message, then retrieves zero or more
 
 To retrieve a message the client must first have retrieved the pipe to know the message URI.  The message will often be an asynclet as defined in RestTL.  The client retrieves a message using the GET method.
 
-The XML description of a message returned by the server has this format:
-
-[[code]]
-<?xml version="1.0"?>
-<restms xmlns="http://www.restms.org/schema/restms">
-  <message
-    [ address="{address literal}" ]
-    [ message_id = "{identifier}" ]
-    [ reply_to="{address literal}" ]
-    [ feed="{originating feed URI}" ] >
-    [ <header name="{header name}" value="{header value}" /> ] ...
-    [ <content href="{content URI}" ... />
-    | <content type="{MIME type} encoding="{encoding}">{content value}</content> ]
-  </message>
-</restms>
-[[/code]]
-
-This is identical to the message specification posted to a feed, with the addition of a 'feed' property.  The server SHOULD set the feed property to the name of the feed to which the message was published.
-
-The message description contains zero or more content elements; the receiver MAY retrieve the contents which have a href URI, using separate GET methods.  The Content-Type: of the retrieved content will be the same as the Content-Type: of the published content.
+The XML description of a message returned by the server is identical to the message specification posted to a feed.  The message description contains zero or more content elements; the receiver MAY retrieve the contents which have a href URI, using separate GET methods.  The Content-Type: of the retrieved content will be the same as the Content-Type: of the published content.
 
 During routing, the server MAY reformat staged contents as encoded, and vice-versa.  The 'type' attribute of the embedded content corresponds one-for-one to the Content-Type: header of a staged content.  Staged contents are not encoded: if a server reformats a base64-encoded content to a staged content it MUST decode the embedded content according to IETF RFC 4648 [((bibcite base64))].  Similarly, if a server reformats a staged content to an encoded content it MUST encode the content as base64 unless the content contains only plain text characters.
 
