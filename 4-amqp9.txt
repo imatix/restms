@@ -25,10 +25,10 @@ This document defines the AMQP9 profile for RestMS.  The AMQP9 profile defines t
 
 We cover these aspects of the AMQP9 profile:
 
-* What the profile is designed for
-* What the resources look like and how they work
-* Guidelines for client applications
-* Guidelines for server implementers.
+* What the profile is designed for;
+* What the resources look like and how they work;
+* Guidelines for client applications;
+* Guidelines for server implementors.
 
 ++ Language
 
@@ -51,7 +51,30 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - checking presence of profile
 - example client and server in pseudo-code
 
-++ Guidelines for servers
++++ Checking profile availability
+
+Clients SHOULD check that the server properly announces its support for AMQP9 before using it.  The server indicates that it supports AMQP9 by listing it as a child of the domain:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /restms/domain/default
+
+Server:
+-------------------------------------------------
+HTTP/1.1 200 OK
+Content-Type: application/restms+xml
+
+<?xml version="1.0"?>
+<restms xmlns = "http://www.restms.org/schema/restms">
+    <domain name = "default" title = "Default domain">
+        <profile name = "4/AMQP9"
+            href = "http://www.restms.org/spec:4/AMQP9" />
+    </domain>
+</restms>
+[[/code]]
+
+++ Guidelines for servers implementors
 
 - optional, server MAY implement it.
 - persistence options

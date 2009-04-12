@@ -12,6 +12,8 @@ Draft/4
 - Add: new resource type 'profile', read-only child of domain
 - Add: defined "Defaults" profile
 - Add: defined "AMQP9" profile
+- Change: removed feed property on delivered messages
+- Change: POST message to feed MAY result in <message> response
 
 Draft/3
 

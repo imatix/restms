@@ -110,7 +110,7 @@ We will take each of requirement in turn and examine how RestMS satisfies it:
 
 * //Unencumbered//: RestMS uses existing designs that are free of patents, and is developed via an intellectual property framework that guarantees freedom from copyright, patent or trademark claims by contributors.
 
-* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  RestMS comes with sample implementations and class libraries in various languages to help implementers get started.
+* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  RestMS comes with sample implementations and class libraries in various languages to help implementors get started.
 
 * //Layered//: RestMS is composed as multiple layers, separating experimental designs from stable ones.  It uses existing HTTP layers such as Basic, and Digest, Authentication and HTTPS (SSL/TLS) for encryption.
 
