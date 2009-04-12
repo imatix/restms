@@ -390,10 +390,12 @@ This specification does not specify the semantics of feed, join, and pipe types.
 
 * The profile name is the specification name (number/Name).
 * The server MUST list all the profiles it supports, in the domain document.
-* The server MUST NOT implement two profiles that have overlapping resource types.
+* The server MUST NOT implement two profiles that have overlapping feed or pipe types.
 * The client SHOULD check that the profiles it plans to use are implemented.
 
 A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
+
+Join types are inherently scoped by feed types.  That is, two profiles can use the same join types: the semantics of the join type is dependent on the type of feed to which it is attached.
 
 Profiles may depend on other profiles.  The profile specification MUST list the profiles it directly depends on.  When a server implements a particular profile it MUST implement all profiles that profile depends on, recursively until all dependencies are resolved.
 
