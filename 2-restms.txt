@@ -232,8 +232,7 @@ The XML specification or description for a join has this format:
   <join
   [ type="{join type}" ]                    optional type
     address="{address pattern}"
-    feed="{feed URI}"                       the feed to pull from
-    >
+    feed="{feed URI}" >                     the feed to pull from
     [ <header name="{header name}" value="{header value}" /> ] ...
   </join>
 </restms>
@@ -315,7 +314,7 @@ The server processes each message element by routing the message+content, using 
 
 If a client attempts to publish the same staged content more than once the server MUST reply with "404 Not Found", and not route the message.  If a client attempts to publish a message referring to contents that were staged to a different feed, the server MUST reply with "403 Forbidden", and not route the message.  The server SHOULD verify the content URIs of all messages in the request before routing any message in the request.
 
-It the server successfully processes the request, it replies with "200 OK".  It does not return a Location: header nor a content body, unlike for a usual RestTL POST operation.
+It the server successfully processes the request, it replies with "200 OK".  Depending on the profile specification of the feed, it MAY return a message resource.  It MAY NOT return a Location: header.
 
 RestMS allows these methods on a staged content:
 
@@ -373,6 +372,7 @@ This specification does not specify the semantics of feed, join, and pipe types.
 * The server MUST list all the profiles it supports, in the domain document.
 * The server MUST NOT implement two profiles that have overlapping feed or pipe types.
 * The client SHOULD check that the profiles it plans to use are implemented.
+* All profiles are optional: a RestMS server MAY implement zero profiles.
 
 A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
 
