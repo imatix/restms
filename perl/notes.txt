@@ -1,0 +1,5 @@
+Changes needed to Perl classes
+
+- way to create feed object passively (succeed only if server feed already exists)
+- check presence of 3/Defaults profile
+- default feed, pipe, join types are ""
