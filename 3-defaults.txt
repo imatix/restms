@@ -1,4 +1,4 @@
-This document defines the Defaults profile for RestMS.  The Defaults profile defines the behaviour of the default feed, join, and pipe types, providing a simple messaging model that implements a direct addressing ("Housecat") pattern.
+This document defines the Defaults profile for RestMS.  The Defaults profile defines the behavior of the default feed, join and pipe types.  This profile provides the basis for simple pub-sub (the "Parrot" pattern) and request-response (the "Housecat" pattern) applications.
 
 * Name: www.restms.org/spec:3/Defaults
 * Version: draft/4
@@ -21,14 +21,14 @@ This document is governed by the Digital Standard Organization's [htttp://www.di
 
 ++ Goals and structure of this document
 
-This document defines the Defaults profile for RestMS.  The Defaults profile defines the behaviour of the default feed, join, and pipe types, providing a simple messaging model that implements a direct addressing ("Housecat") pattern.
+This document defines the Defaults profile for RestMS.  The Defaults profile defines the behavior of the default feed, join and pipe types.  This profile provides the basis for simple pub-sub (the "Parrot" pattern) and request-response (the "Housecat" pattern) applications.
 
 We cover these aspects of the Defaults profile:
 
-* What the profile is designed for
-* What the resources look like and how they work
-* Guidelines for client applications
-* Guidelines for server implementers.
+* What the profile is designed for;
+* What the resources look like and how they work;
+* Guidelines for client applications;
+* Guidelines for server implementors.
 
 ++ Language
 
@@ -36,37 +36,100 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Purpose and scope
 
-- simplest functional messaging model
-- implements 'channels' like IRC, RSS, AtomPub
-- basis for other profiles
+The Defaults profile aims to provide a minimal useful messaging model that is easy to understand, implement, and use.  The name refers to the fact that the feed, join and pipe types this profile exports are empty.  Thus, if a client creates a resource without specifying a type it will use the functionality defined in this document.
+
+Defaults provides a single, basic messaging model based on direct addressing within feeds.  That is, publishers send messages to feeds, where each message has an arbitrary address.  Subscribers receive messages from these feeds, joining on one or more addresses.
+
+Defaults may be extended by other profiles, which specify different types of feed, join, and pipe.
 
 ++ Syntax and semantics
 
-- profile name
-- explanation of resource documents
-- semantics of message flow
+The Defaults profile is formally called "3/Defaults" to distinguish it from future variations.
 
-- default profile
-    - empty feed type (housecat)
-    - empty join type (eq)
-    - empty pipe type (fifo)
+It defines these feed types:
 
-* The server SHOULD create a join from each new pipe to the default feed.
+* the default feed type which the client uses by creating a feed with no type property.  The default feed type routes each message to each join attached to the feed that has an address pattern identical to the message address.  One message can be routed to multiple pipes.
 
-The default join implements a guaranteed Housecat pattern on every pipe.  If clients attempt to delete the default join, or create other joins onto the default feed, the server MUST respond with "403 Forbidden".
+It defines these join types:
 
-* The server SHOULD implement a default public feed called "default" of type "direct"..
+* the default join type which the client uses by creating a join with no type property.  The default join type specifies an address pattern and thus selects all messages, in that feed, which match the address exactly.
+
+It defines these pipe types:
+
+* the default pipe type which the client uses by creating a pipe with no type property.  The default pipe type delivers messages one by one to the application using the semantics defined in RestMS.
+
+It also specifies the following server behaviour:
+
+* The server MUST implement a default public default feed called "default".
+* The server MUST create a default join from each default pipe to the default feed.
+
+The default join implements a guaranteed Housecat pattern on every default pipe.  If clients attempt to delete the default join, or create other joins onto the default feed, the server MUST respond with "403 Forbidden".
+
+Lastly, Defaults specifies synchronous routing notification to publishers.  When the client successfully POSTs a message to the a default type feed, the server MUST respond with a structured message document with a single property, "count" that reports the number of joins that matched the message.
 
 ++ Guidelines for clients
 
-- checking presence of profile
-- example client and server in pseudo-code
++++ Publish-subscribe scenario
 
-++ Guidelines for servers
+The Defaults profile can be used for simple publish-and-subscribe from a set of publishers to a set of subscribers:
 
-- mandatory, every RestMS server MUST implement it.
-- persistence options
-- design suggestions
+# Publisher creates a feed (e.g. "weather") of default type
+# Subscriber creates a pipe of default type
+# Subscriber creates a join specifying each address it wishes to subscribe to (e.g. "New York", "London", "Delhi")
+# Publisher posts messages to the feed, specifying address on each message
+# Subscriber receives selected messages on pipe
+
+This model scales to many publishers and many subscribers.  It may not scale to large numbers of different addresses.
+
++++ Request-response scenario
+
+The Defaults profile can be used for simple request-response from a set of requestors to a service handler:
+
+# Service handler creates a request feed (e.g. "services") of default type
+# Service handler creates a pipe of default type
+# Service handler creates a join specifying as address its own service name (e.g. "weather info")
+# Requestor creates a pipe of default type (pipe is automatically joined to default feed)
+# Requestor posts message to request feed specifying service name as message address, and own pipe name as reply-to property of message.
+# Service receives message on pipe and processes it, creating a response message.
+# Service posts response message to default feed, specifying request 'reply-to' as message address.
+# Requestor receives response message on pipe.
+
+This model scales to many requestors but is restricted to a single service handler.
+
++++ Checking profile availability
+
+Clients SHOULD check that the server properly announces its support for Defaults before using it.  The server indicates that it supports Defaults by listing it as a child of the domain:
+
+[[code]]
+Client:
+-------------------------------------------------
+GET /restms/domain/default
+
+Server:
+-------------------------------------------------
+HTTP/1.1 200 OK
+Content-Type: application/restms+xml
+
+<?xml version="1.0"?>
+<restms xmlns = "http://www.restms.org/schema/restms">
+    <domain name = "default" title = "Default domain">
+        <profile name = "3/Defaults"
+            href = "http://www.restms.org/spec:3/Defaults" />
+        <feed type = "" name = "default" title = "Default feed"
+            href = "http://host.com/restms/feed/default" />
+    </domain>
+</restms>
+[[/code]]
+
+++ Guidelines for servers implementors
+
+The default feed type does not queue messages: it examines its set of joins and copies the message to each pipe that has a matching join, and it then discards the message.
+
+Messages posted before a join is made MAY NOT be routed to pipes.  That is, clients may create and destroy joins as a way of enabling and disabling the flow of messages into their pipes.
+
+The message resource provided as response to a feed POST tells publishers how many recipients their message went to (0 or more).
+
+One data structure that server implementers MAY use for the default feed routing is a hash table of addresses, each address containing a linked-list of joins.  This allows for a rapid lookup of the message address and routing to all joins that requested it.
 
 ++ References
 
