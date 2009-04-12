@@ -1,0 +1,75 @@
+This document defines the Defaults profile for RestMS.  The Defaults profile defines the behaviour of the default feed, join, and pipe types, providing a simple messaging model that implements a direct addressing ("Housecat") pattern.
+
+* Name: www.restms.org/spec:3/Defaults
+* Version: draft/4
+* Editor: Pieter Hintjens <ph@imatix.com>
+* Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
+
+++ License
+
+Copyright (c) 2009 by the Editor and Contributors.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+++ Change Process
+
+This document is governed by the Digital Standard Organization's [htttp://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+++ Goals and structure of this document
+
+This document defines the Defaults profile for RestMS.  The Defaults profile defines the behaviour of the default feed, join, and pipe types, providing a simple messaging model that implements a direct addressing ("Housecat") pattern.
+
+We cover these aspects of the Defaults profile:
+
+* What the profile is designed for
+* What the resources look like and how they work
+* Guidelines for client applications
+* Guidelines for server implementers.
+
+++ Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+
+++ Purpose and scope
+
+- simplest functional messaging model
+- implements 'channels' like IRC, RSS, AtomPub
+- basis for other profiles
+
+++ Syntax and semantics
+
+- profile name
+- explanation of resource documents
+- semantics of message flow
+
+- default profile
+    - empty feed type (housecat)
+    - empty join type (eq)
+    - empty pipe type (fifo)
+
+* The server SHOULD create a join from each new pipe to the default feed.
+
+The default join implements a guaranteed Housecat pattern on every pipe.  If clients attempt to delete the default join, or create other joins onto the default feed, the server MUST respond with "403 Forbidden".
+
+* The server SHOULD implement a default public feed called "default" of type "direct"..
+
+++ Guidelines for clients
+
+- checking presence of profile
+- example client and server in pseudo-code
+
+++ Guidelines for servers
+
+- mandatory, every RestMS server MUST implement it.
+- persistence options
+- design suggestions
+
+++ References
+
+[[bibliography]]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+[[/bibliography]]

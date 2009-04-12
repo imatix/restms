@@ -1,19 +1,65 @@
-RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.  This document provides AMQP-to-RestMS interoperability specifications, for RestMS implementors.
+This document defines the AMQP9 profile for RestMS.  The AMQP9 profile defines the behaviour of a set of feed, join, and pipe types that provide an AMQP/9-interoperable messaging model.
 
-* Name: 10-RESTMS-AMQP@wiki.amqp.org
-* Version: draft/3
+* Name: www.restms.org/spec:4/AMQP9
+* Version: draft/4
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Resources: http://www.restms.org.
+* Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
 
 ++ License
 
-This document is licensed under the [http://wiki.amqp.org/main:intellectual-property-policy Intellectual Property Policy] of the wiki.amqp.org site.
+Copyright (c) 2009 by the Editor and Contributors.
 
-++ Change process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-This document is governed by the 1-COSS@wiki.amqp.org specification[((bibcite coss))]
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-This document is an optional extension to the [[[spec:7 |RestMS specification]]].
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+++ Change Process
+
+This document is governed by the Digital Standard Organization's [htttp://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+++ Goals and structure of this document
+
+This document defines the AMQP9 profile for RestMS.  The AMQP9 profile defines the behaviour of a set of feed, join, and pipe types that provide an AMQP/9-interoperable messaging model.
+
+We cover these aspects of the AMQP9 profile:
+
+* What the profile is designed for
+* What the resources look like and how they work
+* Guidelines for client applications
+* Guidelines for server implementers.
+
+++ Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+
+++ Purpose and scope
+
+- simplest functional messaging model
+- implements AMQP/9 interoperable model
+- basis for other profiles
+
+++ Syntax and semantics
+
+- profile name
+- explanation of resource documents
+- semantics of message flow
+
+++ Guidelines for clients
+
+- checking presence of profile
+- example client and server in pseudo-code
+
+++ Guidelines for servers
+
+- optional, server MAY implement it.
+- persistence options
+- design suggestions
+
+++ To be worked on...
+
+All text below is raw and pending full restructuring.
 
 ++ AMQP
 
@@ -44,6 +90,40 @@ In this section we look at the interoperability of messaging applications, i.e. 
 * How we route messages correctly between RestMS and AMQP applications.
 
 +++ RestMS feed types
+
+Housecat
+
+This feed type implements the Housecat pattern and is used to send messages to specific end-points:
+
+* The **direct** feed type routes the message to //each// join attached to the feed that has an address pattern that is identical to the message address.  One message can be routed to multiple pipes.  The server MUST implement the direct feed type.  The default feed (with URI path "/restms/feed/default") is a configured direct feed.
+
+Wolfpack
+
+These feed types implement the Wolfpack pattern and are used to share work between a set of end-points:
+
+* The **rotator** feed type routes the message to at most one pipe, using a round-robin algorithm to choose the next join from those attached to the feed.  Does not apply any filtering.  If the feed has no attached joins, the server queues the message for an arbitrary period.  The server MAY implement the rotator feed type.
+
+* The **service** feed type works as the rotator feed, with the additional property of self-deleting when the the number of joins attached to it drops from 1 to zero.  This means that the presence or absence of the feed indicates the availability of the "service" it represents.   The server MAY implement the service feed type.
+
+* The **ondemand** pipe type works as the fifo pipe type, but contains at most one message at a time.  The action of retrieving a message asynclet will fetch a message from the feed.  The server MAY validate that ondemand pipes are joined only to rotator or service feeds.  The server MAY implement the ondemand pipe type.
+
+Parrot
+
+These feed types implement the Parrot pattern and are used to distribute copies of messages to a set of end-points:
+
+* The **fanout** feed type routes the message to all joins attached to the feed without filtering.  The server SHOULD implement the fanout feed type.
+
+* The **topic** feed type routes the message to all joins attached to the feed using a topic matching algorithm.   The topic matching algorithm works as follows: the message address is a string of topic names, separated by dots.  The join address pattern is a string of topic names mixed with wild cards.  "*" matches a single topic name and "#" matches zero or more topic names.  The server MAY implement the topic feed type.
+
+* The **headers** feed type routes the message to all joins attached to the feed using a header matching algorithm.  The header matching algorithm works as follows: the join specifies a set of header elements.  The message matches if it has identical values for the header elements specified in the join.  The server MAY implement the headers feed type.
+
+* The **stream** pipe type delivers messages to the cient as a single <message> resource with multipart content, and deletes each message as soon as it is delivered.  The server MAY implement the stream pipe type.
+
+++ Standard pipe types
+
+* The **fifo** pipe type delivers messages to the client one by one as discrete <message> resources, and holds each message until a client deletes it.  The server MUST implement the fifo pipe type.
+
+* The **loopback** pipe type delivers received messages to the feed specified with the "feed" property of the pipe.  The feed property is URI which can be on the same or a different domain and server.  Loopback pipes are //always// empty from the perspective of the client - they do not contain messages, nor asynclets.  The server MAY implement the loopback pipe type.
 
 Implementations SHOULD implement all of these feed types and MAY implement others:
 
@@ -384,7 +464,6 @@ AMQP currently does not implement multicontent messages.  RestMS implementations
 ++ References
 
 [[bibliography]]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
 : amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
-: coss : "Consensus Oriented Specification System" - [http://wiki.amqp.org/spec:1 wiki.amqp.org]
-: rfc2616 : "HTTP/1.1 Protocol Parameters" - http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html w3.org]
 [[/bibliography]]

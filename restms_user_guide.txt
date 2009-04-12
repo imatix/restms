@@ -54,7 +54,7 @@ Application developers can use RestMS at two levels:
 Some other stuff about RestMS that you might like to know:
 
 * The protocol is the work of several people, and if you feel you have something to contribute, drop us a line.  You can help by telling us where the texts are unclear or confusing; by writing and publishing class APIs; by telling us how you use RestMS in your applications.
-* The protocol is designed as a "free and open digital standard", which is a special kind of evil.  The Digital Standards Organization[((bibcite digistan))], who provided the legal frameworks under which RestMS is developed, define a "free and open digital standard" as one that "is immune from vendor capture at all stages in its lifecycle".  This means, as much as anything, that the people who wrote it cannot exclude others from improving it.  Think about this for a tick.  If you want to improve something in RestMS, and you find that we're lazy, absent, or just don't share your viewpoint, you are free to take the specs, fork them, and make your own.  You would hopefully never need do this, but the sheer blackmail value is great.
+* The protocol is designed as a "free and open digital standard".  The Digital Standards Organization[((bibcite digistan))], who provide the frameworks under which RestMS is developed, define a "free and open digital standard" as one that "is immune to vendor capture at all stages in its lifecycle".  This means, as much as anything, that the people who wrote it cannot exclude others from improving it.  Think about this for a tick.  If you want to improve something in RestMS, and you find that we're lazy, absent, or just don't share your viewpoint, you are free to take the specs, fork them, and make your own.  You would hopefully never need do this, but the sheer blackmail value is great.
 * It should go without saying, but we'll say it anyhow because we live in a crazy world, that RestMS is not patented[[footnote]]Unfortunately we cannot guarantee that no patent troll somewhere will patent some aspect of RestMS and hijack the standard when it's widely used.  If you care about such risks, you might add your voice to the growing calls for reform the patent system, and the abolition of the software patents which allow such perverse outcomes.[[/footnote]], and you can use the spec freely in every sense of the word, and that all the reference implementations are licensed under a free software license.  These rights are guaranteed by the rules that govern all contributions to the spec.
 
 We said that RestMS was a community project.  We think those who use a standard need to have a major voice in improving it.  If you use RestMS, or would like to track it or help with it, visit and join the [http://www.restms.org restms.org] web site.  Over time this will become the hub of the RestMS community.
@@ -253,6 +253,8 @@ Resource type           Visibility          Lifecycle
 ----------------        ----------------    ----------------
 Domain                  Public              Configured
   |
+  o- Profile            Public              Configured
+  |
   o- Feed               Public, private     Configured, dynamic
   |
   o- Pipe               Private             Dynamic
@@ -316,7 +318,7 @@ Content-length: 274
 <?xml version="1.0"?>
 <restms xmlns = "http://www.restms.org/schema/restms">
     <domain name = "default" title = "Default domain">
-        <feed type = "direct" name = "default" title = "Default feed"
+        <feed type = "housecat" name = "default" title = "Default feed"
            href = "http://nb200901/restms/feed/default" />
     </domain>
 </restms>

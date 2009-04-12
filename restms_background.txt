@@ -1,7 +1,6 @@
 This document is a background to RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.
 
-* Editor: Pieter Hintjens <ph@imatix.com>
-* Resources: http://www.restms.org.
+* Author: Pieter Hintjens <ph@imatix.com>
 
 ++ License
 
@@ -15,7 +14,7 @@ Open source and free software licenses enable large-scale collaborative projects
 
 The need for messaging is inevitable, as applications scale beyond the abilities of one system.  Messaging can be as simple as a front-end login program asking a back-end credentials server to check a password.  Or as complex as a real-time market data streaming service, where hundreds of terminals can subscribe to complex selections of data coming off stockmarkets.
 
-Messaging is much easier to describe than to implement.  One has a set of applications distributed over some network.  The applications send each other messages.  This lets them "talk" to each other in interesting ways that would not be possible if one application simply included another.  (Including pieces of code, as libraries, is the most common way of constructing applications out of existing pieces.)  Depending on how good the messaging is, it becomes possible to add and remove pieces easily; to upgrade pieces independently of each other; to share work among several pieces; to create "services" that specialize in particular domains; and to promote flows of messages into first-class entities typically called "feeds" so that applications can subscribe to these and receive a stream of messages in near real-time.
+Messaging is easier to describe than to implement.  One has a set of applications distributed over some network.  The applications send each other messages.  This lets them "talk" to each other in interesting ways that would not be possible if one application simply included another.  (Including pieces of code, as libraries, is the most common way of constructing applications out of existing pieces.)  Depending on how good the messaging is, it becomes possible to add and remove pieces easily; to upgrade pieces independently of each other; to share work among several pieces; to create "services" that specialize in particular domains; and to promote flows of messages into first-class entities typically called "feeds" so that applications can subscribe to these and receive a stream of messages in near real-time.
 
 We observe three fundamental messaging patterns that form the basis for all messaging:
 
@@ -65,7 +64,7 @@ New enterprise messaging technologies like AMQP[((bibcite amqp))] have redefined
 * it does not use the web caching architecture that forms the basis of the scalable Internet.
 * it uses a port (5672) that is alien to network managers and firewalls.
 * its infrastructure is not designed to handle Internet-style traffic[[footnote]]Including the unwelcome kind[[/footnote]]
-* it is complex, and thus expensive for non-enterprise developers to learn.
+* it is uses a complex syntax, and is thus expensive for non-enterprise developers to learn.
 
 A web developer, comparing AMQP and an HTTP-based option like XML/RPC, for an application that carries a few messages per second, will very likely choose the HTTP option.  This is a shame because it means doing without queueing or decoupled routing.  But those concepts are too abstract and their benefits too intangible to be worth the learning curve that AMQP demands.
 
@@ -85,7 +84,7 @@ This statelessness is the key to building scalable architectures.  It means that
 
 For the developers reading this, an analogy is a traditional source control system (SCS) like CVS or Subversion, compared to a distributed source control system like Mercurial or Git.  In a traditional SCS every commit must be sequenced exactly right, and clients must be precisely synchronized with the server state.  In a distributed SCS, each patch contains enough information to be intelligently handled, independently of any patches that may have preceded it.
 
-Today, the Linux kernel has switched to Git, Mozilla has switched to Mercurial, and all leading-edge open source projects are doing likewise, due to the overwhelming advantages of being able to handle patches as independent units of work.  Similarly, we believe that RESTful APIs are the future of distributed computing, due to the overwhelming advantages of being able to treat each request as an independent unit of work.
+Today, the Linux kernel has switched to Git, Mozilla has switched to Mercurial, and all leading-edge open source projects are doing likewise, due to the overwhelming advantages of being able to handle patches as independent units of work.  Similarly, we believe that RESTful APIs are the future of distributed computing, due to the valuable simplification of being able to treat each request as an independent unit of work.
 
 ++ Constructing RestMS
 
@@ -93,7 +92,7 @@ We have examined the value of a web messaging architecture that is asynchronous,
 
 Pure invention always carries a high risk of failure and/or rejection and it is more sensible to evolve existing technologies.  Looking at the challenge of web messaging, we see that AMQP offers a usable architecture for messaging, but lacks a client-server pattern that is suitable for use on the web.  Meanwhile, RESTful protocols like AtomPub offer a usable client-server pattern, but lack a generic, decoupled, asynchronous messaging architecture.
 
-By conclusion, mixing the messaging architecture of AMQP with the client-server patterns of REST should in theory give us a good architecture for web messaging.  This is the basis for RestMS[((bitcite restms))].
+By conclusion, mixing the messaging architecture of AMQP with the client-server patterns of REST should in theory give us a good architecture for web messaging.  This was the original basis for RestMS[((bitcite restms))].
 
 We will take each of requirement in turn and examine how RestMS satisfies it:
 
@@ -105,19 +104,17 @@ We will take each of requirement in turn and examine how RestMS satisfies it:
 
 * //Simple//: RestMS uses standard HTTP methods and headers, so works with existing HTTP skills and libraries.  For example, RestMS messages are formatted using the standard HTTP content syntax.  It is possible to do simple RestMS by hand using a TELNET client.  RestMS uses JSON as well as XML, making compatible with more web applications.
 
-* //Generic//: RestMS provides the three basic messaging patterns (Request, Fanout and Collect), reusing the semantics of AMQP in large part.  Thus RestMS can be used for any type of messaging over a public Internet network.
+* //Generic//: RestMS uses extensible messaging "profiles", which cover the Housecat, Wolfpack and Parrot patterns, as well as providing plug-in compatibility with AMQP and other messaging backbones.  Thus RestMS can be used for any type of messaging over a public Internet network.
 
-* //Open//: RestMS is fully open and developed using the "Consensus Oriented Specification System" (COSS) originally proposed by the Digital Standards Organization[((bibcite digistan))] which guarantees the right of any user to improve the specification with or without approval from the original authors.
+* //Open//: RestMS is free and open, developed using the "Consensus Oriented Specification System" (COSS) developed by the Digital Standards Organization[((bibcite digistan))] which guarantees the right of any user to improve the specification with or without approval from the original authors.
 
-* //Unencumbered//: RestMS uses existing designs that are free of patents, and is developed via an intellectual property framework that guarantees freedom from patent claims by all contributors.
+* //Unencumbered//: RestMS uses existing designs that are free of patents, and is developed via an intellectual property framework that guarantees freedom from copyright, patent or trademark claims by contributors.
 
-* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  While RestMS comes with sample implementations and class libraries in various languages, these are pure examples.
+* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  RestMS comes with sample implementations and class libraries in various languages to help implementers get started.
 
-* //Extensible//: RestMS is built as a set of resources and methods that can be extended with new functionality as needed.  It is much easier to extend RestMS than AMQP, mainly to its layered design and its use of a standard HTTP syntax for methods and headers.
+* //Layered//: RestMS is composed as multiple layers, separating experimental designs from stable ones.  It uses existing HTTP layers such as Basic, and Digest, Authentication and HTTPS (SSL/TLS) for encryption.
 
-* //Layered//: RestMS is composed as several layers, each can be improved over time.  It also uses existing HTTP layers such as Basic and Digest for authentication and HTTPS (SSL/TLS) for encryption.
-
-* //Standardized//: we define RestMS as a contract between a client and a server, which gives RestMS users a basis on which to demand interoperability from vendors.  The RestMS sample class libraries include regression tests that validate implementations of the protocol.
+* //Extensible//: RestMS is cheap to extend due to its layered design and use of simple textual representations.  The use of profiles allows RestMS to be used as an experimental testbed for new, better abstract messaging models.
 
 ++ The RESTful Transport Layer
 
@@ -132,13 +129,46 @@ To both questions there are many answers, but we have chosen those we found simp
 
 RestMS, therefore, implements RestTL and anyone seeking to implement a RestMS server or client should understand the RestTL design.
 
+++ RestMS Profiles
+
+RestMS defines a standard resource tree and defines how each resource is represented, and how a client can work with it.  The semantics of message routing are contained in three key resources:
+
+* The **feed**, to which publishers send messages.
+* The **pipe**, from which subscribers read messages.
+* The **join**, which ties these two together in an N-to-N relationship.
+
+The notion of feeds, pipes, and joins is easily familiar since these names are used for similar types of resource elsewhere (such as RSS feeds, SQL joins, and Unix pipes).
+
+However, the mechanics of exactly how messages flow from feed via join to pipe, are delicate.  There are several ways to conceptualize a feed-join-pipe model, and it is unclear which of these ways is best, because abstract messaging models are a very new notion and the field is evolving rapidly.
+
+To give some examples of the choices a model designer faces:
+
+* Should the feed act as a queue, or should it route messages straight into pipes?
+* Should the feed be persistable, and if so is this something the client can choose (by specifying a particular feed type)?
+* Should the model be compatible with other models, such as AMQP?
+* Should joins be passive (specifying criteria that feeds act upon) or active (pulling messages off the feed into their pipe)?
+* Should it be possible to join any pipe type to any feed type?
+* Are there intelligent default models that the client can benefit from?
+
+And so on.
+
+Rather than try to answer these questions directly in RestMS by embedding a single, fixed model (with a high probability that in several years the answers would be proven wrong), we define the messaging model as a //profile//, and make RestMS work with arbitrary profiles.
+
+The real value of an abstract messaging system like RestMS is in the simplicity and effectiveness of its model.  But the time it takes to develop better models depends on the inertia of the encapsulating protocol.  If the protocol uses complex binary framing, then any change is expensive and slow to implement and test.
+
+Given that RestMS is relatively easy to implement - for any developer with an HTTP stack and XML parsing classes - it can be seen as a rapid prototyping environment for profile development, and profiles can be seen as the key product of the RestMS ecosystem.
+
 ++ RestMS as an HTTP-to-AMQP proxy
 
-As we explained, AMQP works well for enterprise messaging but is inadequate and too complex for web messaging.  RestMS is not only inspired by AMQP's messaging architecture, it is explicitly compatible with it.  That is, a RestMS server can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
+As we explained, AMQP works well for enterprise messaging but too complex for web messaging.  However, there is value in allowing RestMS to work as an HTTP front-end for an AMQP network.
+
+This is done by defining an AMQP profile which maps the AMQP model to matching feed, join, and pipe types.  A RestMS server which implements such a profile can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
 
 We believe this to be a natural and advantageous architecture, especially when it becomes necessary to expand an existing enterprise messaging network to include external parties.
 
-RestMS semantics for working with resources and transferring messages can be mapped to and from AMQP semantics, and we provide rules for this mapping so that any RestMS server can work with any AMQP server, if both respect those rules.   Thus, RestMS is explicitly designed to be interoperable with AMQP.  RestMS may be interoperable with other messaging architectures but that is not proven.
+++ Universal interoperability
+
+We believe, but this is not yet proven, that RestMS can interoperate with any existing messaging system through the creation of an appropriate profile.  It is theoretically possible to bridge any profile with any other profile, thus allowing RestMS to become a universal message switching protocol.
 
 ++ References
 

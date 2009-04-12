@@ -1,6 +1,20 @@
-Pending tasks for RestMS
+Change notes on RestMS
 
-Done
+Draft/4
+
+- Fix: all references to wiki.amqp.org changed to restms.org
+- Fix: RestTL made more clearly distinct from RestMS
+- Fix: removed feed & pipe type descriptions from RestMS spec
+- Change: add join 'type' property, defaults to empty
+- Change: default feed type is empty (was "topic")
+- Change: default pipe type is empty (was "fifo")
+- Clarity: default join moved into default profile specification
+- Add: new resource type 'profile', read-only child of domain
+- Add: defined "Defaults" profile
+- Add: defined "AMQP9" profile
+
+Draft/3
+
 - Fix: any references to ;type=xxx should be removed
 - Change: break specification into easier to read documents
 - Change: Etag must include MIME type as part of calculation
@@ -22,9 +36,30 @@ Done
 - Clarify: add rules explaining how clients should handle unknown elements
 - Add: list all error responses (in RestMS spec)
 - Clarify: describe rules for XML and JSON mapping (in RestTL)
+- Clarified: semantics of ondemand pipe type.
+
 
 Pending
 
 - Add: security on feeds, using passwords defined at feed create time
     - all resources should be deletable only by client that created them
     - additionally, rw security can be layered on that
+
+experimental profile 1
+    - type names in joins
+    - feed type is persistence
+    - join type is 'where' clause
+        - address = "*"
+        - empty = all
+        - address like '%pattern%
+        -> operator, and argument
+            like
+            eq
+            ne
+            in
+            ... etc...
+    - pipe type is delivery model
+        - normal
+        - ondemand
+        - stream
+        - loopback

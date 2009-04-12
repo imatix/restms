@@ -1,6 +1,6 @@
 This document defines the RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
 
-* Name: www.restms.org/spec:1/RESTTL
+* Name: www.restms.org/spec:1/RestTL
 * Version: draft/4
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>

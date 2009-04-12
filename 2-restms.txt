@@ -1,6 +1,6 @@
 This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
 
-* Name: www.restms.org/spec:2/RESTMS
+* Name: www.restms.org/spec:2/RestMS
 * Version: draft/4
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steve Vinoski <vinoski@ieee.org>, Brad Clements <bkc@murkworks.com>
@@ -21,7 +21,7 @@ This document is governed by the Digital Standard Organization's [htttp://www.di
 
 ++ Goals and structure of this document
 
-This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
+This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through //Profile// specifications.
 
 We describe:
 
@@ -386,17 +386,16 @@ Additionally, clients should be able to handle all HTTP errors, including:
 
 ++ RestMS Profiles
 
-This specification does not explain the semantics of feed, join, and pipe types.  These semantics are covered in separate profile specifications.  Profiles are the main area of extension and experimentation in RestMS.  Profiles follow these rules:
+This specification does not specify the semantics of feed, join, and pipe types.  These semantics are covered in separate //profile// specifications.  Profiles are the main area of extension and experimentation in RestMS.  Profiles follow these rules:
 
+* The profile name is the specification name (number/Name).
 * The server MUST list all the profiles it supports, in the domain document.
-* Different profiles MAY use the same profile name but they MUST use different URIs.
-* Clients SHOULD use the profile URI to verify the exact version of the profile.
-* A server MUST NOT implement two profiles with the same name.
-* A server MUST NOT implement two profiles that have overlapping resource types.
-
-The type names that a profile uses are not namespaced, because this becomes clumsy.  However, a client having verified that a server implements a specific profile and having verified the profile URI, can be assured that a given resource type works as expected.
+* The server MUST NOT implement two profiles that have overlapping resource types.
+* The client SHOULD check that the profiles it plans to use are implemented.
 
 A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
+
+Profiles may depend on other profiles.  The profile specification MUST list the profiles it directly depends on.  When a server implements a particular profile it MUST implement all profiles that profile depends on, recursively until all dependencies are resolved.
 
 ++ References
 
