@@ -1,4 +1,4 @@
-This document defines the RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
+This document defines a RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
 
 * Name: www.restms.org/spec:1/RestTL
 * Version: draft/4
@@ -21,7 +21,7 @@ This document is governed by the Digital Standard Organization's [htttp://www.di
 
 ++ Goals and structure of this document
 
-This document defines the RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
+This document defines a RESTful Transport Layer (RestTL), a way of working with server-held resources in a RESTful fashion.  RestTL specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
 
 RestTL is a foundation for arbitrary RESTful APIs including, but not limited to, RestMS.  We describe:
 
@@ -48,7 +48,7 @@ While RestTL was designed to support [[[spec:2|RestMS]]], it is not restricted t
 
 +++ RestTL overview
 
-We speak of "the API" as being the RESTful protocol that we layer on top of RestTL.
+We speak of "the API" as being a RESTful protocol that we layer on top of RestTL.
 
 RestTL is built on HTTP/HTTPS and conforms to the HTTP/1.1 specifications.  It implements these HTTP methods:
 

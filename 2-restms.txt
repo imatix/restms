@@ -1,4 +1,4 @@
-This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
+This document defines RestMS, a RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through optional //profiles//.
 
 * Name: www.restms.org/spec:2/RestMS
 * Version: draft/4
@@ -21,7 +21,7 @@ This document is governed by the Digital Standard Organization's [htttp://www.di
 
 ++ Goals and structure of this document
 
-This document defines RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through //Profile// specifications.
+This document defines RestMS, a RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over plain HTTP/HTTPS.  RestMS extends RestTL and is itself extended through //Profile// specifications.
 
 We describe:
 
