@@ -121,7 +121,7 @@ Content-Type: application/restms+xml
 </restms>
 [[/code]]
 
-++ Guidelines for servers implementors
+++ Guidelines for server implementors
 
 The default feed type does not queue messages: it examines its set of joins and copies the message to each pipe that has a matching join, and it then discards the message.
 
