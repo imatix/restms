@@ -56,7 +56,7 @@ It defines these join types:
 
 It defines these pipe types:
 
-* the default pipe type which the client uses by creating a pipe with no type property.  The default pipe type delivers messages one by one to the application using the semantics defined in RestMS.
+* the default pipe type which the client uses by creating a pipe with no type property.  The default pipe type delivers messages using the semantics defined in RestMS (it delivers messages to the client one by one as discrete <message> resources, and holds each message until a client deletes it).
 
 It also specifies the following server behaviour:
 
@@ -130,8 +130,6 @@ Messages posted before a join is made MAY NOT be routed to pipes.  That is, clie
 The message resource provided as response to a feed POST tells publishers how many recipients their message went to (0 or more).
 
 One data structure that server implementers MAY use for the default feed routing is a hash table of addresses, each address containing a linked-list of joins.  This allows for a rapid lookup of the message address and routing to all joins that requested it.
-
-++ References
 
 [[bibliography]]
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]

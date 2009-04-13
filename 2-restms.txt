@@ -81,7 +81,7 @@ RestMS allows these methods on a domain URI:
 * GET - retrieves the domain representation.
 * POST - creates a new feed or pipe within the domain.
 
-A domain document specifies the domain properties, and has references to all public feeds and pipes that the domain contains.  The XML format of this document is:
+A domain document specifies the domain properties, and has references to all profiles and public feeds that the domain contains.  The XML format of this document is:
 
 [[code]]
 <?xml version="1.0"?>
@@ -97,16 +97,11 @@ A domain document specifies the domain properties, and has references to all pub
         type="{type}"
         license="{license}"
         href="{URI}" /> ] ...
-    [ <pipe
-        name="{name}"
-        title="{description}"
-        type="{type}"
-        href="{URI}" /> ] ...
   </domain>
 </restms>
 [[/code]]
 
-The domain document does not necessarily list all feeds and pipes: clients may create these as private and thus make them inaccessible through discovery.
+The domain document does not necessarily list all feeds: clients may create these as private and thus make them inaccessible through discovery.
 
 +++ Profiles
 
@@ -343,6 +338,24 @@ RestMS allows these methods on a content that is part of a delivered message:
 * GET - retrieve the content.
 * DELETE - deletes the content.
 
+++ RestMS Profiles
+
+This specification does not specify the semantics of feed, join, and pipe types.  These semantics are covered in separate //profile// specifications.  Profiles are the main area of extension and experimentation in RestMS.  Profiles follow these rules:
+
+* The profile name is the specification name (number/Name).
+* The server MUST list all the profiles it supports, in the domain document.
+* The server MUST NOT implement two profiles that have overlapping feed or pipe types.
+* The client SHOULD check that the profiles it plans to use are implemented.
+* All profiles are optional: a RestMS server MAY implement zero profiles.
+
+A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
+
+Join types are inherently scoped by feed types.  That is, two profiles can use the same join types: the semantics of the join type is dependent on the type of feed to which it is attached.
+
+Profiles may depend on other profiles.  The profile specification MUST list the profiles it directly depends on.  When a server implements a particular profile it MUST implement all profiles that profile depends on, recursively until all dependencies are resolved.
+
+Clients cannot enable, disable, or switch between profiles.  Servers MAY offer such functionality as part of their configuration.
+
 ++ Response status codes
 
 In RestMS these server reply codes have specific significance:
@@ -363,24 +376,6 @@ Additionally, clients should be able to handle all HTTP errors, including:
 * 500 Internal Error - the server suffered an internal error.
 * 501 Not Implemented - the requested functionality is not implemented.
 * 503 Overloaded - the server was overloaded.
-
-++ RestMS Profiles
-
-This specification does not specify the semantics of feed, join, and pipe types.  These semantics are covered in separate //profile// specifications.  Profiles are the main area of extension and experimentation in RestMS.  Profiles follow these rules:
-
-* The profile name is the specification name (number/Name).
-* The server MUST list all the profiles it supports, in the domain document.
-* The server MUST NOT implement two profiles that have overlapping feed or pipe types.
-* The client SHOULD check that the profiles it plans to use are implemented.
-* All profiles are optional: a RestMS server MAY implement zero profiles.
-
-A profile defines the semantics of a set of feed, join, and pipe types. As part of that, the profile specification MAY extend the properties of feeds, joins, or pipes.  A profile SHOULD work within the constraints defined by RestTL as far as possible.
-
-Join types are inherently scoped by feed types.  That is, two profiles can use the same join types: the semantics of the join type is dependent on the type of feed to which it is attached.
-
-Profiles may depend on other profiles.  The profile specification MUST list the profiles it directly depends on.  When a server implements a particular profile it MUST implement all profiles that profile depends on, recursively until all dependencies are resolved.
-
-++ References
 
 [[bibliography]]
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]

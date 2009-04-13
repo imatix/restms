@@ -748,8 +748,6 @@ Resource documents may contain elements, and unknown attributes on known element
 
 Clients and servers should tolerate and ignore unknown elements.  Neither the client nor the server should maintain unknown elements.
 
-++ References
-
 [[bibliography]]
 : rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
 : atompub : "The Atom Syndication Format" - [http://www.ietf.org/rfc/rfc4287.txt ietf.org]
