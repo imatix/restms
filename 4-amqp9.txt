@@ -550,6 +550,7 @@ The optimal, but most complex model, is to use federation-style normalization.  
 Finally, a RestMS server does not need to work with an AMQP network, it can be totally self-standing.  This is plausible in a federated design, where the RestMS server may run alone, or as a federated node, depending on its configuration.
 
 [[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
 : amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+: rfc2616 : "HTTP/1.1 Protocol Parameters" - http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html w3.org]
 [[/bibliography]]
