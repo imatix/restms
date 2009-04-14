@@ -1,0 +1,68 @@
++ Housecat
+
+[[f>image housecat.png size="medium"]]
+
+//Housecat// is a messaging pattern in which a sender addresses a receiver by name.  The diagram shows this pattern, where //Master// refers to the sender, and //Cat// refers to the receiver.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+In the general decoupled messaging model, the cat reads from a private queue which subscribes to the named address, and the master publishes messages to this named address.  In a coupled model, the cat reads from a named queue and the master publishes into this queue directly.
+
+The RestMS [http://www.restms.org/spec:3 3/Defaults] profile implements both coupled Housecat (using the default feed and default join) and decoupled Housecat (using a dynamic feed and arbitrary joins).
+
+Housecat, or rather its variation [[[wiki:Reverse Housecat]]] is most commonly used as part of a //request-response// scenario, to define a path for replies to a service request.
+
+Housecat scales to many masters, a variation called [[[wiki:Multimaster Housecat]]].  Decoupled Housecat //can// be used with multiple cats, each of which will get a copy of the message.
+
++ Reverse Housecat
+
+[[f>image reverse-housecat.png size="medium"]]
+
+//Reverse Housecat// is a messaging pattern in which a sender asks a receiver to address a reply back to the sender by name.  The diagram shows this pattern, where //Cat// refers to the sender, and //Master// refers to the receiver.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+In the general decoupled messaging model, the cat reads from a private queue which subscribes to the named address, and the master publishes messages to this named address.  In a coupled model, the cat reads from a named queue and the master publishes into this queue directly.
+
+This pattern is reversed from the basic [[[wiki:Housecat]]] because the cat originates the request, telling the master what address to reply to.
+
+The RestMS [http://www.restms.org/spec:3 3/Defaults] profile implements Reverse Housecat via the default join (coupled to pipe name) or ad-hoc joins (coupled using any address the cat and master agree on).  For pragmatic reasons Reverse Housecat naturally uses generated pipe names for reply to addressing.
+
+[[[wiki:Reverse Housecat]]] is most commonly used as part of a //request-response// scenario, to define a path for replies to a service request.
+
+Reverse Housecat scales to many cats, and when used with [[[wiki:Wolfpack]]], also scales to many masters.
+
++ Multimaster Housecat
+
+[[f>image multimaster-housecat.png size="medium"]]
+
+//Multimaster Housecat// is a variation of the [[[wiki:Housecat]]] pattern in which multiple senders send requests to a single receiver.  The diagram shows this pattern, where //Cat// refers to the sender, and //Master// refers to the receiver.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+A typical use for [[[wiki:Multimaster Housecat]]] would be a logging process that receives messages from many sources.  If the purpose is to do work and send responses, a [[[wiki:Wolfpack]]] + [[[wiki:Reverse Housecat]]] combination is more suitable.
+
++ Wolfpack
+
+[[f>image wolfpack.png size="medium"]]
+
+//Wolfpack// is a messaging pattern for workload distribution in which a client addresses a group of services that share a workload stream.  The diagram shows this pattern, where //Feeder// refers to the client, and //Wolf// refers to the service instances.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+Wolfpack is always decoupled.  The wolves read from a named shared queue, and the feeder publishes messages to this named queue.  To support Wolfpack the router must implement shared queues which can distribute messages to wolves on a //round-robin// basis, possibly with the addition of //fair-queueing// in which feeders as well as wolves are selected on a round-robin basis.
+
+The RestMS [http://www.restms.org/spec:4 4/AMQP9] profile implements Wolfpack through the //service// and //rotator// feed types.  For request-response scenarios a good combination is Wolfpack to send work to the wolves, and [[[wiki:Housecat]]] to send responses back to the feeders.
+
++ Wolf Call
+
+[[f>image wolf-call.png size="medium"]]
+
+//Wolf Call// is a messaging pattern for service presence detection in which a client verifies whether or not a service is present.  The diagram shows this pattern, where //Caller// refers to the client, and //Wolf// refers to the service instance or instances.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+Wolf Call is an aspect of [[[wiki:Wolfpack]]] and is always decoupled.  The wolves read from a shared queue named for the service, and the caller checks for the presence of this named queue.
+
+The RestMS [http://www.restms.org/spec:4 4/AMQP9] profile implements Wolf Call through the //service// and //rotator// feed types.
+
++ Parrot
+
+[[f>image parrot.png size="medium"]]
+
+//Parrot// is a messaging pattern for information distribution in which a publisher addresses a group of subscribers.  The diagram shows this pattern, where //Parrot// refers to the publisher, and //Monkey// refers to the subscribers.  The //Router// refers to a set of feeds and pipes, or other resources capable of queuing and routing messages.
+
+Parrot is always decoupled.  The monkeys read from a set of topics, and the parrot publishes messages to this topic set.  To support Parrot the router must implement topic routing into private queues, private selection from shared topic ring buffers, or another equivalent mechanism.
+
+The RestMS [http://www.restms.org/spec:3 3/Defaults] profile implements Parrot via ad-hoc joins, where the feed is the topic name.  The RestMS [http://www.restms.org/spec:4 4/AMQP9] profile implements Parrot through the //fanout//, //direct//, //topic// and //headers// feeds.  In Parrot the monkeys typically do not talk back to the parrots.
+
