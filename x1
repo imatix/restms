@@ -1,0 +1,363 @@
+This document is an introduction to RestMS, the RESTful Messaging Service.  RestMS provides web applications with enterprise-level messaging via an asynchronous RESTful interface that works over standard HTTP/HTTPS.
+
+* Author: Pieter Hintjens <ph@imatix.com>
+
+++ License
+
+This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0 or later.
+
+- evolution of messaging
+- where we are going: specialize, simplify
+- fabric of specs
+- what good msg looks like
+- patterns
+- for internet use
+- origins of restms
+- design of restms
+- state of play
+- conclusions
+
+++ History of messaging
+
+- from large, complex specs & products to simpler ones
+
+++ Future of messaging
+
+- fabric of simpler more specialized technologies
+- open standards & open source
+- main areas:
+
+++ Messaging essentials
+
+- queueing & routing model - push or pull
+- opaque binary blobs
+- no size restrictions
+- support principle patterns
+- free & open standards
+
+++ Messaging for the Web
+
+- human readable control
+- RESTful, JSON, etc.
+- simple to implement
+- simple to use
+- use existing infrastructure
+
+++ Origins of RestMS
+
+- web proxy for AMQP
+- AtomPub
+-
+
+++ RestMS design
+
+- layers
+- transport layer
+- resource tree
+- profiles
+- default profile
+- amqp9 profile
+- client classes
+
+++ Try it
+
+
+
+
+
+
+++ The history of messaging
+
+Wikipedia describes CORBA - arguably the most successful messaging technology of the last century - as "a standard [...] that enables software components written in multiple computer languages and running on multiple computers to work together."[((bibcite corba))]  This is an excellent problem statement for messaging.  CORBA was developed by experts and enjoyed wide support in the decade after its launch in 1991.
+
+In 2002 de Jong et al[((bibcite dejong))] noted five main things wrong with CORBA, in favour of SOAP[((bibcite soap))]: CORBA "//is too complex... too expensive... does not work through firewalls or proxy web servers... isn't being hyped by IBM and MS//" and is not human-readable.
+
+On his page "Alternatives to CORBA"[((bitcite cbrowne)))] Christopher Browne lists the various technologies that could be considered as alternatives to the once successful but now dying CORBA standard.  Obviously there is IBM's MQSeries and its clones, there are the JMS brokers, there is the XML-RPC family, and there is something called "Advanced Message Queuing Protocol".  What strikes me, reading this list, is how few //protocols// are listed.  While CORBA was a protocol standard, it seems the market is still loaded with proprietary products rather than driven by standardization.
+
+The second thing that strikes me is that few of these CORBA alternatives are really popular.  SOAP was meant to be a better XML-RPC but appears to suffer from "version 2 syndrome": too ambitious, and in the end, too complex.  I'd argue that the leading edge of software development is in FOSS projects rather than in enterprise IT departments.  (I'm biased here, but I've seen a lot of enterprise IT departments as well.)  And FOSS projects seem kenest on D-BUS for interprocess communications, and XML-RPC for web messaging.
+
+It's too soon to say that SOAP has failed, but there is one lesson we can draw from the history of messaging: simpler is better, even if (especially if) that means doing less and perhaps doing it faster.
+
+++ Why do we need messaging?
+
+Messging lets a heterogenous collection of software components talk together over a network.  While CORBA mixed local and remote messaging together, it seems that as the demand for messaging grows, the technology diversifies and specializes.  Thus we can see at least three domains:
+
+*
+
+these seem quite distinct.
+
+
+
+
+Whereas previous generations feared a global software shortage[((bibcite brooks))], today's software engineers are able to create new applications rapidly and cheaply.  This is thanks to the emergence of thousands of hyperactive software communities, based on free and open source software licenses, producing the languages, operating systems, frameworks, databases, and libraries needed to build a modern application.
+
+Open source and free software licenses enable large-scale collaborative projects, and the cheap global Internet, based on a stack of thousands of free and open digital standards, amplifies this productivity.  The software crisis of the 80's and 90's is definitely over.  But one area of software construction remains expensive, slow, and mostly non-standardized.  That is the messaging 'middleware' that connects these numerous applications together.
+
+The need for messaging is inevitable, as applications scale beyond the abilities of one system.  Messaging can be as simple as a front-end login program asking a back-end credentials server to check a password.  Or as complex as a real-time market data streaming service, where hundreds of terminals can subscribe to complex selections of data coming off stockmarkets.
+
+Messaging is easier to describe than to implement.  One has a set of applications distributed over some network.  The applications send each other messages.  This lets them "talk" to each other in interesting ways that would not be possible if one application simply included another.  (Including pieces of code, as libraries, is the most common way of constructing applications out of existing pieces.)  Depending on how good the messaging is, it becomes possible to add and remove pieces easily; to upgrade pieces independently of each other; to share work among several pieces; to create "services" that specialize in particular domains; and to promote flows of messages into first-class entities so that applications can subscribe to these and receive a stream of messages in near real-time.
+
+We can classify messaging technologies into four grand families based on use:
+
+* "Internet messaging" that connects arbitrary applications across public networks.  This serves walk-up-and-use collaborations between service providers and their clients, suppliers, and partners.  Such messaging aims for second latencies and capacities of messages per second.  Examples are web services, syndication feeds, and email.
+
+* "Enterprise messaging" that connects multiple applications in a private network.  This serves large businesses which construct their data processing out of a mix of old and new pieces, usually on diverse platforms and built with a mix of technologies.  Such messaging aims for millisecond latencies and capacities of tens of thousands of messages per second.  Examples are traditional message queues and transaction processing systems.
+
+* "Data center messaging" that connects components of a locally-distributed application.  This serves applications that are too large for one system.  Such messaging aims for microsecond latencies and capacities of millions of messages per second.  Examples are supercomputing interconnects and market data distribution.
+
+* "Terradata messaging" that connects components of a widely-distributed application across dedicated very-high-speed networks.  Such messaging aims to collect and transport the large volumes of data collected by natural-world measurement.  Examples are scientific and military data networks.
+
+In all four families, we see closed and open technologies, and standards development.  Across all families, the best designs are, in our opinion, those that are:
+
+* Asynchronous, so they promote the use of robust event-driven architectures.  This means providing queues and ways to work with queues.
+* Decoupled, so they encourage architectures where the cost of change is minimized.  This means providing abstract addressing and dynamic wiring.
+* Generic, so they can be used as the basis for further technological development.  This means avoiding domain-specific limitations.
+
+And these further features are desirable in all technologies
+
+* Scalable, so they can be used for large as well as small projects.
+* Simple, so they are easy to implement, and thus become more widely used.
+* Open, so they can be improved by any party with a minimum of formality.
+* Unencumbered, so they can be used in free and open source implementations.
+* Portable, so they can be used on all platforms, operating systems, and languages.
+* Extensible, so they can evolve gradually over time as knowledge improves.
+* Layered, so they can be improved in a decoupled fashion by different teams over time.
+* Standardized, so they promote interoperability and competition between vendors.
+* Secure, so they can be used to carry real data between real applications.
+* Efficient, so they do not demand large dedicated computer systems.
+
+++ The need for web messaging
+
+We would arguable that a majority of new applications today are written as web applications, often as browser-side JavaScript.  These applications need messaging as much as do in-house Java applications.  Web messaging would allow these applications to participate fully in a global real-time information network.
+
+Certainly from an economic point of view, the most valuable technologies are those that bring together the most diverse parties in an open market.  So while enterprise messaging can add value to one firm, web messaging can add value to many firms at once.
+
+New enterprise messaging technologies like AMQP[((bibcite amqp))] have redefined the way messaging is viewed.  While AMQP has proven a solid performer for enterprise messaging and satisfies our list of requirements it is a clumsy choice for Internet use.  Mostly, it uses a binary framing scheme that is more like a LAN remote-procedure call (RPC) protocol than an Internet protocol.  AMQP is also immature and does not exploit the vast existing HTTP infrastructure (caches, servers, clients, proxies, gateways, accelerators, etc.)
+
+A web developer, comparing AMQP and an HTTP-based option like XML-RPC, for an application that carries a few messages per second, will very likely choose the HTTP option.  This ease of use will outweigh the benefits of queueing and decoupled routing.  Those concepts are too abstract and their benefits too intangible to be worth the learning curve that AMQP demands.
+
+XML-RPC is patented.
+
+So what other standards are available in the area of web messaging?  We know of these:
+
+
+
+* SOAP, the "simple object access protocol".  SOAP is not simple, and it is not asynchronous.  While SOAP has had some success as an enterprise messaging system, it is not popular for web messaging.  SOAP works for simple cases (at an extortionate cost) and is useless for high-volume work.
+* XML-RPC and similar standards, which do much the same as SOAP but is much simpler.  These are popular for web messaging but they are not decoupled, nor asynchronous.  They work for simple cases and are useless for high-volume work.
+* RSS and AtomPub, which are aimed specifically at the distribution of news articles.  These protocols are decoupled but not asynchronous, and are not generic.  One might be able to force them to act as a kind of generic messaging bus, but the results would be slow and clumsy.
+
+Looking at the explosion of web applications and the value of connecting these together in ad-hoc messaging networks, we can conclude first that web messaging is a real need, and secondly, there are no satisfactory answers.  Our challenge therefore is to propose a way of doing web messaging that satisfies the criteria we listed above.
+
+Looking at the Internet and existing web messaging, we see that REST[((bibcite rest))] offers arguably the simplest and most scalable pattern for client-server interactions across the public Internet.  RESTful patterns underly the world-wide web and the specification of HTTP.  Roy Fielding, the designer of the REST pattern and one of the authors of the HTTP specification, describes it thus:
+
+> All REST interactions are stateless. That is, each request contains all of the information necessary for a connector to understand the request, independent of any requests that may have preceded it.
+
+This statelessness is the key to building scalable architectures.  It means that no matter how many proxies, caches, and other layers sit between the client and the server, and no matter how late, out of order, or repeatedly a request arrives, it can be intelligently handled by the server.
+
+For the developers reading this, an analogy is a traditional source control system (SCS) like CVS or Subversion, compared to a distributed source control system like Mercurial or Git.  In a traditional SCS every commit must be sequenced exactly right, and clients must be precisely synchronized with the server state.  In a distributed SCS, each patch contains enough information to be intelligently handled, independently of any patches that may have preceded it.
+
+Today, the Linux kernel has switched to Git, Mozilla has switched to Mercurial, and all leading-edge open source projects are doing likewise, due to the overwhelming advantages of being able to handle patches as independent units of work.  Similarly, we believe that RESTful APIs are the future of distributed computing, due to the valuable simplification of being able to treat each request as an independent unit of work.
+
+++ Constructing RestMS
+
+We have examined the value of a web messaging architecture that is asynchronous, decoupled, scalable, simple, generic, open, unencumbered, portable, extensible, layered, and standardized.  We have argued that such an architecture would be economically valuable.  We have found no existing architecture that meets our requirements.
+
+Pure invention always carries a high risk of failure and/or rejection and it is more sensible to evolve existing technologies.  Looking at the challenge of web messaging, we see that AMQP offers a usable architecture for messaging, but lacks a client-server pattern that is suitable for use on the web.  Meanwhile, RESTful protocols like AtomPub offer a usable client-server pattern, but lack a generic, decoupled, asynchronous messaging architecture.
+
+By conclusion, mixing the messaging architecture of AMQP with the client-server patterns of REST should in theory give us a good architecture for web messaging.  This was the original basis for RestMS[((bitcite restms))].
+
+We will take each of requirement in turn and examine how RestMS satisfies it:
+
+* //Asynchronous//: the RestMS server delivers incoming messages to the recipient immediately as these arrive, and if the recipient is busy, holds messages on a "pipe" until it can deliver them.  REST does not inherently offer asynchronous resource access, but RestMS adds the concept of an asynchronous resource (//asynclet//) that makes it possible.
+
+* //Decoupled//: RestMS uses an abstract addressing model and dynamic wiring so that senders and recipients can be added and removed at any time.  Senders send to "feeds", receivers read from "pipes", and receivers "join" their pipes to one or more feeds in order to receive messages.
+
+* //Scalable//: RestMS is as scalable as HTTP, using the same technologies: caching, proxies, multiple front-ends.  The limits of HTTP scalability are well known and the solutions also well known.  A RestMS network could deliver messages to millions of receivers in parallel.
+
+* //Simple//: RestMS uses standard HTTP methods and headers, so works with existing HTTP skills and libraries.  For example, RestMS messages are formatted using the standard HTTP content syntax.  It is possible to do simple RestMS by hand using a TELNET client.  RestMS uses JSON as well as XML, making compatible with more web applications.
+
+* //Generic//: RestMS uses extensible messaging "profiles", which cover the Housecat, Wolfpack and Parrot patterns, as well as providing plug-in compatibility with AMQP and other messaging backbones.  Thus RestMS can be used for any type of messaging over a public Internet network.
+
+* //Open//: RestMS is free and open, developed using the "Consensus Oriented Specification System" (COSS) developed by the Digital Standards Organization[((bibcite digistan))] which guarantees the right of any user to improve the specification with or without approval from the original authors.
+
+* //Unencumbered//: RestMS uses existing designs that are free of patents, and is developed via an intellectual property framework that guarantees freedom from copyright, patent or trademark claims by contributors.
+
+* //Portable//: RestMS is portable to all operating systems and languages which have TCP/IP or HTTP functionality.  It has no system-specific encodings, features, or dependencies.  RestMS comes with sample implementations and class libraries in various languages to help implementors get started.
+
+* //Layered//: RestMS is composed as multiple layers, separating experimental designs from stable ones.  It uses existing HTTP layers such as Basic, and Digest, Authentication and HTTPS (SSL/TLS) for encryption.
+
+* //Extensible//: RestMS is cheap to extend due to its layered design and use of simple textual representations.  The use of profiles allows RestMS to be used as an experimental testbed for new, better abstract messaging models.
+
+++ The RESTful Transport Layer
+
+In order to provide a formal answer to "what is REST?", at least within the context of RestMS, and in order to answer in one place questions that crop up repeatedly when designing RestMS, we created a RESTful transport layer, RestTL.
+
+Though developed for, and as part of, RestMS, RestTL is a stand-alone answer to two major questions:
+
+# How do we work with resources in a RESTful fashion, across an HTTP connection?
+# What do those resources look like, as structured documents?
+
+To both questions there are many answers, but we have chosen those we found simplest, least surprising, and most generic.  RestTL can be used as the basis for any RESTful protocol that uses HTTP as its basic transport.  It conforms fully to the HTTP specifications.
+
+RestMS, therefore, implements RestTL and anyone seeking to implement a RestMS server or client should understand the RestTL design.
+
+
+++ xxx
+
+We will look at common messaging patterns that form the basis of most real life use cases, and see how to build these using RestMS resources.  These patterns are:
+
+* //Wolfpack//, pattern, in which a sender addresses a service that is handled discretely by multiple receivers.  A sends a message to service B, which distributes its messages in a round-robin fashion to B1, B2, and B3.
+* //Parrot//, in which a sender addresses a feed that is replicated into queues belonging to multiple receivers.  A sends a stream of messages to a multiplexer B which copies the messages to queues B1, B2, and B3.
+
++++ The Wolfpack pattern
+
+In a more realistic service-oriented architecture, requests must be distributed fairly between a set of readers.  We call this the //Wolfpack// pattern: like a pack of wolves eating a carribou, a set of services will eat away at requests until they are done.  This is the basis of "task distribution".
+
+Wolfpack is like a larger version of Housecat, but where Housecat has one (quite fussy) consumer, Wolfpack assumes there are many.
+
+In the common "request-response" architecture, front-end applications use Wolfpack to send requests to a set of back-end service providers, and these send replies back using Housecat.
+
+Here is how Wolfpack works:
+
+* we have a set of writers, who all write to a single well-known feed
+* we have a set of readers (the Wolfpack) that each create a pipe
+* each reader creates a join from its pipe to the feed
+* as the feed receives messages it passes them to each pipe in turn
+* each pipe queues these messages and each reader then fetches them
+
+[[code]]
+.--------.      .--------.      .--------.
+| Writer |      | Writer |      | Writer |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    `===============++==============='
+                    \/
+                .--------.
+                |  Feed  |
+                `--------'
+                    ||
+    .===============++===============.
+    \/              \/              \/
+.--------.      .--------.      .--------.
+|  Join  |      |  Join  |      |  Join  |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    \/              \/              \/
+.--------.      .--------.      .--------.
+|  Pipe  |      |  Pipe  |      |  Pipe  |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    \/              \/              \/
+.--------.      .--------.      .--------.
+| Reader |      | Reader |      | Reader |
+`--------'      `--------'      `--------'
+[[/code]]
+
+One particular feature of Wolfpack is that there are several queuing models, each with their own semantics.  Messages can be queued in the Pipes.  This ensures that each Reader gets the same share of messages.  But it also means messages may be processed unfairly, and not in overal first-in first-out order (messages may get stuck behind a slow Reader).
+
+Wolfpack works best when messages are queued in the Feed.  RestMS allows this (as an option, if the pipes are defined as ondemand pipes, and the feeds are service or rotator feeds - see below).
+
+But it is even better to queue messages in the Feed with one queue per writer, which the Feed consumes from in round-robin fashion.  This is called "fair queueing" and ensures that low-volume writers are not treated unfairly with respect to high-volume writers.  RestMS recommends but does not enforce fair queueing in service and rotator feeds.
+
+A classic messaging architecture is Reverse Housecat over Wolfpack, also called "request-response".  Here, A will send a request to a Wolfpack consisting of B1...Bn.  In the request, A specifies its own return address.  Whichever B processes the request knows to do a Housecat back to A.
+
++++ The Parrot pattern
+
+While Housecat lets us send information to a network node, and Wolfpack lets us distribute work between network nodes, the third major pattern is for distributing data across network nodes, the so-called "publish-subscribe" architecture.  We call this the //Parrot// pattern.
+
+Here is how Parrot works:
+
+* we have a set of writers, each writing to a set of feeds
+* we have a set of readers (the Parrots) that each create a pipe
+* each reader creates joins from its pipe to many feeds
+* the join specifies the subscription criteria for that pipe and feed
+* as a feed receives messages it passes them to all matching pipes
+* each pipe queues these messages and each reader then fetches them
+
+[[code]]
+.--------.      .--------.      .--------.
+| Writer |      | Writer |      | Writer |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    \/              \/              \/
+.--------.      .--------.      .--------.
+|  Feed  |      |  Feed  |      |  Feed  |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    \/              \/              \/
+.--------.      .--------.      .--------.
+|  Join  |      |  Join  |      |  Join  |
+`--------'      `--------'      `--------'
+    ||              ||              ||
+    `===============++==============='
+                    \/
+                .--------.
+                |  Pipe  |
+                `--------'
+                    ||
+                    \/
+                .--------.
+                | Reader |
+                `--------'
+[[/code]]
+
+++ Model
+
+xxx
+
+++ RestMS Profiles
+
+RestMS defines a standard resource tree and defines how each resource is represented, and how a client can work with it.  The semantics of message routing are contained in three key resources:
+
+* The **feed**, to which publishers send messages.
+* The **pipe**, from which subscribers read messages.
+* The **join**, which ties these two together in an N-to-N relationship.
+
+The notion of feeds, pipes, and joins is easily familiar since these names are used for similar types of resource elsewhere (such as RSS feeds, SQL joins, and Unix pipes).
+
+However, the mechanics of exactly how messages flow from feed via join to pipe, are delicate.  There are several ways to conceptualize a feed-join-pipe model, and it is unclear which of these ways is best, because abstract messaging models are a very new notion and the field is evolving rapidly.
+
+To give some examples of the choices a model designer faces:
+
+* Should the feed act as a queue, or should it route messages straight into pipes?
+* Should the feed be persistable, and if so is this something the client can choose (by specifying a particular feed type)?
+* Should the model be compatible with other models, such as AMQP?
+* Should joins be passive (specifying criteria that feeds act upon) or active (pulling messages off the feed into their pipe)?
+* Should it be possible to join any pipe type to any feed type?
+* Are there intelligent default models that the client can benefit from?
+
+And so on.
+
+Rather than try to answer these questions directly in RestMS by embedding a single, fixed model (with a high probability that in several years the answers would be proven wrong), we define the messaging model as a //profile//, and make RestMS work with arbitrary profiles.
+
+The real value of an abstract messaging system like RestMS is in the simplicity and effectiveness of its model.  But the time it takes to develop better models depends on the inertia of the encapsulating protocol.  If the protocol uses complex binary framing, then any change is expensive and slow to implement and test.
+
+Given that RestMS is relatively easy to implement - for any developer with an HTTP stack and XML parsing classes - it can be seen as a rapid prototyping environment for profile development, and profiles can be seen as the key product of the RestMS ecosystem.
+
+
+
+++ RestMS as an HTTP-to-AMQP proxy
+
+As we explained, AMQP works well for enterprise messaging but too complex for web messaging.  However, there is value in allowing RestMS to work as an HTTP front-end for an AMQP network.
+
+This is done by defining an AMQP profile which maps the AMQP model to matching feed, join, and pipe types.  A RestMS server which implements such a profile can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
+
+We believe this to be a natural and advantageous architecture, especially when it becomes necessary to expand an existing enterprise messaging network to include external parties.
+
+++ Universal interoperability
+
+We believe, but this is not yet proven, that RestMS can interoperate with any existing messaging system through the creation of an appropriate profile.  It is theoretically possible to bridge any profile with any other profile, thus allowing RestMS to become a universal message switching protocol.
+
+++ References
+
+[[bibliography]]
+: corba : Common Object Request Broker Architecture - [http://en.wikipedia.org/wiki/CORBA Wikipedia]
+: soap : SOAP - [http://en.wikipedia.org/wiki/SOAP Wikipedia]
+: dejong : Irmen de Jong (and others), "Web Services/SOAP and CORBA" - [http://www.xs4all.nl/~irmen/comp/CORBA_vs_SOAP.html www.xs4all.nl/~irmen]
+: cbrowne : Christopher Browne, "Alternatives to CORBA" - [http://linuxfinances.info/info/corbaalternatives.html linuxdatabases.info]
+: restms : "The RESTful Messaging Service" - [http://wiki.amqp.org/spec:7 wiki.amqp.org]
+: amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
+: rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
+: brooks : Fred Brooks, "No Silver Bullet - Essence and Accidents of Software Engineering" -  [http://en.wikipedia.org/wiki/No_Silver_Bullet Wikipedia]
+: digistan : The Digital Standards Organization - [http://www.digistan.org]
+[[/bibliography]]

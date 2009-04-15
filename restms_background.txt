@@ -8,23 +8,27 @@ This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa
 
 ++ Messaging for a Connected World
 
-Wikipedia describes CORBA - arguably the principle messaging standard of the last century - as "a standard [...] that enables software components written in multiple computer languages and running on multiple computers to work together."[((bibcite corba))]  This is an excellent problem statement for messaging.
+Wikipedia describes CORBA - arguably the principle messaging standard of the last century - as "//a standard [...] that enables software components written in multiple computer languages and running on multiple computers to work together.//"[((bibcite corba))]  This is an excellent problem statement for messaging.
 
-It's been almost two decades since CORBA was launched in 1991, and the connected world has changed fundamentally in that time.  The problem of connecting together pieces of software has exploded in size.  The challenges - from security through scaling - have ballooned.
+It's been almost two decades since CORBA was launched, and the connected world has utterly changed in that time.  As the technology of connecting people, machines, and applications together has doubled in power and halved in cost every two years or so, so have the challenges of scaling and security grown by ten orders of magnitude.
 
-In this article I'll look at one specific aspect - messaging for Web applications, and specifically the RestMS web messaging protocol that a small group is developing.  To set the stage, I'll look at how messaging - the problem as well as the solution - has evolved since 1991, and how RestMS fits into a vision what messaging will look like in another 20 years.
+In this article I'll look at one specific aspect - messaging for Web applications, and specifically the RestMS[((bibcite restms]]) web messaging protocol that a small group is developing.  To set the stage, I'll look at how messaging - the problem as well as the solution - has evolved since 1991, and how RestMS fits into a vision what messaging will look like in another 20 years.
 
 ++ History and evolution of messaging
 
-CORBA was fairly unique in being a //standard// rather than a product.  Messaging is still dominated by products rather than standards and CORBA was ahead of its time in attempting to lay down rules for interoperability and that perfect supplier economy that a free and open standard enables.
+CORBA was fairly unique in being a deliberate //standard// rather than a product.  Messaging is still dominated by products rather than standards and CORBA was ahead of its time in attempting to lay down rules for interoperability and that perfect supplier economy that a free and open standard enables.
 
 In 2002 de Jong et al[((bibcite dejong))] noted five main things wrong with CORBA, in favour of a new standard called SOAP[((bibcite soap))]: "//CORBA... is too complex... too expensive... does not work through firewalls or proxy web servers... isn't being hyped by IBM and MS//" and is not human-readable.
 
-SOAP started life as "simple object access protocol" based on XML-RPC[((bibcite xmlrpc))] but rapidly hit "version two syndrome".  SOAP became too ambitious, too complex, and today it lives only in the ghetto of Enterprise IT.   Given free choice, it seems many more people still prefer XML-RPC over SOAP.  Compare the two Wikipedia pages and it's clear which has the more thriving community.
+My own view is that CORBA failed because it became a vehicle for vendors: too easy to capture, and in the end what customers really wanted was interoperability and choice of vendors, rather than functionality as such.
 
-On his page "Alternatives to CORBA"[((bitcite cbrowne)))] Christopher Browne gives us a long list of messaging products and technologies.  Obviously there is IBM's MQSeries and its clones, there are the JMS brokers, there is the XML-RPC family, and there is something called "Advanced Message Queuing Protocol".  What strikes me, reading this list, is how few //protocols// are listed.  While CORBA was a protocol standard, it seems the market is still loaded with proprietary products rather than driven by standardization.  XML-RPC, D-Bus, AMQP[((bibcite amqp))] and a handful of other protocols sit alone in a long list of closed, uninteroperable products.
+There are not many messaging standards that aim at the whole stack.  After CORBA, SOAP is perhaps the best known one.  Based on XML-RPC[((bibcite xmlrpc))], the "simple object access protocol" became something much larger and soon landed in exactly the same place as CORBA: too ambitious, too complex, too dominated by large vendors.  Today SOAP lives only in the ghetto of Enterprise IT.
+
+Given free choice, it seems many more people still prefer XML-RPC over SOAP.  Compare the two Wikipedia pages and it's clear which has the more thriving community.  Similarly, on his page "Alternatives to CORBA"[((bitcite cbrowne)))] Christopher Browne has one link for SOAP and dozens for XML-RPC.
 
 One lesson that seems to shine through.  The technologies that succeed are the ones which are standardized, open, simple, cheap, and human readable.  Being HTTP-friendly is a plus.  Being hyped by IBM and MS is not.
+
+What is striking is how few attempts there have been to design messaging protocols.  Browne's page lists numerous proprietary products but practically no standards that would permit such products to interoperate.  Or rather, would permit clients to freely choose vendors.  He does list one, "Advanced Message Queuing Protocol"[((bibcite amqp))].
 
 ++ What changed?
 
@@ -44,7 +48,7 @@ It seems clear the future of messaging lies in free and open protocol standards.
 
 What kind of standardized protocols can we expect to see emerge over the next years?
 
-Although it seems counter-intuitive, I believe we'll see open standards that are simpler, not more complex.  "Simpler" could of course mean "just doing less", but to me it means better abstractions.  As an example: if I want to use regular expressions, Perl offers better abstractions than C.  Similarly, over time we learn better abstractions for messaging, and are able to develop simpler standards.
+Although it seems counter-intuitive, I believe we'll see open standards that are simpler, not more complex.  "Simpler" could of course mean "just doing less", but to me it means "better abstractions that do much more with less effort".  As an example: if I want to use regular expressions, Perl offers better abstractions than C.  Similarly, over time we have learned better abstractions for messaging, and should thus be able to develop simpler standards.
 
 There are many areas where messaging standards are needed.  The main ones are:
 
@@ -56,15 +60,15 @@ These areas are so different that in my view there cannot be any single universa
 
 ++ Messaging essentials
 
-Based on my experience of AMQP, and from involvement in many other messaging projects, here are what I consider the essential aspects of a good messaging protocol:
+Based on my experience of AMQP, and from involvement in many other messaging projects, these are what I consider the essential aspects of a good messaging protocol:
 
-* It carries messages as opaque blobs of arbitrary size (0B upwards);
+* It carries messages as opaque blobs of arbitrary size (0 bytes upwards);
 * It carries message envelopes with arbitrary properties;
 * It can route messages to recipients in a variety of ways;
 * It lets recipients select messages based on envelope properties;
-* It can queue messages, before and after routing;
+* It can queue messages, before and/or after routing;
 * It lets applications construct their coupling at runtime;
-* It does synchronous control (so each request has a response);
+* It does synchronous control (so each control request has a response);
 * It does asynchronous (event-driven) message transfer;
 * It is a free and open standard.
 
@@ -76,7 +80,7 @@ I've documented the main routing patterns that a messaging system can implement:
 * [http://www.restms.org/wiki:wolfpack Wolfpack] - distribute work among recipients.
 * [http://www.restms.org/wiki:parrot Parrot] - distribute information to recipients.
 
-We see all three patterns (and their variations) crop up over and over in real life, so it seems safe to say that a messaging protocol should address all three of these.
+We see all three patterns crop up over and over in real life, so it seems safe to say that a messaging protocol should address all three of these (and their variations).
 
 ++ Messaging for the Web
 
@@ -85,28 +89,28 @@ The Internet throws up some very specific challenges.  The Slashdot effect.  Zer
 So we can say that web messaging is about "Scalability, Security, and Simplicity":
 
 * Scalability means working with caches, proxies, and accelerators.
-* Security means using the most common, proven security mechanisms, such as HTTPS.
-* Simplicity means designing really smart, high-level abstractions and then //getting out of the way//.
+* Security means using the most common, proven security mechanisms.
+* Simplicity means designing smart high-level abstractions and then //getting out of the way//.
 
 If simple is good inside the firewall, it's a hundred times better on the wild wild web.  Web messaging must above all be simple to understand, simple to implement, simple to use.  Web developers just won't tolerate complexity they don't absolutely need.  This is the XML-RPC vs. SOAP lesson.
 
-AMQP is a very good protocol.  I like it.  But it is not simple: it uses a binary wire encoding scheme that is highly efficient.  Yet it's a case of premature optimisation.  If you login once a day, you do not care whether that login dialog uses highly efficient binary, or simpler HTTP-like text.  90% of AMQP is used no more than 1% of the time.
+AMQP is a very good protocol.  I like it.  But it is not simple: it uses a binary wire encoding scheme that is highly efficient.  Yet it's a case of premature optimization.  If you login once a day, you do not care whether that login dialog uses highly efficient binary, or simpler HTTP-like text.  90% of AMQP is used no more than 1% of the time.
 
-A cynical old programmer like me has learned to write plain, simple code that is regular and predictable and unsurprising and lazy.  And one puts ones effort only into those areas that need it, knowing that optimizing distorts the code and makes it more fragile.
+A cynical old programmer like me has learned to write plain, simple code that is regular and predictable and unsurprising and lazy.  And one puts effort only into areas that need it, knowing that optimizing distorts the code and makes it more fragile.
 
 So it is with messaging protocols.
 
-So, a web messaging protocol should use human-readable schemes for everything except the high-volume message transfer dialogs that really //need// to be optimized.  And while it can use XML for expressing itself, it should be equally happy with, for example, JSON.
+A web messaging protocol should be human-readable for everything except high-volume message transfers that //need// to be optimized.  And while it can use XML for expressing itself, it should be equally happy with, for example, JSON.
 
 ++ Origins of RestMS
 
-Needless to say, there is as far as I can tell no messaging protocol that does all the things I listed.  Some get part of the way.  But one day last year, as we were thinking about how to map AMQP for web use, Steve Vinoski suggested I read the AtomPub protocol.  I thought I understood what REST meant but AtomPub[((bibcite atompub))] made it much clearer.
+I have not found a messaging protocol that does all these things.  Some get part of the way.  But one day last year, as we were thinking about how to map AMQP for web use, Steve Vinoski suggested I read the AtomPub protocol.  I thought I understood what REST meant but AtomPub[((bibcite atompub))] made it much clearer.
 
 The beauty of Roy Fielding's REST[((bibcite rest))] pattern is that it throws away so much and leaves the essentials in a coherent, scalable structure.  REST's simplicity seems to offend some people, who perhaps cannot believe that four verbs (GET, PUT, DELETE, POST) can do everything.  But I've found it to be a revelation.
 
 Very roughly, we took the AMQP messaging models, which implement Housecat, Wolfpack, and Parrot, and have those essential aspects I spoke of, and made these models work over HTTP using the RESTful rules.
 
-And thus RestMS is that: a REST-over-HTTP messaging protocol that has those ten or so essential aspects, and hopefully does it in a Scalable, Secure, and Simple manner.
+And thus RestMS is that: a REST-over-HTTP messaging protocol that has those ten or so essential aspects, and in theory does it in a Scalable, Secure, and Simple manner.
 
 ++ The design of RestMS
 
@@ -120,25 +124,28 @@ Next, we described the RestMS resources themselves: domains, feeds, pipes, joins
 
 The RestMS feed-join-pipe model supports both 'push routing', where messages are routed into queues and then fetched, and 'pull routing', where unrouted messages are held in a queue and then selected.
 
-But at some stage we need to clearly specify how the routing works.  Initially we hard-coded this into RestMS, making it dependent on AMQP routing semantics.  Not a viable option, since AMQP itself is still changing.
+But at some stage we need to clearly specify how the routing works.  In earlier drafts we hard-coded this into RestMS, making it dependent on AMQP routing semantics.  That's not a viable option, since AMQP itself is still changing (from a push to a pull routing model).
 
-Thus RestMS defines a third layer, "profiles".  A profile defines the semantics of a set of feed, join, and pipe types.  It basically offers a plug-in messaging abstraction.  Having profiles means we do not need to try to design the Ultimate Messaging Abstraction today.  So long as it's cheap and safe to experiment, that's fine.  RestMS comes with two profiles, a [http://www.restms.org/spec:3/Defaults Defaults] profile that does Housecat and simple Parrot, and a [http://www.restms.org/spec:4/AMQP9 AMQP] profile that does more sophisticated messaging and interoperates with AMQP networks.
+Thus RestMS defines a third layer, "profiles".  A profile defines the semantics of a set of feed, join, and pipe types.  It basically offers a plug-in messaging abstraction.  Having profiles means we do not need to try to design the Ultimate Simple Messaging Abstraction today.  So long as it's cheap and safe to experiment, that's fine.  RestMS comes with two profiles, a [http://www.restms.org/spec:3/Defaults Defaults] profile that does Housecat and simple Parrot, and a [http://www.restms.org/spec:4/AMQP9 AMQP] profile that does more sophisticated messaging and interoperates with AMQP networks.
 
 ++ The RestMS specification process
 
-The www.restms.org site is the hub of the small but relaxed - restful, even - RestMS community.  I've mentioned that RestMS is a "free and open standard", which is a term coined by the Digital Standards Organization (Digistan)[((bibcite digistan))].
+The www.restms.org site is the hub of the small but relaxed - restful, even - RestMS community.  I've mentioned that RestMS is a "free and open standard", which is a term coined by the Digital Standards Organization (Digistan)[((bibcite digistan))].  If you like the politics of open standards, Digistan may be fun.
 
 The restms.org website is worth a short story.  It's based on work done by Digistan, which I'm part of.  If you look at http://spec.digistan.org you'll see the template we used for www.restms.org.
 
 In 2007, Digistan started on a project to develop peer-to-peer tools for decentralized standards development.  Most standards are still built by 'Foundations' such as the XMPP Foundation.  I've nothing against not-for-profit entities (and have started one or two in my time) but it is a large step to make for small teams.
 
-The main trick to making a peer-to-peer collaborative standardization project work is clear unilateral grants by all contributors.  This removes the need for a centralizing entity, at least as long as there are no trademarks to acquire.  The Digistan process[((bibcite coss))] guarantees the right to branch and merge specifications.  So if Johan likes a profile that Hubert has written but want to experiment with changes, he can branch Hubert's profile specification, and make his own.  And Hubert has the right to merge any successful experiments back into his profile specification.  If your name is Johan or Hubert, it's nothing personal.
+The main trick to making a peer-to-peer collaborative standardization project work is clear unilateral grants by all contributors.  This removes the need for a centralizing entity, at least as long as there are no trademarks to acquire.  The Digistan process[((bibcite coss))] guarantees the right to branch and merge specifications.  So if Johan likes a profile that Hubert has written but want to experiment with changes, he can branch Hubert's profile specification, and make his own.  And Hubert has the right to merge any successful experiments back into his profile specification.
 
 Peer-to-peer, branch-and-merge, and share-alike are perhaps radical ideas for standards development but I think their time has come, and they form the core of the RestMS process.
 
--- below this line be dragons --
+++ Where is RestMS going?
 
-++ What next?
+The experimentation in RestMS happens in profiles.  It would be fun to make a profile for streamed messaging - high-volume publishers and subscribers.  Profiles for exotic types of routing, based on geographic coordinates, regular expressions, free text matching, soundex, randomization, etc.  Profiles to bridge other messaging systems.  A profile for plugging pipes right back into feeds so that RestMS becomes a universal glue between arbitrary messaging systems.  And so on.
+
+There are two projects to implement RestMS servers (, and two clients projects.
+
 
 ++ Try it
 
