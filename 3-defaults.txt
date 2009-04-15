@@ -28,7 +28,7 @@ We cover these aspects of the Defaults profile:
 * What the profile is designed for;
 * What the resources look like and how they work;
 * Guidelines for client applications;
-* Guidelines for server implementors.
+* Guidelines for server implementers.
 
 ++ Language
 
@@ -121,7 +121,7 @@ Content-Type: application/restms+xml
 </restms>
 [[/code]]
 
-++ Guidelines for server implementors
+++ Guidelines for server implementers
 
 The default feed type does not queue messages: it examines its set of joins and copies the message to each pipe that has a matching join, and it then discards the message.
 

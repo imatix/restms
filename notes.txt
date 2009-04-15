@@ -2,43 +2,43 @@ Change notes on RestMS
 
 Draft/4
 
-- Fix: all references to wiki.amqp.org changed to restms.org
-- Fix: RestTL made more clearly distinct from RestMS
-- Fix: removed feed & pipe type descriptions from RestMS spec
-- Change: add join 'type' property, defaults to empty
-- Change: default feed type is empty (was "topic")
-- Change: default pipe type is empty (was "fifo")
-- Clarity: default join moved into default profile specification
-- Add: new resource type 'profile', read-only child of domain
-- Add: defined "Defaults" profile
-- Add: defined "AMQP9" profile
-- Change: removed feed property on delivered messages
-- Change: POST message to feed MAY result in <message> response
+* Fix: all references to wiki.amqp.org changed to restms.org
+* Fix: RestTL made more clearly distinct from RestMS
+* Fix: removed feed & pipe type descriptions from RestMS spec
+* Change: add join 'type' property, defaults to empty
+* Change: default feed type is empty (was "topic")
+* Change: default pipe type is empty (was "fifo")
+* Clarity: default join moved into default profile specification
+* Add: new resource type 'profile', read-only child of domain
+* Add: defined "Defaults" profile
+* Add: defined "AMQP9" profile
+* Change: removed feed property on delivered messages
+* Change: POST message to feed MAY result in <message> response
 
 Draft/3
 
-- Fix: any references to ;type=xxx should be removed
-- Change: break specification into easier to read documents
-- Change: Etag must include MIME type as part of calculation
-- Change: Remove Slug header and move to document 'name=' attribute
-- Change: use plain text error response bodies, not HTML (and specify this)
-- Clarify: what encodings are allowed on embedded content
-- Clarify: why and how to do pipe caching
-- Clarify: URIs can be relative coming from client, always absolute from server
-- Change: generic data model example should not be <restms>, that is confusing
-- Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
-- Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
-- Clarify: for OOB contents, what headers are preserved (answer: none)
-- Clarify: POST on feeds, if xml/json -> message, else is content
-- Clarify: on post content to feed, response has no content
-- Clarify: on post content to feed, GET and DELETE allowed on that content
-- Clarify: on arrived messages, GET and DELETE allowed on those messages
-- Clarify: joins may also have header entities.
-- Add: message_id also shown on pipe summary of messages
-- Clarify: add rules explaining how clients should handle unknown elements
-- Add: list all error responses (in RestMS spec)
-- Clarify: describe rules for XML and JSON mapping (in RestTL)
-- Clarified: semantics of ondemand pipe type.
+* Fix: any references to ;type=xxx should be removed
+* Change: break specification into easier to read documents
+* Change: Etag must include MIME type as part of calculation
+* Change: Remove Slug header and move to document 'name=' attribute
+* Change: use plain text error response bodies, not HTML (and specify this)
+* Clarify: what encodings are allowed on embedded content
+* Clarify: why and how to do pipe caching
+* Clarify: URIs can be relative coming from client, always absolute from server
+* Change: generic data model example should not be <restms>, that is confusing
+* Clarify: server SHOULD decode published content before sending to broker if encoding is "base64", http://tools.ietf.org/html/rfc4648
+* Clarify: describe how to post / receive messages, with all scenarios (in Using RestMS)
+* Clarify: for OOB contents, what headers are preserved (answer: none)
+* Clarify: POST on feeds, if xml/json -> message, else is content
+* Clarify: on post content to feed, response has no content
+* Clarify: on post content to feed, GET and DELETE allowed on that content
+* Clarify: on arrived messages, GET and DELETE allowed on those messages
+* Clarify: joins may also have header entities.
+* Add: message_id also shown on pipe summary of messages
+* Clarify: add rules explaining how clients should handle unknown elements
+* Add: list all error responses (in RestMS spec)
+* Clarify: describe rules for XML and JSON mapping (in RestTL)
+* Clarified: semantics of ondemand pipe type.
 
 
 Pending

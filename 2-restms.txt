@@ -48,7 +48,7 @@ These terms are introduced by, and have specific meaning, in this specification:
 
 [[[spec:1 | RestTL] specifies standard rules for representing resources, and standard mechanisms for working with them in a RESTful fashion over a plain HTTP client-server network.
 
-Implementors should apply RestTL's rules to all resources and methods that RestMS defines, unless RestMS explicitly states otherwise.  For example there are certain resources (such as contents) and methods (such as POST on a feed) that do not follow the RestTL strictures.  These are clearly noted.  All others follow RestTL.
+Implementers should apply RestTL's rules to all resources and methods that RestMS defines, unless RestMS explicitly states otherwise.  For example there are certain resources (such as contents) and methods (such as POST on a feed) that do not follow the RestTL strictures.  These are clearly noted.  All others follow RestTL.
 
 ++ RestMS resource types
 

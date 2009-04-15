@@ -40,7 +40,7 @@ These terms are introduced by, and have specific meaning, in this specification:
 
 REST[((bibcite rest))] is a design pattern rather than a formal specification.  This means that architects have lattitude in how to implement more or less RESTful APIs.  This is useful for experimentation but problematic for defining standards.  Standards should formalize best practice in a regular way.
 
-The principle of Least Surprise applies: the implementor, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.  We do not want discussions over whether one updates a resource using PUT or POST.
+The principle of Least Surprise applies: the implementer, having learned the rules that apply to object A, expects them to apply to object B insofar as that makes sense.  How we create and work with resources, how we name and address resources, how we represent resources: all these should as regular as possible.  We do not want discussions over whether one updates a resource using PUT or POST.
 
 The best way to enforce the regularity of such rules is to draw them out into a stand-alone specification, and document them clearly, removing redundant optionality so there is exactly one way to do anything, and no grey areas.  This is such a specification.
 

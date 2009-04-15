@@ -28,7 +28,7 @@ We cover these aspects of the AMQP9 profile:
 * What the profile is designed for;
 * What the resources look like and how they work;
 * Guidelines for client applications;
-* Guidelines for server implementors.
+* Guidelines for server implementers.
 
 ++ Language
 
@@ -305,7 +305,7 @@ Content-Type: application/restms+xml
 </restms>
 [[/code]]
 
-++ Guidelines for server implementors
+++ Guidelines for server implementers
 
 +++ Integration with AMQP networks
 
@@ -320,11 +320,11 @@ The AMQP9 profile is designed to be able to interoperate with AMQP.  This works 
 
 Sane use of AMQP demands that applications agree in advance on their routing architecture.  This requires agreement on the names and types of exchanges used, and the allowed values for routing keys used in bindings and messages.  To assure routing between RestMS and AMQP applications we need similar conventions.
 
-We start by re-iterating the three fundemantal messaging patterns:
+We start by re-iterating the three fundamental messaging patterns:
 
 # In which a request is sent to a remote "service", implemented by one or more service applications (the Wolfpack pattern).
-* In which the response to a service request is sent back to the original requesting application (the Housecat pattern).
-* In which a publisher distributes data to multiple subscribers (the Parrot pattern).
+# In which the response to a service request is sent back to the original requesting application (the Housecat pattern).
+# In which a publisher distributes data to multiple subscribers (the Parrot pattern).
 
 To create dependable RestMS-AMQP message routing, these guidelines apply:
 
@@ -533,7 +533,7 @@ Server implementations MAY take any reasonable approach to resources that are "o
 
 +++ Message routing
 
-The AMQP9 profile does not impose a specific architecture for interconnection with an AMQP network and there are several possibilities which we explain for the benefit of implementors.
+The AMQP9 profile does not impose a specific architecture for interconnection with an AMQP network and there are several possibilities which we explain for the benefit of implementers.
 
 In practice, AMQP servers may be paired for high-availability, and/or may be federated themselves into larger AMQP networks.  In this discussion we will assume that the RestMS server speaks to exactly one AMQP server.
 
