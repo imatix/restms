@@ -40,9 +40,9 @@ Draft/3
 * Clarify: describe rules for XML and JSON mapping (in RestTL)
 * Clarified: semantics of ondemand pipe type.
 
-
 Pending
 
+- rewrite user guide
 - Add: security on feeds, using passwords defined at feed create time
     - all resources should be deletable only by client that created them
     - additionally, rw security can be layered on that
