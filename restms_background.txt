@@ -8,33 +8,33 @@ This document is licensed the Creative Commons Attribution Share-Alike (cc-by-sa
 
 ++ Messaging for a Connected World
 
-Wikipedia describes CORBA - arguably the principle messaging standard of the last century - as "//a standard [...] that enables software components written in multiple computer languages and running on multiple computers to work together.//"[((bibcite corba))]  This is an excellent problem statement for messaging.
+Wikipedia [http://en.wikipedia.org/wiki/CORBA describes CORBA] - arguably the principle messaging standard of the last century - as "//a standard [...] that enables software components written in multiple computer languages and running on multiple computers to work together.//" This is an excellent problem statement for messaging.
 
 It's been almost two decades since CORBA was launched, and the connected world has utterly changed in that time.  As the technology of connecting people, machines, and applications together has doubled in power and halved in cost every two years or so, so have the challenges of scaling and security grown by ten orders of magnitude.
 
-In this article I'll look at one specific aspect - messaging for Web applications, and specifically the RestMS[((bibcite restms]]) web messaging protocol that a small group is developing.  To set the stage, I'll look at how messaging - the problem as well as the solution - has evolved since 1991, and how RestMS fits into a vision what messaging will look like in another 20 years.
+In this article I'll look at one specific aspect - messaging for Web applications, and specifically the [http://www.restms.org/ RestMS] web messaging protocol that a small group is developing.  To set the stage, I'll look at how messaging - the problem as well as the solution - has evolved since 1991, and how RestMS fits into a vision what messaging will look like in another 20 years.
 
 ++ History and evolution of messaging
 
 CORBA was fairly unique in being a deliberate //standard// rather than a product.  Messaging is still dominated by products rather than standards and CORBA was ahead of its time in attempting to lay down rules for interoperability and that perfect supplier economy that a free and open standard enables.
 
-In 2002 de Jong et al[((bibcite dejong))] noted five main things wrong with CORBA, in favour of a new standard called SOAP[((bibcite soap))]: "//CORBA... is too complex... too expensive... does not work through firewalls or proxy web servers... isn't being hyped by IBM and MS//" and is not human-readable.
+In 2002 de Jong et al [http://www.xs4all.nl/~irmen/comp/CORBA_vs_SOAP.html noted five main things] wrong with CORBA, in favour of [http://en.wikipedia.org/wiki/SOAP a new standard called SOAP]: "//CORBA... is too complex... too expensive... does not work through firewalls or proxy web servers... isn't being hyped by IBM and MS//" and is not human-readable.
 
 My own view is that CORBA failed because it became a vehicle for vendors: too easy to capture, and in the end what customers really wanted was interoperability and choice of vendors, rather than functionality as such.
 
-There are not many messaging standards that aim at the whole stack.  After CORBA, SOAP is perhaps the best known one.  Based on XML-RPC[((bibcite xmlrpc))], the "simple object access protocol" became something much larger and soon landed in exactly the same place as CORBA: too ambitious, too complex, too dominated by large vendors.  Today SOAP lives only in the ghetto of Enterprise IT.
+There are not many messaging standards that aim at the whole stack.  After CORBA, SOAP is perhaps the best known one.  Based on [http://en.wikipedia.org/wiki/XML-RPC XML-RPC], the "simple object access protocol" became something much larger and soon landed in exactly the same place as CORBA: too ambitious, too complex, too dominated by large vendors.  Today SOAP lives only in the ghetto of Enterprise IT.
 
-Given free choice, it seems many more people still prefer XML-RPC over SOAP.  Compare the two Wikipedia pages and it's clear which has the more thriving community.  Similarly, on his page "Alternatives to CORBA"[((bitcite cbrowne)))] Christopher Browne has one link for SOAP and dozens for XML-RPC.
+Given free choice, it seems many more people still prefer XML-RPC over SOAP.  Compare the two Wikipedia pages and it's clear which has the more thriving community.  Similarly, Christopher Browne [http://linuxfinances.info/info/corbaalternatives.html lists one link] for SOAP and dozens for XML-RPC.
 
 One lesson that seems to shine through.  The technologies that succeed are the ones which are standardized, open, simple, cheap, and human readable.  Being HTTP-friendly is a plus.  Being hyped by IBM and MS is not.
 
-What is striking is how few attempts there have been to design messaging protocols.  Browne's page lists numerous proprietary products but practically no standards that would permit such products to interoperate.  Or rather, would permit clients to freely choose vendors.  He does list one, "Advanced Message Queuing Protocol"[((bibcite amqp))].
+What is striking is how few attempts there have been to design messaging protocols.  Browne's page lists numerous proprietary products but practically no standards that would permit such products to interoperate.  Or rather, would permit clients to freely choose vendors.  He does list one, the "[http://www.amqp.org Advanced Message Queuing Protocol]".
 
 ++ What changed?
 
-In 1991, I released my first FOSS product, Libero[((bibcite libero))].  I sent out packages by email to people who asked for it.  My email account was a dial-up to a Unix shell.  It cost 1,000 Euro a year and ran at 33.6Kb.
+In 1991, I released my first FOSS product, [http://legacy.imatix.com/html/libero/index.htm Libero].  I sent out packages by email to people who asked for it.  My email account was a dial-up to a Unix shell.  It cost 1,000 Euro a year and ran at 33.6Kb.
 
-In 1991, there were still fears of a global software shortage[((bibcite brooks))], which were calmed only around the turn of the century when it became obvious that software had become as cheap as ice.
+In 1991, there were still fears of [http://en.wikipedia.org/wiki/No_Silver_Bullet a global software shortage], which were calmed only around the turn of the century when it became obvious that software had become as cheap as ice.
 
 In 1991, it was still much more expensive to write a piece software than to connect it to another one.  Messaging, like databases, was just a small part of the cost.  Who cared if CORBA was expensive and complex?  Everything was, in 1991.  And don't get me started on 1981... :-)
 
@@ -52,7 +52,7 @@ Although it seems counter-intuitive, I believe we'll see open standards that are
 
 There are many areas where messaging standards are needed.  The main ones are:
 
-* Connecting pieces on a single box or on a data-center LAN (the D-Bus world).
+* Connecting pieces on a single box or on a data-center LAN (the [http://en.wikipedia.org/wiki/D-BUS D-Bus] world).
 * Connecting pieces across a broad LAN (the MQ-Series and JMS world).
 * Connecting pieces across the Internet (the XML-RPC world).
 
@@ -84,7 +84,7 @@ We see all three patterns crop up over and over in real life, so it seems safe t
 
 ++ Messaging for the Web
 
-The Internet throws up some very specific challenges.  The Slashdot effect.  Zero-day exploits.  The Facebook effect[[footnote]]OK, I just invented this one, it means attention spans are limited so you only have until the next Facebook status update to get your point across.[[/footnote]]
+The Internet throws up some very specific challenges.  The Slashdot effect.  Zero-day exploits.  The Facebook effect.  OK, I just invented that one, it means attention spans are limited so you only have until the next Facebook status update to get your point across.
 
 So we can say that web messaging is about "Scalability, Security, and Simplicity":
 
@@ -104,9 +104,9 @@ A web messaging protocol should be human-readable for everything except high-vol
 
 ++ Origins of RestMS
 
-I have not found a messaging protocol that does all these things.  Some get part of the way.  But one day last year, as we were thinking about how to map AMQP for web use, Steve Vinoski suggested I read the AtomPub protocol.  I thought I understood what REST meant but AtomPub[((bibcite atompub))] made it much clearer.
+I have not found a messaging protocol that does all these things.  Some get part of the way.  But one day last year, as we were thinking about how to map AMQP for web use, Steve Vinoski suggested I read the AtomPub protocol.  I thought I understood what http://en.wikipedia.org/wiki/Representational_State_Transfer REST] meant but [http://www.ietf.org/rfc/rfc4287.txt AtomPub] made it much clearer.
 
-The beauty of Roy Fielding's REST[((bibcite rest))] pattern is that it throws away so much and leaves the essentials in a coherent, scalable structure.  REST's simplicity seems to offend some people, who perhaps cannot believe that four verbs (GET, PUT, DELETE, POST) can do everything.  But I've found it to be a revelation.
+The beauty of Roy Fielding's [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm REST pattern] is that it throws away so much and leaves the essentials in a coherent, scalable structure.  REST's simplicity seems to offend some people, who perhaps cannot believe that four verbs (GET, PUT, DELETE, POST) can do everything.  But I've found it to be a revelation.
 
 Very roughly, we took the AMQP messaging models, which implement Housecat, Wolfpack, and Parrot, and have those essential aspects I spoke of, and made these models work over HTTP using the RESTful rules.
 
@@ -126,17 +126,17 @@ The RestMS feed-join-pipe model supports both 'push routing', where messages are
 
 But at some stage we need to clearly specify how the routing works.  In earlier drafts we hard-coded this into RestMS, making it dependent on AMQP routing semantics.  That's not a viable option, since AMQP itself is still changing (from a push to a pull routing model).
 
-Thus RestMS defines a third layer, "profiles".  A profile defines the semantics of a set of feed, join, and pipe types.  It basically offers a plug-in messaging abstraction.  Having profiles means we do not need to try to design the Ultimate Simple Messaging Abstraction today.  So long as it's cheap and safe to experiment, that's fine.  RestMS comes with two profiles, a [http://www.restms.org/spec:3/Defaults Defaults] profile that does Housecat and simple Parrot, and a [http://www.restms.org/spec:4/AMQP9 AMQP] profile that does more sophisticated messaging and interoperates with AMQP networks.
+Thus RestMS defines a third layer, "profiles".  A [http://www.restms.org/wiki:profile profile] defines the semantics of a set of feed, join, and pipe types.  It basically offers a plug-in messaging abstraction.  Having profiles means we do not need to try to design the Ultimate Simple Messaging Abstraction today.  So long as it's cheap and safe to experiment, that's fine.  RestMS comes with two profiles, a [http://www.restms.org/spec:3/Defaults Defaults] profile that does Housecat and simple Parrot, and a [http://www.restms.org/spec:4/AMQP9 AMQP] profile that does more sophisticated messaging and interoperates with AMQP networks.
 
 ++ The RestMS specification process
 
-The www.restms.org site is the hub of the small but relaxed - restful, even - RestMS community.  I've mentioned that RestMS is a "free and open standard", which is a term coined by the Digital Standards Organization (Digistan)[((bibcite digistan))].  If you like the politics of open standards, Digistan may be fun.
+The www.restms.org site is the hub of the small but relaxed - restful, even - RestMS community.  I've mentioned that RestMS is a "free and open standard", which is a term coined by the [http://www.digistan.org Digital Standards Organization] (Digistan).  If you like the politics of open standards, Digistan may be fun.
 
 The restms.org website is worth a short story.  It's based on work done by Digistan, which I'm part of.  If you look at http://spec.digistan.org you'll see the template we used for www.restms.org.
 
 In 2007, Digistan started on a project to develop peer-to-peer tools for decentralized standards development.  Most standards are still built by 'Foundations' such as the XMPP Foundation.  I've nothing against not-for-profit entities (and have started one or two in my time) but it is a large step to make for small teams.
 
-The main trick to making a peer-to-peer collaborative standardization project work is clear unilateral grants by all contributors.  This removes the need for a centralizing entity, at least as long as there are no trademarks to acquire.  The Digistan process[((bibcite coss))] guarantees the right to branch and merge specifications.  So if Johan likes a profile that Hubert has written but want to experiment with changes, he can branch Hubert's profile specification, and make his own.  And Hubert has the right to merge any successful experiments back into his profile specification.
+The main trick to making a peer-to-peer collaborative standardization project work is clear unilateral grants by all contributors.  This removes the need for a centralizing entity, at least as long as there are no trademarks to acquire.  The Digistan [http://www.digistan.org/spec:1 COSS process] guarantees the right to branch and merge specifications.  So if Johan likes a profile that Hubert has written but want to experiment with changes, he can branch Hubert's profile specification, and make his own.  And Hubert has the right to merge any successful experiments back into his profile specification.
 
 Peer-to-peer, branch-and-merge, and share-alike are perhaps radical ideas for standards development but I think their time has come, and they form the core of the RestMS process.
 
@@ -144,69 +144,31 @@ Peer-to-peer, branch-and-merge, and share-alike are perhaps radical ideas for st
 
 The experimentation in RestMS happens in profiles.  It would be fun to make a profile for streamed messaging - high-volume publishers and subscribers.  Profiles for exotic types of routing, based on geographic coordinates, regular expressions, free text matching, soundex, randomization, etc.  Profiles to bridge other messaging systems.  A profile for plugging pipes right back into feeds so that RestMS becomes a universal glue between arbitrary messaging systems.  And so on.
 
-There are two projects to implement RestMS servers (, and two clients projects.
+There are two projects to implement RestMS servers (Thilo Fromm's [http://t-lo.github.com/ahkera/ Akhera] and iMatix's [http://www.zyre.com Zyre], and various clients projects including a RestMS [http://github.com/pieterh/restms/tree/master reference client] in Perl.  It's pretty easy to build a client that sits on top of an HTTP stack and gives applications access to the various RestMS resources.  A RestMS client is a bit larger than an XML-RPC one but it's possible to access RestMS with [http://www.restms.org/wiki:telnet raw HTTP].
 
+For some people, RestMS acts as a web front-end to an AMQP network.  This is how Zyre works with iMatix's [http://www.openamq.org OpenAMQ] package.  For other people, RestMS is fine as a stand-alone messaging protocol.
 
-++ Try it
+++ Get involved
 
-++ RestMS Profiles
+We've set-up [http://lists.digistan.org/mailman/listinfo/restms a mailing list] for discussing RestMS.  That's the best place for comments and questions.  Here are some of the ways you can get involved in RestMS:
 
-RestMS defines a standard resource tree and defines how each resource is represented, and how a client can work with it.  The semantics of message routing are contained in three key resources:
+* If you're a blogger, write about RestMS.
+* If you're a critic, review the specs and tell us what is unclear, inconsistent or downright wrong.
+* If you're a REST expert, tell us what you think of [http://www.restms.org/spec:1/RestTL RestTL].
+* If you're designing a RESTful API, think about using RestTL as the basis, or tell us why not.
+* If you're looking for a web messaging system, tell us whether RestMS would work, or would not.
+* If you want to see how a RestMS server works, grab Thilo's [http://t-lo.github.com/ahkera/ Akhera] written in Python/Django.
+* If you want to see what a RestMS client looks like, grab the Perl classes from [http://github.com/pieterh/restms/tree/master the RestMS git repository].
+* If you want to experiment with protocol design, join the restms.org community, and develop your own profile.
 
-* The **feed**, to which publishers send messages.
-* The **pipe**, from which subscribers read messages.
-* The **join**, which ties these two together in an N-to-N relationship.
+Above all, use RestMS in applications and tell us how to improve it.  We've set up a live RestMS server at [http://live.zyre.com live.zyre.com] but you can also download free RestMS servers to run on your own systems.
 
-The notion of feeds, pipes, and joins is easily familiar since these names are used for similar types of resource elsewhere (such as RSS feeds, SQL joins, and Unix pipes).
+++ Conclusions
 
-However, the mechanics of exactly how messages flow from feed via join to pipe, are delicate.  There are several ways to conceptualize a feed-join-pipe model, and it is unclear which of these ways is best, because abstract messaging models are a very new notion and the field is evolving rapidly.
+I've drawn a view of messaging as necessary but too-complex glue that gets simpler over time as we learn how to do it right.  I've predicted we'll see a fabric of different protocols aimed at different spaces, and RestMS is one of these, aimed at web messaging.  The web demands security, scalability, and simplicity, and these are built into RestMS thanks to its use of plain HTTP/HTTPS as a wire level protocol.
 
-To give some examples of the choices a model designer faces:
+Part of the challenge of designing a messaging protocol is deciding how to queue and route messages.  I've explained that there are several alternatives, and explained how RestMS leaves this choice open for future protocol designers, by using //profiles// to define the queuing and routing semantics.  RestMS has two profiles today, and I expect that number will grow, as people experiment, and then shrink again as the best experiments become widely used.
 
-* Should the feed act as a queue, or should it route messages straight into pipes?
-* Should the feed be persistable, and if so is this something the client can choose (by specifying a particular feed type)?
-* Should the model be compatible with other models, such as AMQP?
-* Should joins be passive (specifying criteria that feeds act upon) or active (pulling messages off the feed into their pipe)?
-* Should it be possible to join any pipe type to any feed type?
-* Are there intelligent default models that the client can benefit from?
+I've explained how RestMS is built as a stack of small specifications, and how the community works, as a peer-to-peer effort that uses [http://www.digistan.org/spec:1 Digistan's COSS] lifecycle, based on branch-and-merge and share-alike.  This is a new approach to specification work, maybe even radical, but it ensures that the freedom of RestMS users to stay in control is guaranteed, forever.
 
-And so on.
-
-Rather than try to answer these questions directly in RestMS by embedding a single, fixed model (with a high probability that in several years the answers would be proven wrong), we define the messaging model as a //profile//, and make RestMS work with arbitrary profiles.
-
-The real value of an abstract messaging system like RestMS is in the simplicity and effectiveness of its model.  But the time it takes to develop better models depends on the inertia of the encapsulating protocol.  If the protocol uses complex binary framing, then any change is expensive and slow to implement and test.
-
-Given that RestMS is relatively easy to implement - for any developer with an HTTP stack and XML parsing classes - it can be seen as a rapid prototyping environment for profile development, and profiles can be seen as the key product of the RestMS ecosystem.
-
-
-
-++ RestMS as an HTTP-to-AMQP proxy
-
-As we explained, AMQP works well for enterprise messaging but too complex for web messaging.  However, there is value in allowing RestMS to work as an HTTP front-end for an AMQP network.
-
-This is done by defining an AMQP profile which maps the AMQP model to matching feed, join, and pipe types.  A RestMS server which implements such a profile can be a node on a federated AMQP network, and act as a proxy between an HTTP web messaging network at one side and an AMQP enterprise messaging network at the other.
-
-We believe this to be a natural and advantageous architecture, especially when it becomes necessary to expand an existing enterprise messaging network to include external parties.
-
-++ Universal interoperability
-
-We believe, but this is not yet proven, that RestMS can interoperate with any existing messaging system through the creation of an appropriate profile.  It is theoretically possible to bridge any profile with any other profile, thus allowing RestMS to become a universal message switching protocol.
-
-++ References
-
-[[bibliography]]
-: corba : Common Object Request Broker Architecture - [http://en.wikipedia.org/wiki/CORBA Wikipedia]
-: soap : SOAP - [http://en.wikipedia.org/wiki/SOAP Wikipedia]
-: dejong : Irmen de Jong (and others), "Web Services/SOAP and CORBA" - [http://www.xs4all.nl/~irmen/comp/CORBA_vs_SOAP.html www.xs4all.nl/~irmen]
-: xmlrpc : XML-RPC - [http://en.wikipedia.org/wiki/XML-RPC Wikipedia]
-: dbus : D-BUS - [http://en.wikipedia.org/wiki/D-BUS Wikipedia]
-: cbrowne : Christopher Browne, "Alternatives to CORBA" - [http://linuxfinances.info/info/corbaalternatives.html linuxdatabases.info]
-: zeromq : ZeroMQ - [http://www.zermq.org/ www.zeromq.org]
-: restms : "The RESTful Messaging Service" - [http://www.restms.org/ www.restms.org]
-: amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
-: atompub : "The Atom Syndication Format" - [http://www.ietf.org/rfc/rfc4287.txt ietf.org]
-: rest : Roy Fielding, "Representational State Transfer (REST)" [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm www.ics.uci.edu]
-: brooks : Fred Brooks, "No Silver Bullet - Essence and Accidents of Software Engineering" -  [http://en.wikipedia.org/wiki/No_Silver_Bullet Wikipedia]
-: digistan : The Digital Standards Organization - [http://www.digistan.org Digistan]
-: coss : Consensus-Oriented Specification System - [http://www.digistan.org/spec:1/COSS www Digistan].
-[[/bibliography]]
+Finally, I've explained how to contribute, if you have an itch that RestMS can scratch for you.
