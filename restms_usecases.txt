@@ -1,0 +1,181 @@
+This article explains RestMS by comparing it to alternatives, and provides some typical use cases for **RestMS**, the RESTful Messaging Service.   These use cases will help you understand the kinds of problems that RestMS can solve.
+
+Copyright (c) 2009 iMatix Corporation.  Licensed under the terms of the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0.
+
+++ Twitter for Applications
+
+RestMS might be described as "Twitter for applications" because it makes it easy for applications to join together.  Let's look at an example of how RestMS could be used.
+
+A firm publishes global flight data: they collect data from airports, aviation authorities, airlines, and booking systems.  They publish this as a series of a dozen or so feeds, broken up by geographic relevance.  North America is covered by three feeds, while Europe is covered by two.
+
+This firm publishes these feeds to an RestMS servers.  The feeds carry around 200 updates per second, or 10M per day.  The feeds peak at 1,000 updates per second.  Each update is one message.
+
+There are a set of message types, covering flight departures and arrivals, delays, and position reports.  Some airlines have started to publish realtime (every 5 minutes) updates of their flights.  There are messages that carry weather and airport information, messages that carry security announcements, and even messages that carry advertising.
+
+These dozen or so feeds are followed by around a thousand applications.  One application tracks the flight delays.  Another application lets users receive a text message when a specific flight arrives.  Another application correlates delays against weather, to predict upcoming problems for travellers.  And yet another application scores airports for performance and advises travellers on airlines and airports to use, or avoid.
+
+Each application tells the RestMS server exactly what kind of messages it wants.  Instead of simply getting the full feed (which would result in a total of around 1M messages a second, applications subscribe to specific categories of message within each feed: by airport, by airline, by type of message, and so on.  Developers like this because they can fine-tune their subscriptions to get exactly the messages they need: all the work is then done by the server.  So finally, the total throughput of the system is around 100K messages per second, well within the capacity of the RestMS server.
+
+The RestMS server streams outgoing messages to specific clients.  This means it keeps 1,000 connections open in parallel, and sends messages across these connections.  This means that message latency is very low, under a second, and the client applications become fairly simple: connect to server, make subscriptions, wait for message, process message, and loop back to waiting again.
+
+The firm sells access to its feeds, providing a mix of free, low-volume, and high-volume feeds.  The RestMS server handles security, only allowing applications access to the feeds they have paid for.
+
+The CTO of the firm explains how RestMS changed his firm's business: "before, we used FTP and XML-RPC to deliver flight data to our clients.  Every client got every message, and we found that our business stopped growing at around fifty clients.  It just became too expensive to scale up, both for our clients and for us.  When we switched to a RestMS architecture, our overall bandwidth consumption dropped by 90%, and we found that it became much easier to make new feeds, so we could expand our product range rapidly.  We went from being a US-only operation to a global one, and we multiplied our business twenty times over the next two years.  For me the question of how to deliver our products to our clients is solved, and we can scale it easily.  We're now looking at running a global network of RestMS brokers so that clients get the very lowest latency, down to a millisecond."
+
+He ends by explaining that RestMS is changing his whole supply chain too: "we're now getting our data suppliers to use RestMS as well.  For them it's easier than making web APIs, and cheaper to run.  They publish their data to a feed on a separate RestMS instance, where we take the data, clean it and reformat it into our standard format, and then republish it.  And we're starting a new project to allow our end-users to upload their own updates and feeds.  RestMS works in both directions, and any client can become a publisher just like that."
+
+//Warning: this is not a real-life story, but a vision of the kind of dramatic changes that RestMS could bring.//
+
+++ In a nutshell
+
+RestMS is designed to do two main things:
+
+# To distribute high volumes of data to many subscribers.
+# To connect applications across the Internet into collaborative networks.
+
+Some scales of operation:
+
+* An application that publishes one message per second, with a dozen subscribers.
+* A set of publishers publishing 100 messages per second, going out to a hundred subscribers.
+* A set of publishers publishing 10,000 messages per second, going out to 1,000 subscribers.
+* An application that accepts service requests, supporting a dozen client applications.
+* A set of services processing 100 requests per second, from a hundred client applications.
+* A set of services processing 1,000 messages per second, from 1,000 client applications.
+
+Alternatives to RestMS include: RSS, file transfer, HTTP, XML-RPC, SOAP, and email.  What RestMS does that makes it special is:
+
+* It is dynamic, so lets applications join and leave the network arbitrarily.
+* It works with //addressed messages// rather than remote objects or remote interfaces.
+* It queues messages for applications that cannot retrieve them immediately.
+* It lets applications specify exactly which messages they want, so data is never sent uselessly.
+* It delivers messages //asynchronously//, so applications do not need to poll.
+
+Together, this lets you imagine much larger networks that run faster, and are cheaper to operate and change.
+
++++ Compared to RSS
+
+RSS is the most popular way of distributing data between web applications.  It carries very simple "articles".  Receivers poll for updates, which creates heavy load on servers.  The only way to select data is to get a custom "feed".  The same feed contents will be sent over and over.  So RSS is limited to small message rates (a few per minute) and simple types of feed.
+
+RestMS, by comparison, can carry any kind of message: news articles, stock quotes, images, video clips, weather information, traffic updates.  It will route messages to subscribers according to criteria that subscribers define beforehand: one subscriber might ask for temperature readings from Poland, while another asks for updates on the gold price.
+
+RSS can handle very large numbers of subscribers, by giving each a very few resources.  Google may have tens of thousands of RSS feed subscribers.  But they cannot do more than fetch a feed, over and over.  One RestMS server is limited to perhaps ten thousand subscribers, each keeping an open connection, but on that connection they can do much more interesting work.
+
+In terms of latency, RestMS delivers new messages to applications immediately, as they become available, and if they match the criteria that the subscriber specified.  With RSS, the latency of a message depends on how often the subscriber polls the server, and there is a conflict of interest: the subscriber wants to poll more often, but that penalizes the server.  With RestMS there is no such conflict.
+
+In terms of capacity, polling is really terrible.  A round trip request-response takes up to a second, meaning that the capacity of a polled network is measured in one, or a handful, of messages per second.  A high volume stream of data can reach tens of thousands of messages per second.  Imagine polling a video camera for frames: the results would be unusable.  Here RestMS does it properly: data is pushed to subscribers at full speed.
+
+Finally, RSS is one-way, whereas RestMS lets any application act both as subscriber, and as publisher.  This lets you build more sophisticated architectures where applications subscribe to some data feeds, process them, and republish them as new feeds.  It also lets you build distributed service networks, where applications can request a service from a remote service, and receive a response.  Data distribution and remote services use the same message-oriented model, the same RestMS syntax.
+
+At the same time, RestMS aims to be simple, which is the winning characteristic of RSS.  It does have a more sophisticated resource model (feeds, joins, and pipes) than RSS (just feeds), but this model is easy to work with from any language.
+
+The disadvantage of RestMS is that it takes more work to use than RSS.  In RSS, an application fetches one resource, and immediately has data.  In RestMS, an application must create a pipe, join it to a feed, and fetch the pipe, and then wait for a message to arrive.  That takes at least four or five steps.
+
++++ Compared to File Transfer
+
+Many businesses still use file transfer to exchange data.  The reasons are that it's a well-understood technology, it's fast for large volumes, and it's simple, conceptually.  You place a file somewhere, and someone picks it up.  File transfer is reliable: data that has been written to disk will survive system crashes.  And it is asynchronous: the sender and the recipient can work at different times.
+
+Indeed, file transfer is the most widely used data distribution mechanism: whenever you click on a link, you are transferring a file from a server to your browser.  HTTP is essentially a file transfer mechanism focused mainly on delivery, though it does also have publication functionality.
+
+The disadvantage of file transfer is that it is polled, and has no semantics for selection.  That is, applications get messages but cannot specify criteria that would let the server select specific individual messages.  And applications must check the server for updates, or use some out-of-band mechanism to request updates.  This means that latency is poor (do applications check for updates once a minute, once an hour, once a second?)
+
+HTTP can be used for asynchronous delivery, and we do this in RestMS using a special header ("When-Modified-After").  Other file transfer protocols (like FTP) do not have such an option.  It might be possible to build special FTP servers which had asynchronous delivery but that is not part of any standard, and not used by applications.
+
+RestMS does not attempt to replace file transfer, and in fact it uses it.  You can imagine RestMS as a very fast postal service that sends small cards and envelopes like an express delivery service.  If you want to send a large parcel, then RestMS will deliver the envelope very rapidly, but allow you to go and collect the parcel at your leisure.  RestMS delivers large messages as ordinary HTTP resources, accessible via a URL.
+
++++ Compared to SOAP or XML-RPC
+
+SOAP and XML-RPC use a "remote object" or "remote procedure call" (RPC) metaphor, in which one application invokes methods that are implemented by another, remote application.  This originated from object-oriented programming and older technologies like CORBA.
+
+While RPC is a well-established approach to building distributed systems, it has serious failings which make it unsuitable for large, dynamic networks:
+
+* RPC has no concept of "push" publication, so cannot be used for data distribution except via the same polling model that RSS and file transfer use.  This means that RPC can carry only a few messages per second (per client), rather than the thousands per second that a high-volume data distribution network needs.
+
+* RPC does no queuing, so if a service is busy or unavailable, it breaks.  This makes clients complex, and architectures fragile.
+
+* RPC has no concept of workload distribution, so a service cannot be scaled simply by adding more processes.
+
+* RPC does no routing, so each caller must know the absolute identity of the service.  This means that networks are expensive to change: to add a new service, to move a service, or to re-factor services, means changing existing clients.
+
+* RPC not symmetrical, and services are structurally different from clients.  It is expensive and complex to turn a client into a service.  This means that natural architectures (you call me, I'll call you) are not possible and need to be distorted (you call me, you call me to ask if I have anything for you).
+
+Where RPC wins is that it is easier to understand for programmers, and closer to their natural way of working.  Defining messages takes more work.
+
+Overall, RPC seems more suited to conventional hub-and-spoke architectures where there is no ambition to create more interesting networks.  For one web site offering a set of services, XML-RPC is a quick and obvious solution.  But if the same website wants to offer data distribution, or wants to act as the client for other services, it needs each time to build new, specific infrastructure.
+
+With RestMS, there is more work up-front in designing messages and deciding how addressing will work (do we route on topic, do we route on service name, what are our service names? etc.).  However, once that work is done, the architecture is easy to expand, easy to change, and easy to scale.
+
++++ Compared to Email
+
+Email is of course mostly used for person-to-person, or software-to-person communications.  It lacks some aspects that would make it useful for software-to-software communications.  However, of all the technologies we've examined, it's perhaps the closest in spirit to RestMS.
+
+Email is a loose network, with queues, and routing.  The routing semantics are simple and work globally.  Recipients can collect their messages at any time.  They still need to poll their mailboxes, which means that the capacity of an email network is limited to a few messages per second.
+
+Email //could// be the basis for a usable messaging system, with some changes:
+
+* The ability to create mailboxes dynamically
+* The ability to route messages to mailboxes on other criteria, e.g. expression matching
+* The ability to stream messages from a mailbox to a recipient (push, not poll)
+
+This would in effect require writing new email servers and clients, and making formal specifications for the above functionality (e.g. how does an application create a new mailbox?).  This is, in effect, what RestMS is, except it runs over HTTP rather than SMTP and POP3.
+
+++ Architectural aspects
+
++++ Hub-and-spoke vs. brokered peers
+
+* In a //hub-and-spoke// architecture (HTTP, FTP, XML-RPC, SOAP), clients are servers are fundamentally different.  Servers are big, expensive, and complex and provide a set of services that are embedded into the server.
+
+* In a //brokered peers// architecture (email, RestMS), there is a server but it does not provide application services.  Rather, it brokers messages which are passed at least from a client, to the broker, and to a client.  It is still expensive to provide a broker but the same generic broker can handle all applications.
+
+The brokered peers architecture (also called message-oriented, or loosely-coupled) makes it very cheap to add new application services: they are clients of the broker.  It is the difference between configuring a new email server, and opening a new mail client.  Or, installing a new web server, and opening a web client.
+
+The RestMS architecture uses a brokered peers architecture.  A request and response dialog takes four steps, where it would take only two with an XML-RPC architecture.  However this extra work is repaid by the low cost of adding services to the network: once the RestMS broker is installed and running, applications can join and leave the network trivially.
+
++++ Addressing and routing
+
+* In a //direct addressing// architecture (HTTP, FTP, XML-RPC, SOAP), senders know the network identity of the application they send a message to.  This is usually how hub-and-spoke architectures work.
+
+* In an //service-oriented// architecture (RestMS, email, SIP), senders use logical addresses that a central broker maps dynamically to real applications.  This is usually how brokered peers architectures work.
+
+The great advantage of service-oriented architectures is that it is cheap to add and remove applications from the network.  Applications do not have knowledge of each other, only of the broker.  Service-oriented architectures generally work by routing messages according to address mappings.
+
+The best of such architectures let applications change these mappings at runtime, so that the network can self-organize.  Mappings can be sophisticated, using various types of matching ("give me messages where product code is 123 and quantity is greater than 1000") rather than simple one-to-one matching on addresses.
+
+Some service-oriented architectures use a hybrid model in which a broker tracks the presence of applications, and maps logical addresses to real application locations, but applications talk directly to each other thereafter.  The SIP protocol for internet telephony, and the Bittorrent protocol for file distribution are examples.
+
+RestMS routes messages to applications based on criteria that applications themselves define.  There are a number of different patterns for routing, and in each case applications connect to the broker and request a certain set of messages:
+
+* Routing a message to a specific application, the [http://www.restms.org/wiki:housecat Housecat pattern], or "one to one".
+* Copying data to a set applications, the [http://www.restms.org/wiki:parrot Parrot pattern], or "one to many".
+* Distributing work to a set of applications, the [http://www.restms.org/wiki:wolfpack Wolfpack pattern], or "one to one-of-many".
+
++++ Synchronous vs. Asynchronous
+
+* In a //synchronous// architecture (HTTP, FTP, XML-RPC, SOAP), clients make a request to a service, which then responds.  If the service is busy, the client waits, or the request may be rejected.  If the service is absent, the client is told to retry later.  When the service completes a request it responds to the client with results.
+
+* In an //asynchronous// architecture (email, RestMS, printer queues), clients send requests to a queue, and a service processes the queue.  The client does not care if the service is busy, or absent.  It may expect a response at some point, but it does not necessarily wait for the response.
+
+Synchronous architectures are notoriously fragile ("server busy, please wait...") and poorly scalable.  They depend on tight coupling between clients and services; if either is absent, nothing can happen.  Compare making a voice call (synchronous) to someone who is going into a tunnel, against sending a text message (asynchronous).  If many people wish to notify someone at the same time, text messages scale much better than voice calls.  It is the same with application-to-application communications.
+
+RestMS uses a mix of synchronous and asynchronous dialogs.  Control requests (the work an application does when it joins the network) are synchronous.  Message delivery is asynchronous (at time of writing the RestMS streaming profile is still being developed, and asynchronous delivery in the default profile is done message-by-message).
+
++++ Polled vs. pushed delivery
+
+* In a //polled delivery// architecture (RSS, XML-RPC, SOAP, HTTP), applications repeatedly ask the server for updates, and process any data that arrived.  It is a simple and obvious, but inefficient strategy, generally employed by synchronous architectures.
+
+* In a //pushed delivery// architecture (RestMS, Comet), applications tell the server "send me data when you have it", and wait.  It is not intuitive for many programmers, but it is a simple, and efficient strategy employed by asynchronous architectures.
+
+The main consequences of using polling is that latency and throughput are worse except for very large messages.  If the recipient polls every N seconds, that adds an average of (N/2) seconds latency to each message.  A request-response dialog is relatively slow due to network costs, so the actual capacity of a connection drops from tens or hundreds of thousands of messages per second to hundreds or thousands (by a factor of 100).  This does not matter for messages of 100KB or more in size, but it matters for small messages who's value decays with time.  You do not want to get a "Happy New Year" text message on January 2nd.
+
+RestMS aims to push messages to applications as fast as possible.  This is not immediately obvious with a RESTful API, which is synchronous, like HTTP.  In RestMS we use two strategies to get pushed message delivery.  First, the //asynclet// resource type gives applications a simple push model for individual messages.  Second, the stream profile (under construction) provides a way to push large volumes of messages to an application with very little overhead.
+
++++ Structured vs. opaque messages
+
+* In a //structured message// model, messages are formatted using a language like XML.  Message properties and message contents are not clearly separated.  This has the advantage of simplicitly for specific use cases, but lacks generality and reusability.
+
+* In an //opaque message// model, the message is clearly separated from the envelope.  There may even be several layers, one used for routing (the FedEx envelope), one with message properties (the shipping slip), and the message contents (the brand new iPhone touch ordered from Amazon.com).
+
+Breaking a message into distinct layers is more work, and inefficient for very small messages (less than 250 bytes, perhaps).  Very short message contents can be optimised into message properties.  Thus we can send a postcard, which has the contents and addressing in a single layer, as compared to a letter, which has the envelope and contents clearly separate.
+
+RestMS aims to offer the best of all worlds: short messages can be encoded in the envelope, like post cards.  Medium sized messages can be embedded within the envelope as encoded opaque data.  And large messages can be wrapped separately, like parcels in the post.
+
+
