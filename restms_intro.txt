@@ -1,6 +1,4 @@
-This article by iMatix Corporation's CEO Pieter Hintjens introduces **RestMS**, the RESTful Messaging Service.   RestMS is a new standard for real web messaging that offers simple, scalable, and secure data delivery over ordinary HTTP.
-
-Copyright (c) 2009 iMatix Corporation.  Licensed under the terms of the Creative Commons Attribution Share-Alike (cc-by-sa) License version 3.0.
+In this article iMatix Corporation's CEO Pieter Hintjens introduces **RestMS**, the RESTful Messaging Service.   RestMS is a new standard for real web messaging that offers simple, scalable, and secure data delivery over ordinary HTTP.
 
 ++ Why do We need Messaging?
 
@@ -8,9 +6,9 @@ Messaging - also called "messaging middleware" or "message-oriented middleware" 
 
 * **It's about scale**.  Applications create more value when they can reach more users.  It used to be hard enough to make a software application that ran all by itself.  Today, that means Internet scale.  It's one thing for a web site to handle many users.  It can be far more profitable to connect that web site to dozens, hundreds of other applications, so that information can be traded, sold, exchange rapidly and accurately.
 
-* **It's about change**.  Used to be, you changed one line of code, you rebuilt the whole system.  That stops making sense when applications are distributed across many teams, and when change happens anywhere, anytime, to any part of the overall system.  Using loose connections between pieces means that change is cheap.  No piece knows too much about any other: all they know is the data they exchange: what it means, and how to exchange it.  Messaging makes this systematic and reliable.
+* **It's about change**.  Used to be, you changed one line of code, you rebuilt the whole system.  That stops making sense when applications are distributed across many teams, and when change happens anywhere, any time, to any part of the overall system.  Using loose connections between pieces means that change is cheap.  No piece knows too much about any other: all they know is the data they exchange: what it means, and how to exchange it.  Messaging makes this systematic and reliable.
 
-* **It's about cost**.  It's expensive to try to define the behavior of each of many software applications that work together in a large network.  It's much cheaper, and more flexible, to define the interfaces between them: the APIs.  Messaging is an API that can be stretched across a network, where even the location of the different pieces is not fixed, and can change at any moment.
+* **It's about cost**.  It's expensive to try to define the behaviour of each of many software applications that work together in a large network.  It's much cheaper, and more flexible, to define the interfaces between them: the APIs.  Messaging is an API that can be stretched across a network, where even the location of the different pieces is not fixed, and can change at any moment.
 
 So a good messaging system lets you plan much larger empires, where many of the pieces are made by your suppliers, customers, or even users.  It lets you start small and grow, without the big risk of having to change fundamental aspects late in the game.  And it saves you money by focusing your investment on those areas where it is most worthwhile.
 
@@ -18,11 +16,11 @@ Most Internet APIs are fairly basic: an application requests some data, the serv
 
 Most web developers, used to thinking of their application as the centre of the universe, will find it normal that client applications come knocking for data.  But it turns out there is a better model for messaging.
 
-Rather than focussing on the web application as the host for random APIs that client applications can call, the better way is to focus instead on data flows.  The common term "feed" is pretty good for these.  For example, let's imagine a feed that contains all appartments for rent.  If I want to rent my appartment, I publish a message to that feed.  If I want to search for an appartment, I subscribe to that feed.
+Rather than focussing on the web application as the host for random APIs that client applications can call, the better way is to focus instead on data flows.  The common term "feed" is pretty good for these.  For example, let's imagine a feed that contains all apartments for rent.  If I want to rent my apartment, I publish a message to that feed.  If I want to search for an apartment, I subscribe to that feed.
 
 Feeds are dynamic rivers of data that are constantly changing and can carry from a few messages a second to millions.  We need new paradigms to efficiently get the data we need.  If searching the web is casting a fishing line into the river, then accessing a feed is more like diverting part of the river into an irrigation channel.
 
-A feed-centric view of messaging works better than an application-centric one.  We can focus on the semantics of publishing, routing, queueing, and delivering data, and define clear and generic APIs to do this, without any regard to which actual applications are involved.
+A feed-centric view of messaging works better than an application-centric one.  We can focus on the semantics of publishing, routing, queuing, and delivering data, and define clear and generic APIs to do this, without any regard to which actual applications are involved.
 
 It's a much more scalable model, but also a more efficient one.  Messages are delivered precisely and rapidly, as soon as they are available.  There is no polling, no wasted bandwidth, no wasted latency.  For a business sells time-dependent content, whole new markets open up.
 
@@ -94,13 +92,13 @@ We can break down the problem of "making a messaging system" into distinct probl
 
 In an ideal world, messaging would be based on free and open standards, like our Internet infrastructure.  There would be a number of standards, tailored to different niches and solving different parts of the puzzle.  I call this a "fabric of messaging protocols".  You'd be able to download dozens of excellent open source products that worked together using these standards.  Your web browser would have messaging built-in.  Messaging would become a standard tool for programmers, as SQL and XML have become.
 
-In an ideal world, messaging would work from any language using standardized APIs that made it easy to replace one product with another.  The art of constructing distributed applications - still something practiced only inside the largest firms - would become a standard teaching for software engineers, so that messaging became the framework on which large scale collaborations could grow, much as operating-system messaging (Windows COM, Linux D-Bus) did for applications on a single box.
+In an ideal world, messaging would work from any language using standardised APIs that made it easy to replace one product with another.  The art of constructing distributed applications - still something practised only inside the largest firms - would become a standard teaching for software engineers, so that messaging became the framework on which large scale collaborations could grow, much as operating-system messaging (Windows COM, Linux D-Bus) did for applications on a single box.
 
 And products would be fast and scalable, handling tens or hundreds of thousands of messages a second, with latencies barely more than the network itself.
 
 We are still a few years away from such a world, but it is happening.
 
-++ The Advanced Message Queueing Protocol (AMQP)
+++ The Advanced Message Queuing Protocol (AMQP)
 
 Late in 2004, a large bank took the unusual step of paying a small firm (mine) to develop a new protocol and product for messaging.  The bank was tired of paying massive sums for messaging.  We built AMQP[((bibcite amqp))], and an implementation called OpenAMQ, and we migrated a huge application onto it.  AMQP looks like an remote API: it lets applications talk to messaging servers and thus to each other.  The API uses a wire level protocol that is carefully documented so that anyone can write their own server and clients (and several teams have done this).  Today AMQP is in the hands of [http://www.amqp.org an industry work group].
 
@@ -114,7 +112,7 @@ AMQP does not however look like this.  Instead it uses a single binary protocol 
 
 ++ AtomPub
 
-I've mentioned AtomPub.  It is perhaps the leading open standard for information distribution on the web.  It looks good: a well-written open specification, easy to use in any language, portable to any operating system, fast enough, and much simpler than SOAP.  However, AtomPub does no routing, and only a basic form of queueing.  The name says it: a protocol for publishing but not for subscribing.  Without upstream filtering, AtomPub cannot scale to large volumes of data (millions of messages per day being sent to thousands of subscribers).
+I've mentioned AtomPub, which is a replacement for RSS, and [http://bitworking.org/projects/atom/rfc5023.html an IETF standard].  It looks good: a simple, well-written open specification, easy to use in any language, portable to any operating system, fast enough, and much simpler than SOAP.  However, AtomPub does no routing, and only a basic form of queuing.  The name says it: a protocol for publishing but not for subscribing.  Without upstream filtering, AtomPub cannot scale to large volumes of data (millions of messages per day being sent to thousands of subscribers).
 
 However, AtomPub is significant nonetheless.  It is one of the best snapshots of REST[((bibcite rest))], a pattern for client-server architectures that has been around for many years (it is an aspect of the HTTP protocol) but is today starting to define the leading edge in the design of web protocols and APIs.
 
@@ -124,9 +122,9 @@ There is still discussion about what REST is, and is not.  In the AtomPub model,
 
 **There is no Internet protocol that does messaging right.**  We have good solutions for security, for delivery, for queuing and routing, indeed for most or all of the challenges I listed.  But no protocol (before RestMS) does them all, even in the village idiot fashion of a first version.
 
-Having said that AMQP is pretty good except that it does not use a text protocol for control commands, and having said that AtomPub is pretty good as a RESTful API (arguably the ideal text protocol for control commands), the next step is obvious and compelling.  We must take the best of AMQP and AtomPub and remix that into a new RESTful protocol that does upstream routing, queueing, and gets rid of polling.  In the process we can perhaps improve on both AMQP and AtomPub.
+Having said that AMQP is pretty good except that it does not use a text protocol for control commands, and having said that AtomPub is pretty good as a RESTful API (arguably the ideal text protocol for control commands), the next step is obvious and compelling.  We must take the best of AMQP and AtomPub and remix that into a new RESTful protocol that does upstream routing, queuing, and gets rid of polling.  In the process we can perhaps improve on both AMQP and AtomPub.
 
-So RestMS is this: a generic routing and queueing protocol (a client-server API) that uses simple and predictable RESTful patterns.  RestMS works over plain HTTP (or secure HTTPS) so that it's familiar to developers and network managers, and friendly to proxies, caches and firewalls.  RestMS implements abstract routing and queueing models ("profiles") and one of its profiles is interoperable with AMQP.  Most importantly, RestMS is a free and open standard that anyone can use, at no cost.  More than that, anyone can extend and improve on any part of RestMS, for instance to make a new profile.
+So RestMS is this: a generic routing and queuing protocol (a client-server API) that uses simple and predictable RESTful patterns.  RestMS works over plain HTTP (or secure HTTPS) so that it's familiar to developers and network managers, and friendly to proxies, caches and firewalls.  RestMS implements abstract routing and queueing models ("profiles") and one of its profiles is interoperable with AMQP.  Most importantly, RestMS is a free and open standard that anyone can use, at no cost.  More than that, anyone can extend and improve on any part of RestMS, for instance to make a new profile.
 
 ++ Architecture
 
@@ -161,84 +159,61 @@ Content-length: 274
 
 ++ How RestMS works
 
-RestMS uses a system of "feeds" and "pipes" to drive messages from a set of senders to a set of recipients.
+RestMS uses a system of "feeds" and "pipes" to drive messages from a set of senders to a set of recipients.  Messages are opaque blobs with an envelope.  A set of subscribers create pipes, and join their pipes to feeds using various subscription criteria.  A set of publishers post messages to feeds, causing messages to arrive in pipes.  Subscribers then read their pipes, fetching and deleting messages.  All this happens at runtime, using a RESTful API.
 
-lets applications create and use "pipes", which are queues of messages that sit on the RestMS server.  A pipe belongs to a single reader application, which can wait for messages, fetch them, and delete them.  Applications do not write directly to pipes but instead to "feeds", which are shared by a set of writers.  Pipe owners then connect their pipes to feeds by creating "joins" that include message selection criteria.  All this happens at runtime, using a RESTful API which is the main focus of this specification.
+The feed-join-pipe model supports any kind of routing: one-to-one, one-to-many, one-to-one-of-many, and so on.  RestMS delegates the actual routing semantics to "profiles", which are extensions that define a particular set of feed, join, and pipe types.
 
-
-Publishers send messages to feeds
-Subscribers create pipes
-And join their pipes to feeds
-Subscribers then read from their pipes
-Get message, process message, loop
-Joins specify the routing arguments
-By key, by expression, etc.
+In the general sense, both feeds and pipes act as FIFO queues, and joins act as multiplexors or selectors on messages.  Individual profiles define more precise queuing and routing semantics.  For example, the AMQP9 profile defines semantics that interoperate cleanly with AMQP/0.9.1, so that any RestMS server which implements the AMQP9 profile can act as an AMQP network front-end.
 
 ++ RESTful access
 
-If you know HTTP, you know REST
-Create/Read/Update/Delete resource
-POST creates a new resource
-GET reads a resource
-PUT updates a resource
-DELETE spawns... just kidding, it deletes the resource
-Resources are mostly shown in XML
-But RestMS also supports JSON
+REST over HTTP is very simple to understand.  Resource operations are expressed as HTTP methods, so they are directly meaningful to all layers.  Thus, fetching a resource is an HTTP GET, and deleting a resource is an HTTP DELETE.  Updating a resource is an HTTP PUT.  These three methods all operate on a resource URI, and can be conditional (using standard HTTP headers like If-Modified-Since).
 
-++ Why REST / HTTP is cool
+Creating a resource is the most complex operation.  The client POSTs a request to the parent of the eventual resource to create.  The server checks the request and if it's ok, it creates the resource and returns a new URI together with the resource description.  All RestMS URIs are either fixed by agreement, or are server-assigned.  The client never specifies the URI for a new resource.
 
-It is simple
-It uses existing transports
-It uses existing security
-It uses existing libraries
-It uses existing metaphors (CRUD)
-It scales on a web infrastructure
-Proper attention to caching
+RestMS expresses most resources in XML, or in JSON.  Messages actually consist of a message resource - the envelope - (XML or JSON) and a set of content resources, which are MIME-typed blobs.  Applications can express small messages fully in the envelope (like a postcard) or send very large contents (parcel post).
 
-++ REST / HTTP gotchas
+++ Why REST-over-HTTP is compelling
 
-Rather chatty
-Can be solved by batching writes and reads
-Polled vs. event driven
-Can be solved by using “long polls”
-Rather verbose (XML envelopes)
-Ignore the problem, it will go away
-Not an “enterprise technology”
-Wait, it will be
+Though REST itself is not HTTP-specific, REST-over-HTTP is compelling because:
 
-++ What's available now?
+* It is simple: REST translates to just four HTTP methods used in a very regular fashion
+* It uses existing transport layers: HTTP is a well-understood, human readable protocol
+* It uses existing security: TLS/SSL software is widely available, and very robust
+* It uses existing libraries: HTTP client and server stacks are cheap, good, and plentiful
+* It uses existing metaphors: the Create-Retrieve-Update-Delete model is easy to understand
+* It uses existing networks: HTTP uses web proxies, firewalls, caches, and accelerators
 
-www.restms.org
-    Draft RestMS specifications
-    Example client code (Perl, for now)
-www.openamq.org
-    Source code for OpenAMQ & Zyre
-www.zyre.com
-    All about Zyre
-live.zyre.com
-    Live RestMS server, running Zyre
+++ REST-over-HTTP gotchas
+
+One problem: the simple patterns of REST-over-HTTP create a chatty protocol in which we see a lot of "request-response" traffic, with verbose resource descriptions.  This is less of a problem than it might seem.  In messaging, the only aspect where performance matters is the transfer of message data itself, not the control of wiring resources.  Message transfer can be batched and encoded in more efficient forms.
+
+A second problem: the basic REST-over-HTTP patterns are synchronous, but messaging needs event-driven delivery.  Polling is not acceptable.  We can resolve this by adding "long polling" to the GET method:
+
+* Return the resource only when it has been modified by another application.  This requires custom HTTP headers (When-Modified-After and When-None-Match).
+* Return the resource only when it has been created.  This requires that the server provides a URI //before// the resource exists.  RestMS introduces this concept as an //asynclet//.
+
+A final problem: REST-over-HTTP is not considered as an "Enterprise Technology", and its appeal to larger businesses may therefore be restricted.  Over time the savings that this design offer are compelling and REST-over-HTTP will become widely used in the enterprise as a basis for web service APIs, for messaging and other tasks.
+
+++ What is available?
+
+The RestMS specification is developed on www.restms.org, a collaborative wiki that hosts a series of specifications that together form RestMS.  The specification process is open to all contributors who agree to license their work under a share-alike agreement.
+
+The specifications, along with ancillary texts and a sample Perl client stack, are available via the [http://github.com/pieterh/restms/tree/master github] website.
+
+[http://www.imatix.com iMatix Corporation] publishes a RestMS server called [http://www.zyre.com Zyre] as part of their open source [http://www.openamq.org OpenAMQ/1.4 messaging product].  Zyre runs on Linux, Solaris, AIX, Windows, and OpenVMS.
+
+Thilo Fromm is the main author of a second open source project, [http://t-lo.github.com/ahkera/ Ahkera], which is building a RestMS server using the Django framework for Python.
 
 ++ Conclusions
 
-Messaging is a great tool
-But the good stuff is too complex
-And the simple stuff is too limited
-Time for a simple, capable option
-Based on a free and open standard
-With a solid implementation
+Messaging is an important tool that is finally coming within reach of the normal software developer.  However the good stuff is still too complex, and the simple stuff not good enough for real work.  We think that it's time for a simple capable option, based on a free and open standard, with solid open source implementations.
 
+RestMS is this free and open standard, based on generic routing and queuing models, and easily extensible to new semantics.  RestMS was heavily influenced by AMQP, another emerging messaging protocol, and AtomPub, a content publishing protocol that uses a simple and regular HTTP-based API style called "REST".
 
+RestMS is simple, secure, scalable.  It is clean, precise and minimal, but gets the job done.  It uses established HTTP security standards.  And it uses HTTP scaling: servers, caches, proxies, accelerators, optimised stacks.
 
-
-RestMS can be described in three words: simple, secure, scalable.
-
-Simple means that RestMS works without bizarre contortions.  It is clean, precise and minimal, but gets the job done.  You need information delivered rapidly across the Internet.  You do not need to invest massive budgets in new platforms, stacks, machines, consultants, and Gurus.
-
-Secure means that RestMS uses the toughest, most hack-resistant, most battle-hardened security that exists on the planet: secure HTTP.  You want security out-of-the-box.  You do not want to have unexpected visitors on your network, reading your data.
-
-Scalable means that RestMS uses the billions-worth of infrastructure that has been built to make the web run quickly: servers, caches, proxies, accelerators, optimised stacks, and so on.  You do not want to explain to your firewall about one more exotic protocol.
-
-++ References
+You can download RestMS implementations today.
 
 [[bibliography]]
 : amqp : "The Advanced Message Queueing Protocol" - [http://www.amqp.org amqp.org]
